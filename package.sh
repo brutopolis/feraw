@@ -1,5 +1,5 @@
 name rawer
-version 0.0.4
+version 0.0.7
 description "rawer"
 # files 
 setup()

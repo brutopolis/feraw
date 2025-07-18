@@ -5,3 +5,5 @@ rawer
 *.a
 *.dll
 *.exe
+valgrind*
+massif*

@@ -113,6 +113,25 @@ parser_step(function_run_parser)
     return false; // Not a run lets check other parsers
 }
 
+parser_step(condition_parser)
+{
+    char *token = (char*)splited->data[word_index].p;
+
+    if (token[0] == '?') // run
+    {
+        BruterInt condition = bruter_pop_int(stack);
+        if (!condition)
+        {
+            // we need to remove the next token
+            char* next_token = bruter_remove_pointer(splited, word_index + 1);
+            // we cannot free next_token because it is a delocated pointer
+            return true; // Indicate that this is a condition and should be ignored
+        }
+        return true;
+    }
+    return false; // Not a run lets check other parsers
+}
+
 parser_step(comment_parser)
 {
     char *token = (char*)splited->data[word_index].p;
@@ -127,7 +146,7 @@ parser_step(comment_parser)
     return false; // Not a comment lets check other parsers
 }
 
-parser_step(variable_parser)
+parser_step(etc_parser)
 {
     char *token = (char*)splited->data[word_index].p;
 
@@ -139,7 +158,6 @@ parser_step(variable_parser)
     {
         // ok its definitively a stack call
         // lets find it first
-
         bool need_context = false;
 
         if (token[len - 2] == '!')
@@ -181,6 +199,25 @@ parser_step(variable_parser)
         function_run_parser(context, stack, splited, word_index);
         return true;
     }
+    else if (len > 0 && token[len - 1] == '?')
+    {
+        // ok its a condition variable
+        token[len - 1] = '\0'; // Remove the '?' from the end
+        BruterInt found = bruter_find_key(context, token);
+        if (found != -1)
+        {
+            // nothing to be done here...
+            // it is as true as it can be
+        }
+        else
+        {
+            // as the variable doesnt exist...
+            // we assume it is false
+            char* next_token = bruter_remove_pointer(splited, word_index + 1);
+            // we cannot free next_token because it is a delocated pointer
+        }
+        return true; // Indicate that this is a condition variable
+    }
 
     BruterInt found = bruter_find_key(context, token);
     if (found != -1)
@@ -193,6 +230,8 @@ parser_step(variable_parser)
     {
         // If not found
         printf("WARNING: Variable '%s' not found in context\n", token);
+        // We can still push a null value to the stack
+        bruter_push_int(stack, 0, NULL, BR_TYPE_NULL);
     }
     return true;
 }
@@ -430,7 +469,8 @@ init(std)
     bruter_push_pointer(parsers, string_parser, "string", BR_TYPE_FUNCTION);
     bruter_push_pointer(parsers, function_run_parser, "run", BR_TYPE_FUNCTION);
     bruter_push_pointer(parsers, comment_parser, "comment", BR_TYPE_FUNCTION);
-    bruter_push_pointer(parsers, variable_parser, "variable", BR_TYPE_FUNCTION);
+    bruter_push_pointer(parsers, condition_parser, "condition", BR_TYPE_FUNCTION);
+    bruter_push_pointer(parsers, etc_parser, "variable", BR_TYPE_FUNCTION);
 
     bruter_push_pointer(context, rawer_print, "print", BR_TYPE_FUNCTION);
     bruter_push_pointer(context, rawer_add, "add", BR_TYPE_FUNCTION);
