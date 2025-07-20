@@ -5,7 +5,7 @@
 
 #include <ctype.h>
 
-#define RAWER_VERSION "0.0.3"
+#define RAWER_VERSION "0.0.4"
 
 enum {
     BR_TYPE_NULL = 0,
@@ -66,7 +66,8 @@ static inline BruterList* string_split(char *input_str)
     }
 
     char* str = strdup(input_str);
-    if (!str) {
+    if (!str) 
+    {
         perror("strdup failed");
         exit(EXIT_FAILURE);
     }
@@ -74,6 +75,10 @@ static inline BruterList* string_split(char *input_str)
     BruterList *stack = bruter_new(2, false, false);
     char *ptr = str;
     bruter_push_pointer(stack, str, NULL, 0); // Push the original string for cleanup later
+
+    while(isspace((unsigned char)*ptr)) ptr++; // Skip leading spaces
+
+    bruter_push_pointer(stack, ptr, NULL, 0); // Push the first token
 
     int recursion = 0;
     while (*ptr != '\0')
@@ -143,9 +148,10 @@ static inline BruterList* parse(BruterList *context, char* input_str)
     {
         return NULL;
     }
+
     char* original_str = (char*)splited->data[0].p; // Keep the original string for cleanup
 
-    for (int i = 0; i < splited->size; i++)
+    for (int i = 1; i < splited->size; i++)
     {
         for (BruterInt j = 0; j < parsers->size; j++)
         {

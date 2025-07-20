@@ -1,5 +1,5 @@
 #(hello world!) #str rename!
-Any retype!
+comment: (Any retype!)
 register!!
 
 1 #condition rename!
@@ -7,11 +7,11 @@ register!!
 
 str print!
 
-5 7 condition? print!
-
-1 context pop! 
+comment: 1 context pop!
 Buffer retype!
 register!!
+
+5 7 condition? print!
 
 comment: 
     (we expect 451 to be printed

@@ -39,12 +39,8 @@ parser_step(list_parser)
     if (token[0] == '(') // list
     {
         char *sub_str = token + 1; // Skip the '('
-        char *end_ptr = strchr(sub_str, ')');
-        if (end_ptr == NULL)
-        {
-            fprintf(stderr, "ERROR: Unmatched parentheses in list\n");
-            exit(EXIT_FAILURE);
-        }
+        char *end_ptr = token + strlen(token) - 1;
+
         *end_ptr = '\0'; // Null-terminate the list string
         BruterList *parsed = parse(context, sub_str);
         if (parsed->size > 1)
@@ -75,12 +71,7 @@ parser_step(string_parser)
         if (token[1] == '(') 
         {
             char *str_value = token + 2; // Skip the ':('
-            char *end_ptr = strchr(str_value, ')');
-            if (end_ptr == NULL)
-            {
-                fprintf(stderr, "ERROR: Unmatched parentheses in string\n");
-                exit(EXIT_FAILURE);
-            }
+            char *end_ptr = token + strlen(token) - 1;
             *end_ptr = '\0'; // Null-terminate the string
             bruter_push_pointer(stack, strdup(str_value), NULL, BR_TYPE_BUFFER);
         }
@@ -253,10 +244,29 @@ function(rawer_print)
             printf("%s\n", (char*)value.value.p);
             break;
         case BR_TYPE_LIST:
-            printf("%p\n", value.value.p);
+            for (BruterInt i = 0; i < ((BruterList*)value.value.p)->size; i++)
+            {
+                BruterMetaValue item = bruter_get_meta((BruterList*)value.value.p, i);
+                switch (item.type)
+                {
+                    case BR_TYPE_FLOAT:
+                        printf("%f ", item.value.f);
+                        break;
+                    case BR_TYPE_BUFFER:
+                        printf("%s ", (char*)item.value.p);
+                        break;
+                    case BR_TYPE_LIST:
+                        printf("[List] ");
+                        break;
+                    default:
+                        printf("%ld ", item.value.i);
+                        break;
+                }
+            }
+            printf("\n");
             break;
         default:
-            printf("%d\n", value.value.i);
+            printf("%ld\n", value.value.i);
             break;
     }
 }
@@ -448,6 +458,42 @@ function(rawer_list_set)
     bruter_set_meta(list, index, value);
 }
 
+function(rawer_list_find)
+{
+    BruterList* list = bruter_pop_pointer(stack);
+    BruterMetaValue value = bruter_pop_meta(stack);
+    BruterInt found_index = -1;
+
+    for (BruterInt i = 0; i < list->size; i++)
+    {
+        if (list->types[i] == value.type && list->data[i].i == value.value.i)
+        {
+            found_index = i;
+            break;
+        }
+    }
+
+    bruter_push_int(stack, found_index, NULL, BR_TYPE_ANY);
+}
+
+function(rawer_list_find_key)
+{
+    BruterList* list = bruter_pop_pointer(stack);
+    char* key = bruter_pop_pointer(stack);
+    BruterInt found_index = -1;
+
+    for (BruterInt i = 0; i < list->size; i++)
+    {
+        if (list->keys[i] != NULL && strcmp(list->keys[i], key) == 0)
+        {
+            found_index = i;
+            break;
+        }
+    }
+
+    bruter_push_int(stack, found_index, NULL, BR_TYPE_ANY);
+}
+
 init(std)
 {
     BruterInt found = bruter_find_key(context, "context");
@@ -487,6 +533,8 @@ init(std)
     bruter_push_pointer(context, rawer_list_remove, "remove", BR_TYPE_FUNCTION);
     bruter_push_pointer(context, rawer_list_get, "get", BR_TYPE_FUNCTION);
     bruter_push_pointer(context, rawer_list_set, "set", BR_TYPE_FUNCTION);
+    bruter_push_pointer(context, rawer_list_find, "where", BR_TYPE_FUNCTION);
+    bruter_push_pointer(context, rawer_list_find_key, "find", BR_TYPE_FUNCTION);
 
     bruter_push_int(context, BR_TYPE_NULL, "Null", BR_TYPE_ANY);
     bruter_push_int(context, BR_TYPE_ANY, "Any", BR_TYPE_ANY);
