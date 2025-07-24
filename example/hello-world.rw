@@ -1,15 +1,11 @@
+123 print!
 #(hello world!) #str rename!
-comment: (Any retype!)
 register!!
 
 1 #condition rename!
 register!!
 
 str print!
-
-comment: 1 context pop!
-Buffer retype!
-register!!
 
 5 7 condition? print!
 
