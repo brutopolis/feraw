@@ -1,12 +1,18 @@
-123 print !
+print(123)
 
-#(hello world!) #str rename !
+"hello world!" "str" rename!
 register !!
+
+var str = "hello world!"
 
 1 #condition rename !
 register !!
 
+var condition = 1
+
 str print !
+
+print(str)
 
 5 7 condition ? print !
 

@@ -3,7 +3,7 @@
 // parsers
 parser_step(number_parser)
 {
-    char* token = (char*)splited->data[word_index].p;
+    char* token = (char*)splited->data[*word_index].p;
 
     if (isdigit(token[0]) || (token[0] == '-' && isdigit(token[1]))) // number
     {
@@ -34,7 +34,7 @@ parser_step(number_parser)
 
 parser_step(list_parser)
 {
-    char *token = (char*)splited->data[word_index].p;
+    char *token = (char*)splited->data[*word_index].p;
 
     if (token[0] == '(') // list
     {
@@ -64,20 +64,20 @@ parser_step(list_parser)
 
 parser_step(string_parser)
 {
-    char *token = (char*)splited->data[word_index].p;
+    char *token = (char*)splited->data[*word_index].p;
 
     if (token[0] == '#') // string 
     {
         if (token[1] == '(') 
         {
-            char *str_value = token + 2; // Skip the ':('
+            char *str_value = token + 2; // Skip the '#('
             char *end_ptr = token + strlen(token) - 1;
             *end_ptr = '\0'; // Null-terminate the string
             bruter_push_pointer(stack, strdup(str_value), NULL, BR_TYPE_BUFFER);
         }
         else 
         {
-            char *str_value = token + 1; // Skip the ':'
+            char *str_value = token + 1; // Skip the '#'
             bruter_push_pointer(stack, strdup(str_value), NULL, BR_TYPE_BUFFER);
         }
         return true;
@@ -87,7 +87,7 @@ parser_step(string_parser)
 
 parser_step(function_run_parser)
 {
-    char *token = (char*)splited->data[word_index].p;
+    char *token = (char*)splited->data[*word_index].p;
 
     if (token[0] == '!') // run
     {
@@ -106,16 +106,14 @@ parser_step(function_run_parser)
 
 parser_step(condition_parser)
 {
-    char *token = (char*)splited->data[word_index].p;
+    char *token = (char*)splited->data[*word_index].p;
 
     if (token[0] == '?') // run
     {
         BruterInt condition = bruter_pop_int(stack);
         if (!condition)
         {
-            // we need to remove the next token
-            char* next_token = bruter_remove_pointer(splited, word_index + 1);
-            // we cannot free next_token because it is a delocated pointer
+            *word_index += 1; // Skip the next token
             return true; // Indicate that this is a condition and should be ignored
         }
         return true;
@@ -123,92 +121,43 @@ parser_step(condition_parser)
     return false; // Not a run lets check other parsers
 }
 
-parser_step(comment_parser)
+parser_step(movctrl_parser)
 {
-    char *token = (char*)splited->data[word_index].p;
+    char *token = (char*)splited->data[*word_index].p;
 
-    if (token[0] == 'c' && token[1] == 'o' && token[2] == 'm' && token[3] == 'm' && token[4] == 'e' && token[5] == 'n' && token[6] == 't' && token[7] == ':')
+    if (token[0] == 's' && token[1] == 'k' && token[2] == 'i' && token[3] == 'p' && token[4] == '\0')
     {
-        // Ignore comments
-        char* next_token = bruter_remove_pointer(splited, word_index + 1);
-        // we cannoot free next_token because it is a delocated pointer
-        return true; // Indicate that this is a comment and should be ignored
-    }
-    return false; // Not a comment lets check other parsers
-}
-
-parser_step(etc_parser)
-{
-    char *token = (char*)splited->data[word_index].p;
-
-    // ok its a variable but we dont know yet how the user wants to use it
-    // lets get the len of the token as it is expected not to be so long
-    size_t len = strlen(token);
-
-    if (len > 0 && token[len - 1] == '!')
-    {
-        // ok its definitively a stack call
-        // lets find it first
-        bool need_context = false;
-
-        if (token[len - 2] == '!')
-        {
-            need_context = true; // we need to insert the context into the stack
-            token[len - 2] = '\0'; // Remove the '!!' from the
-        }
-        else
-        {
-            token[len - 1] = '\0'; // Remove the '!' from the end
-        }
-
-        BruterInt found = bruter_find_key(context, token);
-        if (found == -1)
-        {
-            printf("WARNING: Variable '%s' not found in context\n", token);
-            return true; // Not found, we cannot push it
-        }
-
-        // we found it, lets push it
-        BruterMetaValue meta = bruter_get_meta(context, found);
-        meta.key = NULL; // we don't need the key here
-        bruter_push_meta(stack, meta);
-
-        // lets turn the token into '!' or '!!'
-        if (need_context)
-        {
-            token[0] = '!';
-            token[1] = '!';
-            token[2] = '\0'; // Make it '!!'
-        }
-        else
-        {
-            token[0] = '!';
-            token[1] = '\0'; // Make it '!'
-        }
-
-        // now we can just pass everthing to the function step
-        function_run_parser(context, stack, splited, word_index);
+        *word_index += bruter_pop_int(stack);
         return true;
     }
-    else if (len > 0 && token[len - 1] == '?')
+    else if (token[0] == 'b' && token[1] == 'a' && token[2] == 'c' && token[3] == 'k' && token[4] == '\0')
     {
-        // ok its a condition variable
-        token[len - 1] = '\0'; // Remove the '?' from the end
-        BruterInt found = bruter_find_key(context, token);
-        if (found != -1)
-        {
-            // nothing to be done here...
-            // it is as true as it can be
-        }
-        else
-        {
-            // as the variable doesnt exist...
-            // we assume it is false
-            char* next_token = bruter_remove_pointer(splited, word_index + 1);
-            // we cannot free next_token because it is a delocated pointer
-        }
-        return true; // Indicate that this is a condition variable
+        *word_index -= bruter_pop_int(stack);
+        if (*word_index < 0) *word_index = 0; // Prevent going out of bounds
+        return true;
     }
+    else if (token[0] == 'b' && token[1] == 'r' && token[2] == 'e' && token[3] == 'a' && token[4] == 'k' && token[5] == '\0')
+    {
+        *word_index = splited->size + 1; // Break the loop
+        return true;
+    }
+    else if (token[0] == 'g' && token[1] == 'o' && token[2] == '\0')
+    {
+        BruterInt target = bruter_pop_int(stack);
+        if (target < 0 || target >= splited->size)
+        {
+            printf("WARNING: Go to index out of bounds: %ld\n", target);
+            return true; // Ignore this command
+        }
+        *word_index = target - 1; // Set the word index to the target
+        return true;
+    }
+    return false;
+}
+
+parser_step(variable_parser)
+{
+    char *token = (char*)splited->data[*word_index].p;
 
     BruterInt found = bruter_find_key(context, token);
     if (found != -1)
@@ -494,6 +443,13 @@ function(rawer_list_find_key)
     bruter_push_int(stack, found_index, NULL, BR_TYPE_ANY);
 }
 
+function(rawer_dup)
+{
+    BruterMetaValue value = bruter_pop_meta(stack);
+    bruter_push_meta(stack, value); // Push the value back to the stack
+    bruter_push_meta(stack, value); // Duplicate it
+}
+
 init(std)
 {
     BruterInt found = bruter_find_key(context, "context");
@@ -514,9 +470,9 @@ init(std)
     bruter_push_pointer(parsers, list_parser, "list", BR_TYPE_FUNCTION);
     bruter_push_pointer(parsers, string_parser, "string", BR_TYPE_FUNCTION);
     bruter_push_pointer(parsers, function_run_parser, "run", BR_TYPE_FUNCTION);
-    bruter_push_pointer(parsers, comment_parser, "comment", BR_TYPE_FUNCTION);
+    bruter_push_pointer(parsers, movctrl_parser, "comment", BR_TYPE_FUNCTION);
     bruter_push_pointer(parsers, condition_parser, "condition", BR_TYPE_FUNCTION);
-    bruter_push_pointer(parsers, etc_parser, "variable", BR_TYPE_FUNCTION);
+    bruter_push_pointer(parsers, variable_parser, "variable", BR_TYPE_FUNCTION);
 
     bruter_push_pointer(context, rawer_print, "print", BR_TYPE_FUNCTION);
     bruter_push_pointer(context, rawer_add, "add", BR_TYPE_FUNCTION);
@@ -535,6 +491,7 @@ init(std)
     bruter_push_pointer(context, rawer_list_set, "set", BR_TYPE_FUNCTION);
     bruter_push_pointer(context, rawer_list_find, "where", BR_TYPE_FUNCTION);
     bruter_push_pointer(context, rawer_list_find_key, "find", BR_TYPE_FUNCTION);
+    bruter_push_pointer(context, rawer_dup, "dup", BR_TYPE_FUNCTION);
 
     bruter_push_int(context, BR_TYPE_NULL, "Null", BR_TYPE_ANY);
     bruter_push_int(context, BR_TYPE_ANY, "Any", BR_TYPE_ANY);

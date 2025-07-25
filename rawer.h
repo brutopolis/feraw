@@ -5,7 +5,7 @@
 
 #include <ctype.h>
 
-#define RAWER_VERSION "0.0.4"
+#define RAWER_VERSION "0.0.5"
 
 enum {
     BR_TYPE_NULL = 0,
@@ -23,11 +23,11 @@ enum {
     void init_##name(BruterList *context)
 
 #define parser_step(name) \
-    bool name(BruterList *context, BruterList *stack, BruterList *splited, BruterInt word_index)
+    bool name(BruterList *context, BruterList *stack, BruterList *splited, BruterInt *word_index)
 
 typedef void (*Function)(BruterList *stack);
 
-typedef bool (*ParserStep)(BruterList *context, BruterList *stack, BruterList *splited, BruterInt word_index);
+typedef bool (*ParserStep)(BruterList *context, BruterList *stack, BruterList *splited, BruterInt *word_index);
 
 static inline void clear_context(BruterList *context)
 {
@@ -94,7 +94,7 @@ static inline BruterList* string_split(char *input_str)
 
             if (*ptr != '\0')
             {
-                // Push the current token onto the stack
+                // Push the current token into the stack
                 bruter_push_pointer(stack, ptr, NULL, 0);
             }
             else
@@ -151,12 +151,12 @@ static inline BruterList* parse(BruterList *context, char* input_str)
 
     char* original_str = (char*)splited->data[0].p; // Keep the original string for cleanup
 
-    for (int i = 1; i < splited->size; i++)
+    for (BruterInt i = 1; i < splited->size; i++)
     {
         for (BruterInt j = 0; j < parsers->size; j++)
         {
             ParserStep step = bruter_get_pointer(parsers, j);
-            if (step(context, result, splited, i))
+            if (step(context, result, splited, &i))
             {
                 break; // If a parser matched, break to the next token
             }
