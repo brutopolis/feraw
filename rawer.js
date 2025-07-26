@@ -3,9 +3,27 @@ function tokenize(input)
     let tokens = [];
     let i = 0;
 
-    function skipWhitespace()
+    function skipWhitespace() 
     {
-        while (/\s/.test(input[i])) i++;
+        while (i < input.length) 
+        {
+            if (/\s/.test(input[i])) 
+            {
+                i++;
+            } 
+            else if (input[i] === '/' && input[i + 1] === '/') 
+            {
+                i += 2;
+                while (i < input.length && input[i] !== '\n') i++;
+            } 
+            else if (input[i] === '/' && input[i + 1] === '*') 
+            {
+                i += 2;
+                while (i < input.length && !(input[i] === '*' && input[i + 1] === '/')) i++;
+                if (i < input.length) i += 2;
+            } 
+            else break;
+        }
     }
 
     function parseString() 
@@ -14,7 +32,7 @@ function tokenize(input)
         let str = '';
         while (i < input.length) 
         {
-            if (input[i] === '"')
+            if (input[i] === '"') 
             {
                 i++;
                 break;
@@ -42,14 +60,24 @@ function tokenize(input)
     function parseIdentifier() 
     {
         let start = i;
-        while (/[a-zA-Z0-9_]/.test(input[i])) i++;
+        if (i >= input.length || !/[a-zA-Z_]/.test(input[i])) return null;
+
+        i++;
+        while (i < input.length && /[a-zA-Z0-9_]/.test(input[i])) i++;
+
+        if (input[i] === ':') 
+        {
+            i++;
+            return input.slice(start, i);
+        }
+
         return input.slice(start, i);
     }
 
     function parseNumber() 
     {
         let start = i;
-        while (/[0-9]/.test(input[i])) i++;
+        while (i < input.length && /[0-9]/.test(input[i])) i++;
         return input.slice(start, i);
     }
 
@@ -106,13 +134,16 @@ function tokenize(input)
         }
 
         let id = parseIdentifier();
+        if (!id) return;
+
         skipWhitespace();
 
         if (input[i] === '(') 
         {
             tokens.push('!', id);
             i++; // skip (
-            while (true) {
+            while (true) 
+            {
                 skipWhitespace();
                 if (input[i] === ')') 
                 {
@@ -134,13 +165,19 @@ function tokenize(input)
     {
         skipWhitespace();
         if (input[i] === ';') 
-            {
+        {
             i++;
             continue;
         }
 
         let start = i;
         let name = parseIdentifier();
+        if (!name) 
+        {
+            i++;
+            continue;
+        }
+
         skipWhitespace();
         if (input[i] === '=') 
         {
@@ -164,13 +201,54 @@ function rawer_compile(input)
 {
     let commands = input.split(';');
     let result = [];
-    for (let command of commands) {
+    for (let command of commands) 
+    {
         command = command.trim();
-        if (command) {
-            result.push(tokenize(command).reverse());
+        if (command) 
+        {
+            result.push(tokenize(command));
+        }
+    }
+    
+    let result_string = rawer_labelparser(result);
+    return result_string;
+}
+
+function rawer_labelparser(original_input) 
+{
+    // we need this to know exactly where the labels were positioned originally
+    let unreversed_input = original_input.map(tokens => tokens.join(' ')).join(' ');
+    
+    // split by any kind of whitespace
+    let splited = unreversed_input.toString().split(/\s+/);
+    
+    let input = original_input.map(tokens => tokens.reverse().join(' '))
+        .join('\n').toString();
+
+
+    // remove empty strings
+    splited = splited.filter(token => token.trim() !== '');
+    
+    let labels = [];
+    let correction = 0;
+    for (let i = 0; i < splited.length; i++)
+    {
+        let word = splited[i];
+        if (word.endsWith(':')) 
+        {
+            let label = word.slice(0, -1);
+            labels.push([label, i - correction]);
+            correction++;
         }
     }
 
-    let result_string = result.map(tokens => tokens.join(' ')).join('\n');
-    return result_string.trim();
+    // lets remove all label: from the input
+    input = input.replaceAll(/(\w+):/g, '');
+
+    
+    for (let label of labels) 
+    {
+        input = input.replaceAll(new RegExp(`\\b${label[0]}\\b`, 'g'), `${label[1]}`);
+    }
+    return input;
 }

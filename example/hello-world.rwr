@@ -1,9 +1,10 @@
-
 print(123);
+start:
 str = "hello world!";
 condition = 1;
 print(str);
 
 print(add(400, 51));
-numbers = list(7, 1, 2, 3, 4, 5, 2, 7);
+numbers = [1, 2, 3, 4, 5, 2, 7];
 print(pop(numbers, 1));
+go(start);
