@@ -5,7 +5,7 @@
 
 #include <ctype.h>
 
-#define RAWER_VERSION "0.0.5"
+#define RAWER_VERSION "0.0.6"
 
 enum {
     BR_TYPE_NULL = 0,
@@ -22,12 +22,7 @@ enum {
 #define init(name) \
     void init_##name(BruterList *context)
 
-#define parser_step(name) \
-    bool name(BruterList *context, BruterList *stack, BruterList *splited, BruterInt *word_index)
-
 typedef void (*Function)(BruterList *stack);
-
-typedef bool (*ParserStep)(BruterList *context, BruterList *stack, BruterList *splited, BruterInt *word_index);
 
 static inline void clear_context(BruterList *context)
 {
@@ -58,113 +53,108 @@ static inline void clear_context(BruterList *context)
     context->size = 0; // Reset the size to 0
 }
 
-static inline BruterList* string_split(char *input_str)
+static inline BruterList* parse(BruterList *context, char* input_str)
 {
-    if (input_str == NULL || *input_str == '\0')
+    BruterList *stack = bruter_new(8, true, true);
+    BruterList *splited = bruter_new(8, false, false);
+    char* original_str = strdup(input_str); // Duplicate the input string to avoid modifying the original
+    char* token = strtok(original_str, "\n\t\r ");
+    while (token != NULL)
     {
-        return bruter_new(0, false, false); // Return an empty list if input is NULL or empty
+        bruter_push_pointer(splited, token, NULL, 0);
+        token = strtok(NULL, "\n\t\r ");
     }
 
-    char* str = strdup(input_str);
-    if (!str) 
+    for (BruterInt i = 0; i < splited->size; i++)
     {
-        perror("strdup failed");
-        exit(EXIT_FAILURE);
-    }
-
-    BruterList *stack = bruter_new(2, false, false);
-    char *ptr = str;
-    bruter_push_pointer(stack, str, NULL, 0); // Push the original string for cleanup later
-
-    while(isspace((unsigned char)*ptr)) ptr++; // Skip leading spaces
-
-    bruter_push_pointer(stack, ptr, NULL, 0); // Push the first token
-
-    int recursion = 0;
-    while (*ptr != '\0')
-    {
-        if (isspace((unsigned char)*ptr) && recursion == 0)
+        char* token = bruter_get_pointer(splited, i);
+        if (token == NULL || token[0] == '\0') continue; // Skip empty tokens
+        
+        if (isdigit(token[0]) || (token[0] == '-' && isdigit(token[1]))) // number
         {
-            // break word
-            *ptr = '\0'; 
-            ptr++;
-
-            // skip spaces
-            while (*ptr && isspace((unsigned char)*ptr)) ptr++;
-
-            if (*ptr != '\0')
+            if (token[0] == '0' && token[1] == 'x') // hex
             {
-                // Push the current token into the stack
-                bruter_push_pointer(stack, ptr, NULL, 0);
+                bruter_push_int(stack, strtol(token+2, NULL, 16), NULL, BR_TYPE_ANY);
+            }
+            else if (token[0] == '0' && token[1] == 'b') // bin
+            {
+                bruter_push_int(stack, strtol(token+2, NULL, 2), NULL, BR_TYPE_ANY);
+            }
+            else if (token[0] == '0' && token[1] == 'o') // oct
+            {
+                bruter_push_int(stack, strtol(token+2, NULL, 8), NULL, BR_TYPE_ANY);
+            }
+            else if (strchr(token, '.')) // float
+            {
+                bruter_push_float(stack, strtof(token, NULL), NULL, BR_TYPE_FLOAT);
+            }
+            else // int
+            {
+                bruter_push_int(stack, strtol(token, NULL, 10), NULL, BR_TYPE_ANY);
+            }
+        }
+        else if (token[0] == '!') // run
+        {
+            void (*func)(BruterList *stack) = bruter_pop_pointer(stack);
+            if (token[1] == '!')
+            {
+                // we need to insert the context into the stack too
+                // we assume the user will pop the context
+                bruter_push_pointer(stack, context, NULL, BR_TYPE_NULL);
+            }
+            func(stack);
+        }
+        else if (token[0] == '?') // run
+        {
+            BruterInt condition = bruter_pop_int(stack);
+            if (!condition)
+            {
+                i += 1; // Skip the next token
+            }
+        }
+        else if (token[0] == 's' && token[1] == 'k' && token[2] == 'i' && token[3] == 'p' && token[4] == '\0')
+        {
+            i += bruter_pop_int(stack);
+        }
+        else if (token[0] == 'b' && token[1] == 'a' && token[2] == 'c' && token[3] == 'k' && token[4] == '\0')
+        {
+            i -= bruter_pop_int(stack);
+            if (i < 0) i = 0; // Prevent going out of bounds
+        }
+        else if (token[0] == 'b' && token[1] == 'r' && token[2] == 'e' && token[3] == 'a' && token[4] == 'k' && token[5] == '\0')
+        {
+            i = splited->size + 1; // Break the loop
+        }
+        else if (token[0] == 'g' && token[1] == 'o' && token[2] == '\0')
+        {
+            BruterInt target = bruter_pop_int(stack);
+            if (target < 0 || target >= splited->size)
+            {
+                printf("WARNING: Go to index out of bounds: %ld\n", target);
+            }
+            i = target - 1; // Set the word index to the target
+        }
+        else 
+        {
+            BruterInt found = bruter_find_key(context, token);
+            if (found != -1)
+            {
+                BruterMetaValue meta = bruter_get_meta(context, found);
+                meta.key = NULL; // we don't need the key here
+                bruter_push_meta(stack, meta);
             }
             else
             {
-                // If we hit the end of the string, we can break
-                break;
-            }
-
-            continue;
-        }
-        else if (*ptr == '(')
-        {
-            recursion++;
-        }
-        else if (*ptr == ')')
-        {
-            recursion--;
-            if (recursion < 0)
-            {
-                fprintf(stderr, "ERROR: Unmatched parentheses in string\n");
-                exit(EXIT_FAILURE);
-            }
-        }
-
-        ptr++;
-    }
-
-    if (recursion != 0)
-    {
-        fprintf(stderr, "ERROR: Unmatched parentheses in string\n");
-        exit(EXIT_FAILURE);
-    }
-
-    return stack;
-}
-
-static inline BruterList* parse(BruterList *context, char* input_str)
-{
-    BruterInt found = bruter_find_key(context, "parsers");
-    if (found == -1)
-    {
-        fprintf(stderr, "ERROR: No parsers found in context\n");
-        return NULL;
-    }
-    BruterList *parsers = bruter_get_pointer(context, found);
-
-    BruterList *splited = string_split(input_str);
-    BruterList *result = bruter_new(8, true, true);
-
-    if (splited->size == 0)
-    {
-        return NULL;
-    }
-
-    char* original_str = (char*)splited->data[0].p; // Keep the original string for cleanup
-
-    for (BruterInt i = 1; i < splited->size; i++)
-    {
-        for (BruterInt j = 0; j < parsers->size; j++)
-        {
-            ParserStep step = bruter_get_pointer(parsers, j);
-            if (step(context, result, splited, &i))
-            {
-                break; // If a parser matched, break to the next token
+                // If not found
+                printf("WARNING: Variable '%s' not found in context\n", token);
+                // We can still push a null value to the stack
+                bruter_push_int(stack, 0, NULL, BR_TYPE_NULL);
             }
         }
     }
+    bruter_free(splited); // Free the temporary list
     free(original_str); // free the original string
-    bruter_free(splited); // free the splited list
-    return result;
+    return stack;
 }
 
 #endif // RAWER_H macro

@@ -1,181 +1,5 @@
 #include "rawer.h"
 
-// parsers
-parser_step(number_parser)
-{
-    char* token = (char*)splited->data[*word_index].p;
-
-    if (isdigit(token[0]) || (token[0] == '-' && isdigit(token[1]))) // number
-    {
-        if (token[0] == '0' && token[1] == 'x') // hex
-        {
-            bruter_push_int(stack, strtol(token+2, NULL, 16), NULL, BR_TYPE_ANY);
-        }
-        else if (token[0] == '0' && token[1] == 'b') // bin
-        {
-            bruter_push_int(stack, strtol(token+2, NULL, 2), NULL, BR_TYPE_ANY);
-        }
-        else if (token[0] == '0' && token[1] == 'o') // oct
-        {
-            bruter_push_int(stack, strtol(token+2, NULL, 8), NULL, BR_TYPE_ANY);
-        }
-        else if (strchr(token, '.')) // float
-        {
-            bruter_push_float(stack, strtof(token, NULL), NULL, BR_TYPE_FLOAT);
-        }
-        else // int
-        {
-            bruter_push_int(stack, strtol(token, NULL, 10), NULL, BR_TYPE_ANY);
-        }
-        return true;
-    }
-    return false; // Not a number lets check other parsers
-}
-
-parser_step(list_parser)
-{
-    char *token = (char*)splited->data[*word_index].p;
-
-    if (token[0] == '(') // list
-    {
-        char *sub_str = token + 1; // Skip the '('
-        char *end_ptr = token + strlen(token) - 1;
-
-        *end_ptr = '\0'; // Null-terminate the list string
-        BruterList *parsed = parse(context, sub_str);
-        if (parsed->size > 1)
-        {
-            bruter_push_pointer(stack, parsed, NULL, BR_TYPE_LIST);
-        }
-        else if (parsed->size == 1)
-        {
-            // If the list has only one item, push it directly
-            bruter_push_meta(stack, bruter_pop_meta(parsed));
-            bruter_free(parsed); // Free the parsed list after use
-        }
-        else
-        {
-            bruter_push_pointer(stack, bruter_new(0, false, false), NULL, BR_TYPE_LIST);
-        }
-        return true;
-    }
-    return false; // Not a list lets check other parsers
-}
-
-parser_step(string_parser)
-{
-    char *token = (char*)splited->data[*word_index].p;
-
-    if (token[0] == '#') // string 
-    {
-        if (token[1] == '(') 
-        {
-            char *str_value = token + 2; // Skip the '#('
-            char *end_ptr = token + strlen(token) - 1;
-            *end_ptr = '\0'; // Null-terminate the string
-            bruter_push_pointer(stack, strdup(str_value), NULL, BR_TYPE_BUFFER);
-        }
-        else 
-        {
-            char *str_value = token + 1; // Skip the '#'
-            bruter_push_pointer(stack, strdup(str_value), NULL, BR_TYPE_BUFFER);
-        }
-        return true;
-    }
-    return false; // Not a string lets check other parsers
-}
-
-parser_step(function_run_parser)
-{
-    char *token = (char*)splited->data[*word_index].p;
-
-    if (token[0] == '!') // run
-    {
-        void (*func)(BruterList *stack) = bruter_pop_pointer(stack);
-        if (token[1] == '!')
-        {
-            // we need to insert the context into the stack too
-            // we assume the user will pop the context
-            bruter_push_pointer(stack, context, NULL, BR_TYPE_NULL);
-        }
-        func(stack);
-        return true;
-    }
-    return false; // Not a run lets check other parsers
-}
-
-parser_step(condition_parser)
-{
-    char *token = (char*)splited->data[*word_index].p;
-
-    if (token[0] == '?') // run
-    {
-        BruterInt condition = bruter_pop_int(stack);
-        if (!condition)
-        {
-            *word_index += 1; // Skip the next token
-            return true; // Indicate that this is a condition and should be ignored
-        }
-        return true;
-    }
-    return false; // Not a run lets check other parsers
-}
-
-parser_step(movctrl_parser)
-{
-    char *token = (char*)splited->data[*word_index].p;
-
-    if (token[0] == 's' && token[1] == 'k' && token[2] == 'i' && token[3] == 'p' && token[4] == '\0')
-    {
-        *word_index += bruter_pop_int(stack);
-        return true;
-    }
-    else if (token[0] == 'b' && token[1] == 'a' && token[2] == 'c' && token[3] == 'k' && token[4] == '\0')
-    {
-        *word_index -= bruter_pop_int(stack);
-        if (*word_index < 0) *word_index = 0; // Prevent going out of bounds
-        return true;
-    }
-    else if (token[0] == 'b' && token[1] == 'r' && token[2] == 'e' && token[3] == 'a' && token[4] == 'k' && token[5] == '\0')
-    {
-        *word_index = splited->size + 1; // Break the loop
-        return true;
-    }
-    else if (token[0] == 'g' && token[1] == 'o' && token[2] == '\0')
-    {
-        BruterInt target = bruter_pop_int(stack);
-        if (target < 0 || target >= splited->size)
-        {
-            printf("WARNING: Go to index out of bounds: %ld\n", target);
-            return true; // Ignore this command
-        }
-        *word_index = target - 1; // Set the word index to the target
-        return true;
-    }
-    return false;
-}
-
-parser_step(variable_parser)
-{
-    char *token = (char*)splited->data[*word_index].p;
-
-    BruterInt found = bruter_find_key(context, token);
-    if (found != -1)
-    {
-        BruterMetaValue meta = bruter_get_meta(context, found);
-        meta.key = NULL; // we don't need the key here
-        bruter_push_meta(stack, meta);
-    }
-    else
-    {
-        // If not found
-        printf("WARNING: Variable '%s' not found in context\n", token);
-        // We can still push a null value to the stack
-        bruter_push_int(stack, 0, NULL, BR_TYPE_NULL);
-    }
-    return true;
-}
-
 // functions
 // functions
 // functions
@@ -315,6 +139,18 @@ function(rawer_clear)
     clear_context(stack);
 }
 
+function(rawer_list)
+{
+    BruterInt size = bruter_pop_int(stack);
+    BruterList *list = bruter_new(8, true, true);
+    for (BruterInt i = 0; i < size; i++)
+    {
+        BruterMetaValue value = bruter_pop_meta(stack);
+        bruter_push_meta(list, value);
+    }
+    bruter_push_pointer(stack, list, NULL, BR_TYPE_LIST);
+}
+
 function(rawer_list_pop)
 {
     BruterList* list = bruter_pop_pointer(stack);
@@ -450,6 +286,25 @@ function(rawer_dup)
     bruter_push_meta(stack, value); // Duplicate it
 }
 
+function(rawer_string)
+{
+    BruterInt size = bruter_pop_int(stack);
+    char* str = (char*)malloc(size + 1);
+    if (str == NULL)
+    {
+        fprintf(stderr, "ERROR: Memory allocation failed for string\n");
+        exit(EXIT_FAILURE);
+    }
+
+    for (BruterInt i = 0; i < size; i++)
+    {
+        str[i] = (char)bruter_pop_int(stack);
+    }
+
+    str[size] = '\0'; // Null-terminate the string
+    bruter_push_pointer(stack, str, NULL, BR_TYPE_BUFFER);
+}
+
 init(std)
 {
     BruterInt found = bruter_find_key(context, "context");
@@ -457,22 +312,6 @@ init(std)
     {
         bruter_push_pointer(context, context, "context", BR_TYPE_ANY);
     }
-    
-    found = bruter_find_key(context, "parsers");
-    if (found == -1)
-    {
-        bruter_push_pointer(context, bruter_new(8, true, false), "parsers", BR_TYPE_LIST);
-        found = bruter_find_key(context, "parsers");
-    }
-
-    BruterList *parsers = bruter_get_pointer(context, found);
-    bruter_push_pointer(parsers, number_parser, "number", BR_TYPE_FUNCTION);
-    bruter_push_pointer(parsers, list_parser, "list", BR_TYPE_FUNCTION);
-    bruter_push_pointer(parsers, string_parser, "string", BR_TYPE_FUNCTION);
-    bruter_push_pointer(parsers, function_run_parser, "run", BR_TYPE_FUNCTION);
-    bruter_push_pointer(parsers, movctrl_parser, "comment", BR_TYPE_FUNCTION);
-    bruter_push_pointer(parsers, condition_parser, "condition", BR_TYPE_FUNCTION);
-    bruter_push_pointer(parsers, variable_parser, "variable", BR_TYPE_FUNCTION);
 
     bruter_push_pointer(context, rawer_print, "print", BR_TYPE_FUNCTION);
     bruter_push_pointer(context, rawer_add, "add", BR_TYPE_FUNCTION);
@@ -481,6 +320,7 @@ init(std)
     bruter_push_pointer(context, rawer_retype, "retype", BR_TYPE_FUNCTION);
     bruter_push_pointer(context, rawer_register, "register", BR_TYPE_FUNCTION);
     bruter_push_pointer(context, rawer_clear, "clear", BR_TYPE_FUNCTION);
+    bruter_push_pointer(context, rawer_list, "list", BR_TYPE_FUNCTION);
     bruter_push_pointer(context, rawer_list_pop, "pop", BR_TYPE_FUNCTION);
     bruter_push_pointer(context, rawer_list_push, "push", BR_TYPE_FUNCTION);
     bruter_push_pointer(context, rawer_list_shift, "shift", BR_TYPE_FUNCTION);
@@ -492,6 +332,7 @@ init(std)
     bruter_push_pointer(context, rawer_list_find, "where", BR_TYPE_FUNCTION);
     bruter_push_pointer(context, rawer_list_find_key, "find", BR_TYPE_FUNCTION);
     bruter_push_pointer(context, rawer_dup, "dup", BR_TYPE_FUNCTION);
+    bruter_push_pointer(context, rawer_string, "string", BR_TYPE_FUNCTION);
 
     bruter_push_int(context, BR_TYPE_NULL, "Null", BR_TYPE_ANY);
     bruter_push_int(context, BR_TYPE_ANY, "Any", BR_TYPE_ANY);

@@ -1,84 +1,148 @@
-function splitIgnoringParensAndQuotes(input, delimiterRegex = /[ \t\n\r]+/) {
-    const result = [];
-    let current = '';
-    let parenLevel = 0;
-    let inQuotes = false;
+function tokenize(input) 
+{
+    let tokens = [];
     let i = 0;
 
-    while (i < input.length) {
-        const c = input[i];
+    function skipWhitespace() 
+    {
+        while (/\s/.test(input[i])) i++;
+    }
 
-        if (c === '"' && input[i - 1] !== '\\') {
-            inQuotes = !inQuotes;
-            current += c;
-            i++;
-        } else if (!inQuotes && c === '(') {
-            parenLevel++;
-            current += c;
-            i++;
-        } else if (!inQuotes && c === ')') {
-            parenLevel = Math.max(0, parenLevel - 1);
-            current += c;
-            i++;
-        } else if (!inQuotes && parenLevel === 0) {
-            const remaining = input.slice(i);
-            const match = remaining.match(delimiterRegex);
-            if (match && match.index === 0) {
-                if (current !== '') {
-                    result.push(current);
-                    current = '';
-                }
-                i += match[0].length;
-            } else {
-                current += c;
+    function parseString() 
+    {
+        i++; // skip opening "
+        let str = '';
+        while (i < input.length) 
+        {
+            if (input[i] === '"') 
+            {
                 i++;
+                break;
             }
-        } else {
-            current += c;
-            i++;
+            if (input[i] === '\\') 
+                {
+                i++;
+                const esc = input[i++];
+                if (esc === 'n') str += '\n';
+                else if (esc === 't') str += '\t';
+                else if (esc === '"') str += '"';
+                else if (esc === '\\') str += '\\';
+                else str += esc;
+            } 
+            else 
+            {
+                str += input[i++];
+            }
+        }
+        
+        tokens.push('!', 'string', str.length.toString());
+
+        // convert string to char codes
+        for (let c of str) tokens.push(c.charCodeAt(0).toString());
+
+    }
+
+    function parseIdentifier() 
+    {
+        let start = i;
+        while (/[a-zA-Z0-9_]/.test(input[i])) i++;
+        return input.slice(start, i);
+    }
+
+    function parseNumber() 
+    {
+        let start = i;
+        while (/[0-9]/.test(input[i])) i++;
+        return input.slice(start, i);
+    }
+
+    function parseExpr() 
+    {
+        skipWhitespace();
+
+        if (input[i] === '"') 
+        {
+            parseString();
+            return;
+        }
+
+        if (/[0-9]/.test(input[i])) 
+        {
+            tokens.push(parseNumber());
+            return;
+        }
+
+        let id = parseIdentifier();
+        skipWhitespace();
+
+        if (input[i] === '(') 
+        {
+            tokens.push('!', id);
+            i++; // skip (
+            while (true) {
+                skipWhitespace();
+                if (input[i] === ')') 
+                {
+                    i++;
+                    break;
+                }
+                parseExpr();
+                skipWhitespace();
+                if (input[i] === ',') i++;
+            }
+        } 
+        else 
+        {
+            tokens.push(id);
         }
     }
 
-    if (current !== '') {
-        result.push(current);
+    while (i < input.length) 
+    {
+        skipWhitespace();
+        if (input[i] === ';') 
+        {
+            i++;
+            continue;
+        }
+
+        let start = i;
+        let name = parseIdentifier();
+        skipWhitespace();
+        if (input[i] === '=') 
+        {
+            i++;
+            skipWhitespace();
+            // convert lhs var name to ASCII
+            tokens.push("!!", "register", "!", "rename", "!", "string", name.length.toString());
+            for (let c of name) {
+                tokens.push(c.charCodeAt(0).toString());
+            }
+            parseExpr(); // right-hand side
+        } 
+        else 
+        {
+            i = start;
+            parseExpr();
+        }
     }
 
-    return result;
+    return tokens;
 }
 
 
 function rawer_preparser(input) 
 {
-    words = splitIgnoringParensAndQuotes(input);
-    for (let i = 0; i < words.length; i++) 
-    {
-        word = words[i].trim();
-        if (word.startsWith('"')) 
-        {
-            // #abc -> (61 62 63 string !)
-            let str = "(";
-            for (let j = 1; j < word.length - 1; j++) 
-            {
-                str += word.charCodeAt(j) + " ";
-            }
-            str += word.length + " string !)";
-            words[i] = str; // Replace the word with the string representation
-            
-        } 
-        else if (word.endsWith('!!')) 
-        {
-            words[i] = word.slice(0, -2); // Remove '!!' at the end
-            words.splice(i + 1, 0, '!!'); // Insert '!!' after the word
-            i++;
-        } 
-        else if (word.endsWith('!')) 
-        {
-            words[i] = word.slice(0, -1); // Remove '!' at the end
-            words.splice(i + 1, 0, '!'); // Insert '!' after the word
-            i++;
+    let commands = input.split(';');
+    let result = [];
+    for (let command of commands) {
+        command = command.trim();
+        if (command) {
+            result.push(tokenize(command).reverse());
         }
     }
-    words = words.filter(word => word !== ''); // Remove empty strings
-    return words;
+
+    let result_string = result.map(tokens => tokens.join(' ')).join('\n');
+    return result_string.trim();
 }
 

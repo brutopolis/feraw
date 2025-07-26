@@ -19,6 +19,8 @@ int main(int argc, char *argv[])
     if (strcmp(argv[1], "eval") == 0)
     {
         BruterList *result = parse(context, argv[2]);
+        clear_context(result); // Clear the context to free allocated memory
+        bruter_free(result); // Free the result list
     }
     else if (strcmp(argv[1], "run") == 0)
     {
@@ -44,7 +46,8 @@ int main(int argc, char *argv[])
         input_str[length] = '\0'; // null-terminate the string
         fclose(file);
         BruterList *result = parse(context, input_str);
-        bruter_free(result); // Free the result list after use
+        clear_context(result); // Clear the context to free allocated memory
+        bruter_free(result); // Free the result list
         free(input_str); // Free the input string after use
     }
     else

@@ -1,26 +1,7 @@
 123 print !
-
-#(hello world!) #str rename !
-register !!
-
-1 #condition rename !
-register !!
-
+33 100 108 114 111 119 32 111 108 108 101 104 12 string ! 114 116 115 3 string ! rename ! register !!
+1 110 111 105 116 105 100 110 111 99 9 string ! rename ! register !!
 str print !
-
-5 7 condition ? print !
-
-1 skip
-    (we expect 451 to be printed
-    because if the result of a list is only one item, 
-    it is returned as a single value)
-
-(400 51 add !) print !
-
-1 skip (we expect 7 2 to be printed)
-
-(1 2 3 4 5 2 7) #numbers rename !
-register !!
-
-2 numbers pop ! print ! print !
-0 go
+51 400 add ! print !
+7 2 5 4 3 2 1 7 list ! 115 114 101 98 109 117 110 7 string ! rename ! register !!
+1 numbers pop ! print !

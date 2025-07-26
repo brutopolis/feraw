@@ -1,18 +1,12 @@
-print(123)
+123 print !
 
-"hello world!" "str" rename!
+#(hello world!) #str rename !
 register !!
-
-var str = "hello world!"
 
 1 #condition rename !
 register !!
 
-var condition = 1
-
 str print !
-
-print(str)
 
 5 7 condition ? print !
 
@@ -30,3 +24,14 @@ register !!
 
 2 numbers pop ! print ! print !
 0 go
+
+// new
+
+print(123);
+str = "hello world!";
+condition = 1;
+print(str);
+
+print(add(400, 51));
+numbers = list(7, 1, 2, 3, 4, 5, 2, 7);
+print(pop(1, numbers));
