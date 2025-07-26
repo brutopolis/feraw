@@ -77,9 +77,41 @@ function tokenize(input)
     function parseNumber() 
     {
         let start = i;
-        while (i < input.length && /[0-9]/.test(input[i])) i++;
+
+        if (input[i] === '0' && i + 1 < input.length) {
+            let next = input[i + 1];
+            if (next === 'b' || next === 'B') {
+                i += 2;
+                while (i < input.length && /[01]/.test(input[i])) i++;
+                return input.slice(start, i);
+            }
+            if (next === 'x' || next === 'X') {
+                i += 2;
+                while (i < input.length && /[0-9a-fA-F]/.test(input[i])) i++;
+                return input.slice(start, i);
+            }
+            if (next === 'o' || next === 'O') {
+                i += 2;
+                while (i < input.length && /[0-7]/.test(input[i])) i++;
+                return input.slice(start, i);
+            }
+        }
+
+        let seenDot = false;
+        while (i < input.length) {
+            if (/[0-9]/.test(input[i])) {
+                i++;
+            } else if (input[i] === '.' && !seenDot) {
+                seenDot = true;
+                i++;
+            } else {
+                break;
+            }
+        }
+
         return input.slice(start, i);
     }
+
 
     function parseList() 
     {
@@ -112,7 +144,7 @@ function tokenize(input)
     }
 
     function parseExpr() 
-{
+    {
         skipWhitespace();
 
         if (input[i] === '"') 

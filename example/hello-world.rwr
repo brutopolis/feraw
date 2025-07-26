@@ -1,4 +1,5 @@
 print(123);
+
 start:
 str = "hello world!";
 condition = 1;
