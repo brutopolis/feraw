@@ -1,0 +1,2 @@
+#/bin/bash
+node -e "$(cat rawer.js); process.stdout.write(rawer_compile(process.argv[1]));" "$(cat $1);"

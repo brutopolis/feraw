@@ -3,7 +3,7 @@ function tokenize(input)
     let tokens = [];
     let i = 0;
 
-    function skipWhitespace() 
+    function skipWhitespace()
     {
         while (/\s/.test(input[i])) i++;
     }
@@ -14,13 +14,13 @@ function tokenize(input)
         let str = '';
         while (i < input.length) 
         {
-            if (input[i] === '"') 
+            if (input[i] === '"')
             {
                 i++;
                 break;
             }
             if (input[i] === '\\') 
-                {
+            {
                 i++;
                 const esc = input[i++];
                 if (esc === 'n') str += '\n';
@@ -34,12 +34,9 @@ function tokenize(input)
                 str += input[i++];
             }
         }
-        
+
         tokens.push('!', 'string', str.length.toString());
-
-        // convert string to char codes
         for (let c of str) tokens.push(c.charCodeAt(0).toString());
-
     }
 
     function parseIdentifier() 
@@ -56,13 +53,49 @@ function tokenize(input)
         return input.slice(start, i);
     }
 
-    function parseExpr() 
+    function parseList() 
     {
+        i++; // skip [
+
+        let tempTokens = [];
+        let itemCount = 0;
+
+        while (true) 
+        {
+            skipWhitespace();
+            if (input[i] === ']') 
+            {
+                i++; // skip ]
+                break;
+            }
+
+            let saved = tokens;
+            tokens = [];
+            parseExpr();
+            tempTokens.push(...tokens);
+            itemCount++;
+            tokens = saved;
+
+            skipWhitespace();
+            if (input[i] === ',') i++;
+        }
+
+        tokens.push('!', 'list', itemCount.toString(), ...tempTokens);
+    }
+
+    function parseExpr() 
+{
         skipWhitespace();
 
         if (input[i] === '"') 
         {
             parseString();
+            return;
+        }
+
+        if (input[i] === '[') 
+        {
+            parseList();
             return;
         }
 
@@ -101,7 +134,7 @@ function tokenize(input)
     {
         skipWhitespace();
         if (input[i] === ';') 
-        {
+            {
             i++;
             continue;
         }
@@ -113,12 +146,9 @@ function tokenize(input)
         {
             i++;
             skipWhitespace();
-            // convert lhs var name to ASCII
             tokens.push("!!", "register", "!", "rename", "!", "string", name.length.toString());
-            for (let c of name) {
-                tokens.push(c.charCodeAt(0).toString());
-            }
-            parseExpr(); // right-hand side
+            for (let c of name) tokens.push(c.charCodeAt(0).toString());
+            parseExpr();
         } 
         else 
         {
@@ -130,8 +160,7 @@ function tokenize(input)
     return tokens;
 }
 
-
-function rawer_preparser(input) 
+function rawer_compile(input) 
 {
     let commands = input.split(';');
     let result = [];
@@ -145,4 +174,3 @@ function rawer_preparser(input)
     let result_string = result.map(tokens => tokens.join(' ')).join('\n');
     return result_string.trim();
 }
-

@@ -5,7 +5,7 @@
 
 #include <ctype.h>
 
-#define RAWER_VERSION "0.0.6"
+#define RAWER_VERSION "0.0.7"
 
 enum {
     BR_TYPE_NULL = 0,
