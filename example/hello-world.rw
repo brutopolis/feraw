@@ -5,6 +5,7 @@ str print !
 51 400 add ! print !
 7 2 5 4 3 2 1 7 list ! #numbers rename ! context register !
 1 numbers pop ! print !
-33 100 108 114 111 119 32 111 108 108 101 104 12 buffer ! print !
+33 100 108 114 111 119 32 111 108 108 101 104 12 buffer ! #str2 rename ! context register !
+str2 print !
 ;
 3 ,
