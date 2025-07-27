@@ -141,7 +141,7 @@ function tokenize(input)
                 skipWhitespace();
                 if (input[i] === ',') i++;
             }
-        } 
+        }
         else 
         {
             tokens.push(name);

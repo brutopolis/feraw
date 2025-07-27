@@ -6,4 +6,4 @@ str print !
 7 2 5 4 3 2 1 7 list ! 115 114 101 98 109 117 110 7 string ! rename ! context register !
 1 numbers pop ! print !
 break
-3 go !
+3 goto
