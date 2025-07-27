@@ -95,22 +95,23 @@ static inline BruterList* parse(BruterList *context, char* input_str)
         }
         else if (token[0] == '!')
         {
-            func(bruter_pop_pointer(stack));
+            Function func = bruter_pop_pointer(stack);
+            func(stack);
         }
-        else if (token[0] == 's' && token[1] == 'k' && token[2] == 'i' && token[3] == 'p' && token[4] == '\0')
+        else if (token[0] == '>') // skip
         {
             i += bruter_pop_int(stack);
         }
-        else if (token[0] == 'b' && token[1] == 'a' && token[2] == 'c' && token[3] == 'k' && token[4] == '\0')
+        else if (token[0] == '<') // back
         {
             i -= bruter_pop_int(stack);
             if (i < 0) i = 0; // Prevent going out of bounds
         }
-        else if (token[0] == 'b' && token[1] == 'r' && token[2] == 'e' && token[3] == 'a' && token[4] == 'k' && token[5] == '\0')
+        else if (token[0] == ';') // break
         {
             i = splited->size + 1; // Break the loop
         }
-        else if (token[0] == 'g' && token[1] == 'o' && token[2] == 't' && token[3] == 'o' && token[4] == '\0')
+        else if (token[0] == ',') // goto
         {
             BruterInt target = bruter_pop_int(stack);
             if (target < 0 || target >= splited->size)
@@ -119,6 +120,19 @@ static inline BruterList* parse(BruterList *context, char* input_str)
             }
             i = target - 1; // Set the word index to the target
         }
+        else if (token[0] == '#') // string
+        {
+            char* str = strdup(token + 1);
+            for (char* p = str; *p; p++) 
+            {
+                if (*p == '\x14') *p = '\n'; // Replace ASCII 20 with newline
+                else if (*p == '\x15') *p = '\r'; // Replace ASCII 21 with carriage return
+                else if (*p == '\x16') *p = '\t'; // Replace ASCII 22 with tab
+                else if (*p == '\x17') *p = ' '; // Replace ASCII 23 with space
+                else if (*p == '\x18') *p = ':'; // Replace ASCII 24 with colon
+            }
+            bruter_push_pointer(stack, str, NULL, BR_TYPE_BUFFER);
+        } 
         else 
         {
             BruterInt found = bruter_find_key(context, token);

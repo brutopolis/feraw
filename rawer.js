@@ -28,8 +28,9 @@ function tokenize(input)
 
     function parseString() 
     {
-        i++; // skip opening "
+        // copy content inside ""
         let str = '';
+        i++; // skip the opening quote
         while (i < input.length) 
         {
             if (input[i] === '"') 
@@ -37,6 +38,42 @@ function tokenize(input)
                 i++;
                 break;
             }
+            else if (input[i] === '\n')
+            {
+                // replace to a unused ascii character
+                str += '\x14'; // ASCII 20 is a non-printable character
+                i++;
+                continue;
+            }
+            else if (input[i] === '\r')
+            {
+                // replace to a unused ascii character
+                str += '\x15'; // ASCII 21 is a non-printable character
+                i++;
+                continue;
+            }
+            else if (input[i] === '\t')
+            {
+                // replace to a unused ascii character
+                str += '\x16'; // ASCII 22 is a non-printable character
+                i++;
+                continue;
+            }
+            else if (input[i] === ' ')
+            {                
+                // replace to a unused ascii character
+                str += '\x17'; // ASCII 23 is a non-printable character
+                i++;
+                continue;
+            }
+            else if (input[i] === ':')
+            {
+                // replace to a unused ascii character
+                str += '\x18'; // ASCII 24 is a non-printable character
+                i++;
+                continue;
+            }
+
             if (input[i] === '\\') 
             {
                 i++;
@@ -50,11 +87,11 @@ function tokenize(input)
             else 
             {
                 str += input[i++];
+
             }
         }
 
-        tokens.push('!', 'string', str.length.toString());
-        for (let c of str) tokens.push(c.charCodeAt(0).toString());
+        tokens.push('#' + str);
     }
 
     function parseList()
@@ -86,10 +123,39 @@ function tokenize(input)
         tokens.push('!', 'list', itemCount.toString(), ...tempTokens);
     }
 
+    function parseBuffer()
+    {
+        i++; // skip [
+        let tempTokens = [];
+        let itemCount = 0;
+
+        while (true) 
+        {
+            skipWhitespace();
+            if (i >= input.length || input[i] === ']') 
+            {
+                i++; // skip ]
+                break;
+            }
+
+            let saved = tokens;
+            tokens = [];
+            parseExpr();
+            tempTokens.push(...tokens);
+            itemCount++;
+            tokens = saved;
+
+            skipWhitespace();
+            if (input[i] === ',') i++;
+        }
+
+        tokens.push('!', 'buffer', itemCount.toString(), ...tempTokens);
+    }
+
     function parseRawToken() 
     {
         let start = i;
-        while (i < input.length && !/\s/.test(input[i]) && !"()[],=".includes(input[i])) 
+        while (i < input.length && !/\s/.test(input[i]) && !"()[]{},=;".includes(input[i]))
         {
             i++;
         }
@@ -106,10 +172,14 @@ function tokenize(input)
             parseString();
             return;
         }
-
-        if (input[i] === '[') 
+        else if (input[i] === '[') 
         {
             parseList();
+            return;
+        }
+        else if (input[i] === '{') // buffer
+        {
+            parseBuffer();
             return;
         }
 
@@ -121,7 +191,26 @@ function tokenize(input)
         {
             if (name == 'skip' || name == 'back' || name == 'goto' || name == 'break' || name == '!')
             {
-                tokens.push(name);
+                switch (name)
+                {
+                    case 'skip':
+                        tokens.push('>');
+                        break;
+                    case 'back':
+                        tokens.push('<');
+                        break;
+                    case 'goto':
+                        tokens.push(',');
+                        break;
+                    case 'break':
+                        tokens.push(';');
+                        break;
+                    case '!':
+                        tokens.push('!');
+                        break;
+                    default:
+                        throw new Error(`Unknown command: ${name}`);
+                }
             }
             else 
             {
@@ -166,8 +255,7 @@ function tokenize(input)
         {
             i++;
             skipWhitespace();
-            tokens.push("!", "register", "context", "!", "rename", "!", "string", name.length.toString());
-            for (let c of name) tokens.push(c.charCodeAt(0).toString());
+            tokens.push("!", "register", "context", "!", "rename", "#" + name);
             parseExpr();
         } 
         else 

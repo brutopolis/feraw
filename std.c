@@ -286,13 +286,13 @@ function(rawer_dup)
     bruter_push_meta(stack, value); // Duplicate it
 }
 
-function(rawer_string)
+function(rawer_buffer)
 {
     BruterInt size = bruter_pop_int(stack);
     char* str = (char*)malloc(size + 1);
     if (str == NULL)
     {
-        fprintf(stderr, "ERROR: Memory allocation failed for string\n");
+        fprintf(stderr, "ERROR: Memory allocation failed for buffer\n");
         exit(EXIT_FAILURE);
     }
 
@@ -332,7 +332,7 @@ init(std)
     bruter_push_pointer(context, rawer_list_find, "where", BR_TYPE_FUNCTION);
     bruter_push_pointer(context, rawer_list_find_key, "find", BR_TYPE_FUNCTION);
     bruter_push_pointer(context, rawer_dup, "dup", BR_TYPE_FUNCTION);
-    bruter_push_pointer(context, rawer_string, "string", BR_TYPE_FUNCTION);
+    bruter_push_pointer(context, rawer_buffer, "buffer", BR_TYPE_FUNCTION);
 
     bruter_push_int(context, BR_TYPE_NULL, "Null", BR_TYPE_ANY);
     bruter_push_int(context, BR_TYPE_ANY, "Any", BR_TYPE_ANY);
