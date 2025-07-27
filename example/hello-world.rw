@@ -1,8 +1,9 @@
 123 print !
-33 100 108 114 111 119 32 111 108 108 101 104 12 string ! 114 116 115 3 string ! rename ! register !! 
-1 110 111 105 116 105 100 110 111 99 9 string ! rename ! register !!
+33 100 108 114 111 119 32 111 108 108 101 104 12 string ! 114 116 115 3 string ! rename ! context register ! 
+1 110 111 105 116 105 100 110 111 99 9 string ! rename ! context register !
 str print !
 51 400 add ! print !
-7 2 5 4 3 2 1 7 list ! 115 114 101 98 109 117 110 7 string ! rename ! register !!
+7 2 5 4 3 2 1 7 list ! 115 114 101 98 109 117 110 7 string ! rename ! context register !
 1 numbers pop ! print !
+break
 3 go !

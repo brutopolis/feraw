@@ -5,7 +5,7 @@
 
 #include <ctype.h>
 
-#define RAWER_VERSION "0.0.7"
+#define RAWER_VERSION "0.0.8"
 
 enum {
     BR_TYPE_NULL = 0,
@@ -93,24 +93,9 @@ static inline BruterList* parse(BruterList *context, char* input_str)
                 bruter_push_int(stack, strtol(token, NULL, 10), NULL, BR_TYPE_ANY);
             }
         }
-        else if (token[0] == '!') // run
+        else if (token[0] == '!')
         {
-            void (*func)(BruterList *stack) = bruter_pop_pointer(stack);
-            if (token[1] == '!')
-            {
-                // we need to insert the context into the stack too
-                // we assume the user will pop the context
-                bruter_push_pointer(stack, context, NULL, BR_TYPE_NULL);
-            }
-            func(stack);
-        }
-        else if (token[0] == '?') // run
-        {
-            BruterInt condition = bruter_pop_int(stack);
-            if (!condition)
-            {
-                i += 1; // Skip the next token
-            }
+            func(bruter_pop_pointer(stack));
         }
         else if (token[0] == 's' && token[1] == 'k' && token[2] == 'i' && token[3] == 'p' && token[4] == '\0')
         {
@@ -125,7 +110,7 @@ static inline BruterList* parse(BruterList *context, char* input_str)
         {
             i = splited->size + 1; // Break the loop
         }
-        else if (token[0] == 'g' && token[1] == 'o' && token[2] == '\0')
+        else if (token[0] == 'g' && token[1] == 'o' && token[2] == 't' && token[3] == 'o' && token[4] == '\0')
         {
             BruterInt target = bruter_pop_int(stack);
             if (target < 0 || target >= splited->size)

@@ -57,73 +57,16 @@ function tokenize(input)
         for (let c of str) tokens.push(c.charCodeAt(0).toString());
     }
 
-    function parseIdentifier() 
-    {
-        let start = i;
-        if (i >= input.length || !/[a-zA-Z_]/.test(input[i])) return null;
-
-        i++;
-        while (i < input.length && /[a-zA-Z0-9_]/.test(input[i])) i++;
-
-        if (input[i] === ':') 
-        {
-            i++;
-            return input.slice(start, i);
-        }
-
-        return input.slice(start, i);
-    }
-
-    function parseNumber() 
-    {
-        let start = i;
-
-        if (input[i] === '0' && i + 1 < input.length) {
-            let next = input[i + 1];
-            if (next === 'b' || next === 'B') {
-                i += 2;
-                while (i < input.length && /[01]/.test(input[i])) i++;
-                return input.slice(start, i);
-            }
-            if (next === 'x' || next === 'X') {
-                i += 2;
-                while (i < input.length && /[0-9a-fA-F]/.test(input[i])) i++;
-                return input.slice(start, i);
-            }
-            if (next === 'o' || next === 'O') {
-                i += 2;
-                while (i < input.length && /[0-7]/.test(input[i])) i++;
-                return input.slice(start, i);
-            }
-        }
-
-        let seenDot = false;
-        while (i < input.length) {
-            if (/[0-9]/.test(input[i])) {
-                i++;
-            } else if (input[i] === '.' && !seenDot) {
-                seenDot = true;
-                i++;
-            } else {
-                break;
-            }
-        }
-
-        return input.slice(start, i);
-    }
-
-
-    function parseList() 
+    function parseList()
     {
         i++; // skip [
-
         let tempTokens = [];
         let itemCount = 0;
 
         while (true) 
         {
             skipWhitespace();
-            if (input[i] === ']') 
+            if (i >= input.length || input[i] === ']') 
             {
                 i++; // skip ]
                 break;
@@ -143,9 +86,20 @@ function tokenize(input)
         tokens.push('!', 'list', itemCount.toString(), ...tempTokens);
     }
 
+    function parseRawToken() 
+    {
+        let start = i;
+        while (i < input.length && !/\s/.test(input[i]) && !"()[],=".includes(input[i])) 
+        {
+            i++;
+        }
+        return input.slice(start, i);
+    }
+
     function parseExpr() 
     {
         skipWhitespace();
+        if (i >= input.length) return;
 
         if (input[i] === '"') 
         {
@@ -159,25 +113,26 @@ function tokenize(input)
             return;
         }
 
-        if (/[0-9]/.test(input[i])) 
-        {
-            tokens.push(parseNumber());
-            return;
-        }
-
-        let id = parseIdentifier();
-        if (!id) return;
-
+        let start = i;
+        let name = parseRawToken();
         skipWhitespace();
 
         if (input[i] === '(') 
         {
-            tokens.push('!', id);
+            if (name == 'skip' || name == 'back' || name == 'goto' || name == 'break' || name == '!')
+            {
+                tokens.push(name);
+            }
+            else 
+            {
+                tokens.push('!', name);
+            }
+
             i++; // skip (
             while (true) 
             {
                 skipWhitespace();
-                if (input[i] === ')') 
+                if (i >= input.length || input[i] === ')') 
                 {
                     i++;
                     break;
@@ -189,13 +144,14 @@ function tokenize(input)
         } 
         else 
         {
-            tokens.push(id);
+            tokens.push(name);
         }
     }
 
     while (i < input.length) 
     {
         skipWhitespace();
+        if (i >= input.length) break;
         if (input[i] === ';') 
         {
             i++;
@@ -203,19 +159,14 @@ function tokenize(input)
         }
 
         let start = i;
-        let name = parseIdentifier();
-        if (!name) 
-        {
-            i++;
-            continue;
-        }
-
+        let name = parseRawToken();
         skipWhitespace();
+
         if (input[i] === '=') 
         {
             i++;
             skipWhitespace();
-            tokens.push("!!", "register", "!", "rename", "!", "string", name.length.toString());
+            tokens.push("!", "register", "context", "!", "rename", "!", "string", name.length.toString());
             for (let c of name) tokens.push(c.charCodeAt(0).toString());
             parseExpr();
         } 
