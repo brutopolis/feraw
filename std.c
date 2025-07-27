@@ -289,7 +289,7 @@ function(rawer_dup)
 function(rawer_buffer)
 {
     BruterInt size = bruter_pop_int(stack);
-    char* str = (char*)malloc(size + 1);
+    char* str = (char*)malloc(size);
     if (str == NULL)
     {
         fprintf(stderr, "ERROR: Memory allocation failed for buffer\n");
@@ -301,7 +301,6 @@ function(rawer_buffer)
         str[i] = (char)bruter_pop_int(stack);
     }
 
-    str[size] = '\0'; // Null-terminate the string
     bruter_push_pointer(stack, str, NULL, BR_TYPE_BUFFER);
 }
 
