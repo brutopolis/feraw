@@ -99,6 +99,7 @@ function splitOutsideStrings(input, char = ';') {
                 }
                 i++;
             }
+            i++;
             continue;
         }
 
@@ -116,51 +117,6 @@ function splitOutsideStrings(input, char = ';') {
     }
 
     return parts;
-}
-
-let counter = 0;
-
-function preprocessTernary(code) {
-    return code.split('\n').map(line => {
-        let i = 0;
-        let inString = false;
-        let buffer = '';
-        let qmark = -1, colon = -1, semicolon = -1;
-
-        while (i < line.length) {
-            let c = line[i];
-
-            if (c === '"') {
-                inString = !inString;
-            } else if (!inString) {
-                if (c === '?' && qmark === -1) qmark = i;
-                else if (c === ':' && colon === -1) colon = i;
-                else if (c === ';' && semicolon === -1) semicolon = i;
-            }
-
-            buffer += c;
-            i++;
-        }
-
-        if (qmark === -1 || colon === -1 || semicolon === -1) return line;
-
-        let condition = buffer.slice(0, qmark).trim();
-        let a = buffer.slice(qmark + 1, colon).trim();
-        let b = buffer.slice(colon + 1, semicolon).trim();
-
-        let id = counter++;
-        let result = [
-            `if(${condition}, cond_true_${id}, cond_false_${id});`,
-            `cond_true_${id}:`,
-            `${a};`,
-            `goto(after_cond_${id});`,
-            `cond_false_${id}:`,
-            `${b};`,
-            `after_cond_${id}:`
-        ];
-
-        return result.join('\n');
-    }).join('\n');
 }
 
 function tokenize(input) {
@@ -287,7 +243,7 @@ function tokenize(input) {
         skipWhitespace();
 
         if (input[i] === '(') {
-            if (["skip", "back", "goto", "break", "if", "!"].includes(name)) {
+            if (["skip", "back", "goto", "break", "!", "if", "ifelse"].includes(name)) {
                 tokens.push({ skip: '>', back: '<', goto: ',', break: ';', '!': '!', 'if': '?', 'ifelse': '??'}[name]);
             } else {
                 tokens.push('!', name);
@@ -377,7 +333,7 @@ function rawer_labelparser(original_input)
 
 function rawer_compile(input) 
 {
-    let commands = splitOutsideStrings(preprocessTernary(input), ';');
+    let commands = splitOutsideStrings(input, ';');
     let result = [];
     for (let command of commands) 
     {

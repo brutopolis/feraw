@@ -142,18 +142,18 @@ static inline BruterList* parse(BruterList *context, char* input_str)
                 BruterInt iffalse_position = bruter_pop_int(stack);
                 if (condition)
                 {
-                    i = iftrue_position;
+                    i = iftrue_position - 1;
                 }
                 else
                 {
-                    i = iffalse_position;
+                    i = iffalse_position - 1;
                 }
             }
             else // simple if
             {
                 if (condition)
                 {
-                    i = iftrue_position;
+                    i = iftrue_position - 1;
                 }
             }
         }
