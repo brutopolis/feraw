@@ -22,7 +22,7 @@ aftercondition:
 */
 
 // this does the same as the above commented block
-condition ? (print("true");print("true")) : print("false");
+condition ? (print("true")) : print("false");
 
 break();
 
