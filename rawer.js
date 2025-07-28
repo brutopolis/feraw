@@ -77,6 +77,30 @@ function splitOutsideStrings(input, char = ';') {
             i--; // adjust for the loop increment
             continue;
         }
+        else if(c === '/' && input[i + 1] === '/') { // single-line comment
+            while (i < input.length && input[i] !== '\n') {
+                current += input[i];
+                i++;
+            }
+            current += '\n'; // preserve the newline
+            continue;
+        }
+        else if(c === '/' && input[i + 1] === '*') { // multi-line comment
+            current += c; // add the first /
+            current += input[i + 1]; // add the second *
+            i += 2; // skip the /*
+            while (i < input.length) {
+                current += input[i];
+                if (input[i] === '*' && input[i + 1] === '/') {
+                    current += '/'; // add the closing /
+                    current += input[i + 1]; // add the closing *
+                    i += 2; // skip the */
+                    break;
+                }
+                i++;
+            }
+            continue;
+        }
 
         if (c === char && !inString) {
             parts.push(current.trim());
