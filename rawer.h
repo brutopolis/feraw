@@ -5,7 +5,7 @@
 
 #include <ctype.h>
 
-#define RAWER_VERSION "0.0.8"
+#define RAWER_VERSION "0.0.9"
 
 enum {
     BR_TYPE_NULL = 0,
@@ -132,7 +132,31 @@ static inline BruterList* parse(BruterList *context, char* input_str)
                 else if (*p == '\x18') *p = ':'; // Replace ASCII 24 with colon
             }
             bruter_push_pointer(stack, str, NULL, BR_TYPE_BUFFER);
-        } 
+        }
+        else if (token[0] == '?') // if
+        {
+            BruterInt condition = bruter_pop_int(stack);
+            BruterInt iftrue_position = bruter_pop_int(stack);
+            if (token[1] == '?') // ifelse
+            {
+                BruterInt iffalse_position = bruter_pop_int(stack);
+                if (condition)
+                {
+                    i = iftrue_position;
+                }
+                else
+                {
+                    i = iffalse_position;
+                }
+            }
+            else // simple if
+            {
+                if (condition)
+                {
+                    i = iftrue_position;
+                }
+            }
+        }
         else 
         {
             BruterInt found = bruter_find_key(context, token);

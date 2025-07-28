@@ -11,6 +11,19 @@ print(pop(numbers, 1));
 str2 = buffer(13, 104, 101, 108, 108, 111, 32, 119, 111, 114, 108, 100, 33, 0);
 print(str2);
 
+/*
+if(condition, conditiontrue, conditionfalse);
+conditiontrue:
+print("true");
+goto(aftercondition);
+conditionfalse:
+print("false");
+aftercondition:
+*/
+
+// this does the same as the above commented block
+condition ? (print("true");print("true")) : print("false");
+
 break();
 
 goto(start);

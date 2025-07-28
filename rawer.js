@@ -1,81 +1,193 @@
-function tokenize(input) 
-{
+
+function splitOutsideStrings(input, char = ';') {
+    let parts = [];
+    let current = '';
+    let inString = false;
+    let escape = false;
+
+    for (let i = 0; i < input.length; i++) {
+        let c = input[i];
+
+        if (escape) {
+            current += c;
+            escape = false;
+            continue;
+        }
+
+        if (c === '\\') {
+            current += c;
+            escape = true;
+            continue;
+        }
+
+        if (c === '"') {
+            inString = !inString;
+            current += c;
+            continue;
+        }
+
+        if (c === '{') // lets make sure we don't split inside a block
+        {
+            let blockDepth = 1;
+            current += c;
+            i++;
+            while (i < input.length && blockDepth > 0) {
+                if (input[i] === '{') {
+                    blockDepth++;
+                } else if (input[i] === '}') {
+                    blockDepth--;
+                }
+                current += input[i];
+                i++;
+            }
+            i--; // adjust for the loop increment
+            continue;
+        }
+        else if (c === '(' || c === ')') // lets make sure we don't split inside a function call
+        {
+            let parenDepth = c === '(' ? 1 : -1;
+            current += c;
+            i++;
+            while (i < input.length && parenDepth !== 0) {
+                if (input[i] === '(') {
+                    parenDepth++;
+                } else if (input[i] === ')') {
+                    parenDepth--;
+                }
+                current += input[i];
+                i++;
+            }
+            i--; // adjust for the loop increment
+            continue;
+        }
+        else if (c === '[' || c === ']') // lets make sure we don't split inside a list
+        {
+            let listDepth = c === '[' ? 1 : -1;
+            current += c;
+            i++;
+            while (i < input.length && listDepth !== 0) {
+                if (input[i] === '[') {
+                    listDepth++;
+                } else if (input[i] === ']') {
+                    listDepth--;
+                }
+                current += input[i];
+                i++;
+            }
+            i--; // adjust for the loop increment
+            continue;
+        }
+
+        if (c === char && !inString) {
+            parts.push(current.trim());
+            current = '';
+            continue;
+        }
+
+        current += c;
+    }
+
+    if (current.trim() !== '') {
+        parts.push(current.trim());
+    }
+
+    return parts;
+}
+
+let counter = 0;
+
+function preprocessTernary(code) {
+    return code.split('\n').map(line => {
+        let i = 0;
+        let inString = false;
+        let buffer = '';
+        let qmark = -1, colon = -1, semicolon = -1;
+
+        while (i < line.length) {
+            let c = line[i];
+
+            if (c === '"') {
+                inString = !inString;
+            } else if (!inString) {
+                if (c === '?' && qmark === -1) qmark = i;
+                else if (c === ':' && colon === -1) colon = i;
+                else if (c === ';' && semicolon === -1) semicolon = i;
+            }
+
+            buffer += c;
+            i++;
+        }
+
+        if (qmark === -1 || colon === -1 || semicolon === -1) return line;
+
+        let condition = buffer.slice(0, qmark).trim();
+        let a = buffer.slice(qmark + 1, colon).trim();
+        let b = buffer.slice(colon + 1, semicolon).trim();
+
+        let id = counter++;
+        let result = [
+            `if(${condition}, cond_true_${id}, cond_false_${id});`,
+            `cond_true_${id}:`,
+            `${a};`,
+            `goto(after_cond_${id});`,
+            `cond_false_${id}:`,
+            `${b};`,
+            `after_cond_${id}:`
+        ];
+
+        return result.join('\n');
+    }).join('\n');
+}
+
+function tokenize(input) {
     let tokens = [];
     let i = 0;
+    const MAX_TOKENS = 1e6;
+    const MAX_DEPTH = 1000;
 
-    function skipWhitespace() 
-    {
-        while (i < input.length) 
-        {
-            if (/\s/.test(input[i])) 
-            {
+    function skipWhitespace() {
+        let safety = 0;
+        while (i < input.length) {
+            if (++safety > MAX_TOKENS) throw new Error("skipWhitespace: loop exceeded safe bounds");
+
+            if (/\s/.test(input[i])) {
                 i++;
-            } 
-            else if (input[i] === '/' && input[i + 1] === '/') 
-            {
+            } else if (input[i] === '/' && input[i + 1] === '/') {
                 i += 2;
-                while (i < input.length && input[i] !== '\n') i++;
-            } 
-            else if (input[i] === '/' && input[i + 1] === '*') 
-            {
+                while (i < input.length && input[i] !== '\n') {
+                    if (++safety > MAX_TOKENS) throw new Error("skipWhitespace: comment loop too long");
+                    i++;
+                }
+            } else if (input[i] === '/' && input[i + 1] === '*') {
                 i += 2;
-                while (i < input.length && !(input[i] === '*' && input[i + 1] === '/')) i++;
+                while (i < input.length && !(input[i] === '*' && input[i + 1] === '/')) {
+                    if (++safety > MAX_TOKENS) throw new Error("skipWhitespace: block comment loop too long");
+                    i++;
+                }
                 if (i < input.length) i += 2;
-            } 
-            else break;
+            } else break;
         }
     }
 
-    function parseString() 
-    {
-        // copy content inside ""
+    function parseString() {
         let str = '';
-        i++; // skip the opening quote
-        while (i < input.length) 
-        {
-            if (input[i] === '"') 
-            {
+        i++; // skip opening "
+
+        let safety = 0;
+        while (i < input.length) {
+            if (++safety > MAX_TOKENS) throw new Error("parseString: unterminated string");
+
+            if (input[i] === '"') {
                 i++;
                 break;
             }
-            else if (input[i] === '\n')
-            {
-                // replace to a unused ascii character
-                str += '\x14'; // ASCII 20 is a non-printable character
-                i++;
-                continue;
-            }
-            else if (input[i] === '\r')
-            {
-                // replace to a unused ascii character
-                str += '\x15'; // ASCII 21 is a non-printable character
-                i++;
-                continue;
-            }
-            else if (input[i] === '\t')
-            {
-                // replace to a unused ascii character
-                str += '\x16'; // ASCII 22 is a non-printable character
-                i++;
-                continue;
-            }
-            else if (input[i] === ' ')
-            {                
-                // replace to a unused ascii character
-                str += '\x17'; // ASCII 23 is a non-printable character
-                i++;
-                continue;
-            }
-            else if (input[i] === ':')
-            {
-                // replace to a unused ascii character
-                str += '\x18'; // ASCII 24 is a non-printable character
-                i++;
-                continue;
-            }
 
-            if (input[i] === '\\') 
-            {
+            if (input[i] === '\n') str += '\x14';
+            else if (input[i] === '\r') str += '\x15';
+            else if (input[i] === '\t') str += '\x16';
+            else if (input[i] === ' ') str += '\x17';
+            else if (input[i] === ':') str += '\x18';
+            else if (input[i] === '\\') {
                 i++;
                 const esc = input[i++];
                 if (esc === 'n') str += '\n';
@@ -83,35 +195,40 @@ function tokenize(input)
                 else if (esc === '"') str += '"';
                 else if (esc === '\\') str += '\\';
                 else str += esc;
-            } 
-            else 
-            {
-                str += input[i++];
-
+                continue;
+            } else {
+                str += input[i];
             }
+
+            i++;
         }
+
+        if (safety >= MAX_TOKENS) throw new Error("String not terminated");
 
         tokens.push('#' + str);
     }
 
-    function parseList()
-    {
+    function parseList(depth = 0) {
+        if (depth > MAX_DEPTH) throw new Error("Max list nesting exceeded");
         i++; // skip [
+
         let tempTokens = [];
         let itemCount = 0;
 
-        while (true) 
-        {
+        let safety = 0;
+        while (true) {
+            if (++safety > MAX_TOKENS) throw new Error("parseList: unterminated list");
+
             skipWhitespace();
-            if (i >= input.length || input[i] === ']') 
-            {
-                i++; // skip ]
+            if (i >= input.length) throw new Error("parseList: unexpected end of input");
+            if (input[i] === ']') {
+                i++;
                 break;
             }
 
             let saved = tokens;
             tokens = [];
-            parseExpr();
+            parseExpr(depth + 1);
             tempTokens.push(...tokens);
             itemCount++;
             tokens = saved;
@@ -123,166 +240,76 @@ function tokenize(input)
         tokens.push('!', 'list', itemCount.toString(), ...tempTokens);
     }
 
-    function parseBuffer()
-    {
-        i++; // skip [
-        let tempTokens = [];
-        let itemCount = 0;
 
-        while (true) 
-        {
-            skipWhitespace();
-            if (i >= input.length || input[i] === ']') 
-            {
-                i++; // skip ]
-                break;
-            }
-
-            let saved = tokens;
-            tokens = [];
-            parseExpr();
-            tempTokens.push(...tokens);
-            itemCount++;
-            tokens = saved;
-
-            skipWhitespace();
-            if (input[i] === ',') i++;
-        }
-
-        tokens.push('!', 'buffer', itemCount.toString(), ...tempTokens);
-    }
-
-    function parseRawToken() 
-    {
+    function parseRawToken() {
         let start = i;
-        while (i < input.length && !/\s/.test(input[i]) && !"()[]{},=;".includes(input[i]))
-        {
+        while (i < input.length && !/\s/.test(input[i]) && !"()[]{},=;".includes(input[i])) {
             i++;
         }
         return input.slice(start, i);
     }
 
-    function parseExpr() 
-    {
+    function parseExpr(depth = 0) {
+        if (depth > MAX_DEPTH) throw new Error("Max expression nesting exceeded");
+
         skipWhitespace();
         if (i >= input.length) return;
 
-        if (input[i] === '"') 
-        {
-            parseString();
-            return;
-        }
-        else if (input[i] === '[') 
-        {
-            parseList();
-            return;
-        }
-        else if (input[i] === '{') // buffer
-        {
-            parseBuffer();
-            return;
-        }
+        if (input[i] === '"') return parseString();
+        if (input[i] === '[') return parseList(depth);
+        //if (input[i] === '{') return parseBlock(depth);
 
-        let start = i;
         let name = parseRawToken();
         skipWhitespace();
 
-        if (input[i] === '(') 
-        {
-            if (name == 'skip' || name == 'back' || name == 'goto' || name == 'break' || name == '!')
-            {
-                switch (name)
-                {
-                    case 'skip':
-                        tokens.push('>');
-                        break;
-                    case 'back':
-                        tokens.push('<');
-                        break;
-                    case 'goto':
-                        tokens.push(',');
-                        break;
-                    case 'break':
-                        tokens.push(';');
-                        break;
-                    case '!':
-                        tokens.push('!');
-                        break;
-                    default:
-                        throw new Error(`Unknown command: ${name}`);
-                }
-            }
-            else 
-            {
+        if (input[i] === '(') {
+            if (["skip", "back", "goto", "break", "if", "!"].includes(name)) {
+                tokens.push({ skip: '>', back: '<', goto: ',', break: ';', '!': '!', 'if': '?', 'ifelse': '??'}[name]);
+            } else {
                 tokens.push('!', name);
             }
 
             i++; // skip (
-            while (true) 
-            {
+            let safety = 0;
+            while (true) {
+                if (++safety > MAX_TOKENS) throw new Error("parseExpr: function call too long");
                 skipWhitespace();
-                if (i >= input.length || input[i] === ')') 
-                {
+                if (i >= input.length) throw new Error("Function call not closed with )");
+                if (input[i] === ')') {
                     i++;
                     break;
                 }
-                parseExpr();
+                parseExpr(depth + 1);
                 skipWhitespace();
                 if (input[i] === ',') i++;
             }
-        }
-        else 
-        {
+        } else {
             tokens.push(name);
         }
     }
 
-    while (i < input.length) 
-    {
+    let safety = 0;
+    while (i < input.length) {
+        if (++safety > MAX_TOKENS) throw new Error("Main loop exceeded safe bounds");
         skipWhitespace();
         if (i >= input.length) break;
-        if (input[i] === ';') 
-        {
-            i++;
-            continue;
-        }
 
         let start = i;
         let name = parseRawToken();
         skipWhitespace();
 
-        if (input[i] === '=') 
-        {
+        if (input[i] === '=') {
             i++;
             skipWhitespace();
             tokens.push("!", "register", "context", "!", "rename", "#" + name);
             parseExpr();
-        } 
-        else 
-        {
+        } else {
             i = start;
             parseExpr();
         }
     }
 
     return tokens;
-}
-
-function rawer_compile(input) 
-{
-    let commands = input.split(';');
-    let result = [];
-    for (let command of commands) 
-    {
-        command = command.trim();
-        if (command) 
-        {
-            result.push(tokenize(command));
-        }
-    }
-    
-    let result_string = rawer_labelparser(result);
-    return result_string;
 }
 
 function rawer_labelparser(original_input) 
@@ -322,4 +349,20 @@ function rawer_labelparser(original_input)
         input = input.replaceAll(new RegExp(`\\b${label[0]}\\b`, 'g'), `${label[1]}`);
     }
     return input;
+}
+
+function rawer_compile(input) 
+{
+    let commands = splitOutsideStrings(preprocessTernary(input), ';');
+    let result = [];
+    for (let command of commands) 
+    {
+        if (command) 
+        {
+            result.push(tokenize(command));
+        }
+    }
+
+    let result_string = rawer_labelparser(result);
+    return result_string;
 }
