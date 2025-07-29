@@ -1,26 +1,31 @@
 
-function splitOutsideStrings(input, char = ';') {
+function splitOutsideStrings(input, char = ';') 
+{
     let parts = [];
     let current = '';
     let inString = false;
     let escape = false;
 
-    for (let i = 0; i < input.length; i++) {
+    for (let i = 0; i < input.length; i++) 
+    {
         let c = input[i];
 
-        if (escape) {
+        if (escape) 
+        {
             current += c;
             escape = false;
             continue;
         }
 
-        if (c === '\\') {
+        if (c === '\\') 
+        {
             current += c;
             escape = true;
             continue;
         }
 
-        if (c === '"') {
+        if (c === '"') 
+        {
             inString = !inString;
             current += c;
             continue;
@@ -31,10 +36,14 @@ function splitOutsideStrings(input, char = ';') {
             let blockDepth = 1;
             current += c;
             i++;
-            while (i < input.length && blockDepth > 0) {
-                if (input[i] === '{') {
+            while (i < input.length && blockDepth > 0) 
+            {
+                if (input[i] === '{') 
+                {
                     blockDepth++;
-                } else if (input[i] === '}') {
+                } 
+                else if (input[i] === '}') 
+                {
                     blockDepth--;
                 }
                 current += input[i];
@@ -48,10 +57,14 @@ function splitOutsideStrings(input, char = ';') {
             let parenDepth = c === '(' ? 1 : -1;
             current += c;
             i++;
-            while (i < input.length && parenDepth !== 0) {
-                if (input[i] === '(') {
+            while (i < input.length && parenDepth !== 0) 
+            {
+                if (input[i] === '(') 
+                {
                     parenDepth++;
-                } else if (input[i] === ')') {
+                } 
+                else if (input[i] === ')') 
+                {
                     parenDepth--;
                 }
                 current += input[i];
@@ -65,10 +78,14 @@ function splitOutsideStrings(input, char = ';') {
             let listDepth = c === '[' ? 1 : -1;
             current += c;
             i++;
-            while (i < input.length && listDepth !== 0) {
-                if (input[i] === '[') {
+            while (i < input.length && listDepth !== 0) 
+            {
+                if (input[i] === '[') 
+                {
                     listDepth++;
-                } else if (input[i] === ']') {
+                } 
+                else if (input[i] === ']') 
+                {
                     listDepth--;
                 }
                 current += input[i];
@@ -77,21 +94,26 @@ function splitOutsideStrings(input, char = ';') {
             i--; // adjust for the loop increment
             continue;
         }
-        else if(c === '/' && input[i + 1] === '/') { // single-line comment
-            while (i < input.length && input[i] !== '\n') {
+        else if(c === '/' && input[i + 1] === '/') 
+        { // single-line comment
+            while (i < input.length && input[i] !== '\n') 
+            {
                 current += input[i];
                 i++;
             }
             current += '\n'; // preserve the newline
             continue;
         }
-        else if(c === '/' && input[i + 1] === '*') { // multi-line comment
+        else if(c === '/' && input[i + 1] === '*') 
+        { // multi-line comment
             current += c; // add the first /
             current += input[i + 1]; // add the second *
             i += 2; // skip the /*
-            while (i < input.length) {
+            while (i < input.length) 
+            {
                 current += input[i];
-                if (input[i] === '*' && input[i + 1] === '/') {
+                if (input[i] === '*' && input[i + 1] === '/') 
+                {
                     current += '/'; // add the closing /
                     current += input[i + 1]; // add the closing *
                     i += 2; // skip the */
@@ -103,7 +125,8 @@ function splitOutsideStrings(input, char = ';') {
             continue;
         }
 
-        if (c === char && !inString) {
+        if (c === char && !inString) 
+        {
             parts.push(current.trim());
             current = '';
             continue;
@@ -112,35 +135,46 @@ function splitOutsideStrings(input, char = ';') {
         current += c;
     }
 
-    if (current.trim() !== '') {
+    if (current.trim() !== '') 
+    {
         parts.push(current.trim());
     }
 
     return parts;
 }
 
-function tokenize(input) {
+function tokenize(input) 
+{
     let tokens = [];
     let i = 0;
     const MAX_TOKENS = 1e6;
     const MAX_DEPTH = 1000;
 
-    function skipWhitespace() {
+    function skipWhitespace() 
+    {
         let safety = 0;
-        while (i < input.length) {
+        while (i < input.length) 
+        {
             if (++safety > MAX_TOKENS) throw new Error("skipWhitespace: loop exceeded safe bounds");
 
-            if (/\s/.test(input[i])) {
+            if (/\s/.test(input[i])) 
+            {
                 i++;
-            } else if (input[i] === '/' && input[i + 1] === '/') {
+            } 
+            else if (input[i] === '/' && input[i + 1] === '/') 
+            {
                 i += 2;
-                while (i < input.length && input[i] !== '\n') {
+                while (i < input.length && input[i] !== '\n') 
+                {
                     if (++safety > MAX_TOKENS) throw new Error("skipWhitespace: comment loop too long");
                     i++;
                 }
-            } else if (input[i] === '/' && input[i + 1] === '*') {
+            } 
+            else if (input[i] === '/' && input[i + 1] === '*') 
+            {
                 i += 2;
-                while (i < input.length && !(input[i] === '*' && input[i + 1] === '/')) {
+                while (i < input.length && !(input[i] === '*' && input[i + 1] === '/')) 
+                {
                     if (++safety > MAX_TOKENS) throw new Error("skipWhitespace: block comment loop too long");
                     i++;
                 }
@@ -149,15 +183,18 @@ function tokenize(input) {
         }
     }
 
-    function parseString() {
+    function parseString() 
+    {
         let str = '';
         i++; // skip opening "
 
         let safety = 0;
-        while (i < input.length) {
+        while (i < input.length) 
+        {
             if (++safety > MAX_TOKENS) throw new Error("parseString: unterminated string");
 
-            if (input[i] === '"') {
+            if (input[i] === '"') 
+            {
                 i++;
                 break;
             }
@@ -167,7 +204,8 @@ function tokenize(input) {
             else if (input[i] === '\t') str += '\x16';
             else if (input[i] === ' ') str += '\x17';
             else if (input[i] === ':') str += '\x18';
-            else if (input[i] === '\\') {
+            else if (input[i] === '\\') 
+            {
                 i++;
                 const esc = input[i++];
                 if (esc === 'n') str += '\n';
@@ -176,7 +214,9 @@ function tokenize(input) {
                 else if (esc === '\\') str += '\\';
                 else str += esc;
                 continue;
-            } else {
+            } 
+            else 
+            {
                 str += input[i];
             }
 
@@ -188,7 +228,8 @@ function tokenize(input) {
         tokens.push('#' + str);
     }
 
-    function parseList(depth = 0) {
+    function parseList(depth = 0) 
+    {
         if (depth > MAX_DEPTH) throw new Error("Max list nesting exceeded");
         i++; // skip [
 
@@ -196,12 +237,14 @@ function tokenize(input) {
         let itemCount = 0;
 
         let safety = 0;
-        while (true) {
+        while (true) 
+        {
             if (++safety > MAX_TOKENS) throw new Error("parseList: unterminated list");
 
             skipWhitespace();
             if (i >= input.length) throw new Error("parseList: unexpected end of input");
-            if (input[i] === ']') {
+            if (input[i] === ']') 
+            {
                 i++;
                 break;
             }
@@ -221,7 +264,8 @@ function tokenize(input) {
     }
 
 
-    function parseRawToken() {
+    function parseRawToken() 
+    {
         let start = i;
         while (i < input.length && !/\s/.test(input[i]) && !"()[]{},=;".includes(input[i])) {
             i++;
@@ -229,7 +273,8 @@ function tokenize(input) {
         return input.slice(start, i);
     }
 
-    function parseExpr(depth = 0) {
+    function parseExpr(depth = 0) 
+    {
         if (depth > MAX_DEPTH) throw new Error("Max expression nesting exceeded");
 
         skipWhitespace();
@@ -242,20 +287,26 @@ function tokenize(input) {
         let name = parseRawToken();
         skipWhitespace();
 
-        if (input[i] === '(') {
-            if (["skip", "back", "goto", "done", "!", "if", "ifelse"].includes(name)) {
+        if (input[i] === '(') 
+        {
+            if (["skip", "back", "goto", "done", "!", "if", "ifelse"].includes(name)) 
+            {
                 tokens.push({ skip: '>', back: '<', goto: ',', done: ';', '!': '!', if: '?', ifelse: '??'}[name]);
-            } else {
+            } 
+            else 
+            {
                 tokens.push('!', name);
             }
 
             i++; // skip (
             let safety = 0;
-            while (true) {
+            while (true) 
+            {
                 if (++safety > MAX_TOKENS) throw new Error("parseExpr: function call too long");
                 skipWhitespace();
                 if (i >= input.length) throw new Error("Function call not closed with )");
-                if (input[i] === ')') {
+                if (input[i] === ')') 
+                {
                     i++;
                     break;
                 }
@@ -263,13 +314,16 @@ function tokenize(input) {
                 skipWhitespace();
                 if (input[i] === ',') i++;
             }
-        } else {
+        } 
+        else 
+        {
             tokens.push(name);
         }
     }
 
     let safety = 0;
-    while (i < input.length) {
+    while (i < input.length) 
+    {
         if (++safety > MAX_TOKENS) throw new Error("Main loop exceeded safe bounds");
         skipWhitespace();
         if (i >= input.length) break;
@@ -278,12 +332,16 @@ function tokenize(input) {
         let name = parseRawToken();
         skipWhitespace();
 
-        if (input[i] === '=') {
+        if (input[i] === '=') 
+        {
             i++;
             skipWhitespace();
-            tokens.push("!", "register", "context", "!", "rename", "#" + name);
+            tokens.push("!", "register", "context", "!", "rename");
             parseExpr();
-        } else {
+            tokens.push("#" + name);
+        } 
+        else 
+        {
             i = start;
             parseExpr();
         }

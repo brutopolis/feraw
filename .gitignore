@@ -8,3 +8,4 @@ rawer
 valgrind*
 massif*
 .bpm
+*.rw
