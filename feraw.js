@@ -243,8 +243,8 @@ function tokenize(input) {
         skipWhitespace();
 
         if (input[i] === '(') {
-            if (["skip", "back", "goto", "break", "!", "if", "ifelse"].includes(name)) {
-                tokens.push({ skip: '>', back: '<', goto: ',', break: ';', '!': '!', 'if': '?', 'ifelse': '??'}[name]);
+            if (["skip", "back", "goto", "done", "!", "if", "ifelse"].includes(name)) {
+                tokens.push({ skip: '>', back: '<', goto: ',', done: ';', '!': '!', if: '?', ifelse: '??'}[name]);
             } else {
                 tokens.push('!', name);
             }
@@ -292,7 +292,7 @@ function tokenize(input) {
     return tokens;
 }
 
-function rawer_labelparser(original_input) 
+function feraw_labelparser(original_input) 
 {
     // we need this to know exactly where the labels were positioned originally
     let unreversed_input = original_input.map(tokens => tokens.join(' ')).join(' ');
@@ -331,7 +331,7 @@ function rawer_labelparser(original_input)
     return input;
 }
 
-function rawer_compile(input) 
+function feraw_compile(input) 
 {
     let commands = splitOutsideStrings(input, ';');
     let result = [];
@@ -343,6 +343,6 @@ function rawer_compile(input)
         }
     }
 
-    let result_string = rawer_labelparser(result);
+    let result_string = feraw_labelparser(result);
     return result_string;
 }

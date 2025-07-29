@@ -1,2 +1,85 @@
-#/bin/bash
-node -e "$(cat rawer.js); process.stdout.write(rawer_compile(process.argv[1]));" "$(cat $1);"
+#!/bin/bash
+
+ORIGIN=$(pwd)
+SUDO=$(command -v sudo >/dev/null && echo "sudo" || echo "")
+CC=${CC:-"gcc -O3"}
+
+shift
+if [[ $# -lt 1 ]]; then
+    echo "[=°~°=]: usage: compile <source_file> [-lnome ...]"
+    exit 1
+fi
+
+SRC_FILE="$1"
+shift
+
+# Read and escape source if needed
+if [[ ! -f "$SRC_FILE" ]]; then
+    echo "[=°~°=]: source file not found: $SRC_FILE"
+    exit 1
+fi
+
+# executable name is the source file name without extension
+EXECUTABLE_NAME="${SRC_FILE%.*}"
+
+ESCAPED_CONTENT=$(sed 's/\\/\\\\/g; s/"/\\"/g; s/^/"/; s/$/\\n"/' "$SRC_FILE")
+
+COMPILE_COMMAND="$CC -o $EXECUTABLE_NAME $EXECUTABLE_NAME.c  "
+
+# Process lib names
+LIB_HEADERS=""
+LIB_INITS=""
+while [[ "$1" == -l* ]]; do
+    LIB_NAME="${1:2}"
+    LIB_HEADERS+="extern init($LIB_NAME);"
+    LIB_INITS+="    init_$LIB_NAME(context);"
+    COMPILE_COMMAND+=" ./.bpm/$LIB_NAME/$LIB_NAME.brl "
+    shift
+done
+
+
+# Output c file
+OUTPUT_FILE="$EXECUTABLE_NAME.c"
+
+    cat <<EOF > "$OUTPUT_FILE"
+
+#include "rawer.h"
+
+//<functions>
+init(std);
+$LIB_HEADERS
+
+int main(int argc, char *argv[])
+{
+    BruterList *context = bruter_new(8, true, true);
+
+    //<functions_init>
+    $LIB_INITS
+    init_std(context); // Initialize the standard functions
+
+    //<code_initialization>
+    const char *embedded_code =
+    $ESCAPED_CONTENT
+    ;
+
+    BruterList *result = parse(context, embedded_code);
+    clear_context(result); // Clear the context to free allocated memory
+    bruter_free(result); // Free the result list
+
+    clear_context(context); // Clear the context to free allocated memory
+    bruter_free(context); // Free the context after use
+    return EXIT_SUCCESS;
+}
+EOF
+    
+
+$COMPILE_COMMAND
+if [[ $? -ne 0 ]]; then
+    echo "[=°~°=]: compilation failed"
+    exit 1
+fi
+rm -f "$OUTPUT_FILE"
+# mv "$EXECUTABLE_NAME" .
+echo "[=°~°=]: compilation successful."
+
+exit 0

@@ -53,7 +53,7 @@ static inline void clear_context(BruterList *context)
     context->size = 0; // Reset the size to 0
 }
 
-static inline BruterList* parse(BruterList *context, char* input_str)
+static inline BruterList* parse(BruterList *context, const char* input_str)
 {
     BruterList *stack = bruter_new(8, true, true);
     BruterList *splited = bruter_new(8, false, false);

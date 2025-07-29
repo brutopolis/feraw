@@ -7,3 +7,5 @@ rawer
 *.exe
 valgrind*
 massif*
+.bpm
+*.rw
