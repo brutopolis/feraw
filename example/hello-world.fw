@@ -5,7 +5,7 @@ str = "hello world:";
 condition = 1;
 print(str);
 
-print(add(400, 51));
+print(add(0b1010, 0xa));
 
 // this
 // push(context, rename([1, 2, 3, 4, 5, 2, 7], "numbers"));
@@ -18,17 +18,25 @@ print(pop(numbers));
 str2 = buffer(13, 104, 101, 108, 108, 111, 32, 119, 111, 114, 108, 100, 33, 0);
 print(str2);
 
-ifelse(condition, conditiontrue, conditionfalse);
+// if?
+?(condition, conditiontrue);
+// ... else?
+?(1, conditionfalse);
 
 conditiontrue:
     print("true");
-    goto(aftercondition);
+    // go to aftercondition
+    ?(1, aftercondition);
 
 conditionfalse:
     print("false");
 
 aftercondition:
 
-done();
+// break;
+?(1, end);
 
-goto(start);
+// go to start;
+?(1, start);
+
+end:

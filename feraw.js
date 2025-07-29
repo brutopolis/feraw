@@ -282,34 +282,65 @@ function tokenize(input)
 
         if (input[i] === '"') return parseString();
         if (input[i] === '[') return parseList(depth);
-        //if (input[i] === '{') return parseBlock(depth);
+        // if (input[i] === '{') return parseBlock(depth);
+
+        // números com suporte a prefixo 0x, 0b, 0o
+        if (input[i] === '0') 
+        {
+            let start = i;
+            i++;
+            while (
+                i < input.length &&
+                !/\s|[\]\[\(\)\{\},]/.test(input[i]) // separadores
+            ) {
+                i++;
+            }
+
+            let numStr = input.slice(start, i);
+            let num = Number(numStr);
+
+            if (isNaN(num)) throw new Error("parseExpr: invalid number format: " + numStr);
+            tokens.push(num + '');
+            return;
+        }
 
         let name = parseRawToken();
+        if (!name) throw new Error("parseExpr: invalid or empty token");
+
         skipWhitespace();
+        if (i >= input.length) 
+        {
+            tokens.push(name);
+            return;
+        }
 
         if (input[i] === '(') 
         {
-            if (["skip", "back", "goto", "done", "!", "if", "ifelse"].includes(name)) 
+            if (["!", "?"].includes(name)) 
             {
-                tokens.push({ skip: '>', back: '<', goto: ',', done: ';', '!': '!', if: '?', ifelse: '??'}[name]);
+                tokens.push(name);
             } 
             else 
             {
                 tokens.push('!', name);
             }
 
-            i++; // skip (
+            i++; // skip '('
             let safety = 0;
+
             while (true) 
             {
                 if (++safety > MAX_TOKENS) throw new Error("parseExpr: function call too long");
+
                 skipWhitespace();
                 if (i >= input.length) throw new Error("Function call not closed with )");
+
                 if (input[i] === ')') 
                 {
                     i++;
                     break;
                 }
+
                 parseExpr(depth + 1);
                 skipWhitespace();
                 if (input[i] === ',') i++;
@@ -320,6 +351,7 @@ function tokenize(input)
             tokens.push(name);
         }
     }
+
 
     let safety = 0;
     while (i < input.length) 

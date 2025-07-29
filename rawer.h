@@ -36,19 +36,10 @@ static inline void clear_context(BruterList *context)
             case BR_TYPE_LIST:
                 bruter_free((BruterList*)context->data[i].p);
                 break;
-            case BR_TYPE_FUNCTION:
-                // No need to free function pointers
-                break;
-            default:
-                // For other types, no specific cleanup is needed
-                break;
         }
 
-        if (context->keys && context->keys[i])
-        {
-            free(context->keys[i]); // Free the key if it was allocated
-            context->keys[i] = NULL; // Set to NULL to avoid dangling pointers
-        }
+        free(context->keys[i]); // Free the key if it was allocated
+        context->keys[i] = NULL; // Set to NULL to avoid dangling pointers
     }
     context->size = 0; // Reset the size to 0
 }
@@ -68,23 +59,25 @@ static inline BruterList* parse(BruterList *context, const char* input_str)
     for (BruterInt i = 0; i < splited->size; i++)
     {
         char* token = bruter_get_pointer(splited, i);
-        if (token == NULL || token[0] == '\0') continue; // Skip empty tokens
+        //if (token == NULL || token[0] == '\0') continue; // Skip empty tokens
         
-        if (isdigit(token[0]) || (token[0] == '-' && isdigit(token[1]))) // number
+        if (token[0] == '!') // call stack
         {
-            if (token[0] == '0' && token[1] == 'x') // hex
+            Function func = bruter_pop_pointer(stack);
+            func(stack);
+        }
+        else if (token[0] == '?') // if-goto, the only control operator
+        {
+            BruterInt condition = bruter_pop_int(stack);
+            BruterInt iftrue_position = bruter_pop_int(stack);
+            if (condition)
             {
-                bruter_push_int(stack, strtol(token+2, NULL, 16), NULL, BR_TYPE_ANY);
+                i = iftrue_position - 1;
             }
-            else if (token[0] == '0' && token[1] == 'b') // bin
-            {
-                bruter_push_int(stack, strtol(token+2, NULL, 2), NULL, BR_TYPE_ANY);
-            }
-            else if (token[0] == '0' && token[1] == 'o') // oct
-            {
-                bruter_push_int(stack, strtol(token+2, NULL, 8), NULL, BR_TYPE_ANY);
-            }
-            else if (strchr(token, '.')) // float
+        }
+        else if (isdigit(token[0]) || (token[0] == '-' && isdigit(token[1]))) // number
+        {
+            if (strchr(token, '.')) // float
             {
                 bruter_push_float(stack, strtof(token, NULL), NULL, BR_TYPE_FLOAT);
             }
@@ -92,33 +85,6 @@ static inline BruterList* parse(BruterList *context, const char* input_str)
             {
                 bruter_push_int(stack, strtol(token, NULL, 10), NULL, BR_TYPE_ANY);
             }
-        }
-        else if (token[0] == '!')
-        {
-            Function func = bruter_pop_pointer(stack);
-            func(stack);
-        }
-        else if (token[0] == '>') // skip
-        {
-            i += bruter_pop_int(stack);
-        }
-        else if (token[0] == '<') // back
-        {
-            i -= bruter_pop_int(stack);
-            if (i < 0) i = 0; // Prevent going out of bounds
-        }
-        else if (token[0] == ';') // break
-        {
-            i = splited->size + 1; // Break the loop
-        }
-        else if (token[0] == ',') // goto
-        {
-            BruterInt target = bruter_pop_int(stack);
-            if (target < 0 || target >= splited->size)
-            {
-                printf("WARNING: Go to index out of bounds: %ld\n", target);
-            }
-            i = target - 1; // Set the word index to the target
         }
         else if (token[0] == '#') // string
         {
@@ -133,31 +99,7 @@ static inline BruterList* parse(BruterList *context, const char* input_str)
             }
             bruter_push_pointer(stack, str, NULL, BR_TYPE_BUFFER);
         }
-        else if (token[0] == '?') // if
-        {
-            BruterInt condition = bruter_pop_int(stack);
-            BruterInt iftrue_position = bruter_pop_int(stack);
-            if (token[1] == '?') // ifelse
-            {
-                BruterInt iffalse_position = bruter_pop_int(stack);
-                if (condition)
-                {
-                    i = iftrue_position - 1;
-                }
-                else
-                {
-                    i = iffalse_position - 1;
-                }
-            }
-            else // simple if
-            {
-                if (condition)
-                {
-                    i = iftrue_position - 1;
-                }
-            }
-        }
-        else 
+        else // find variable
         {
             BruterInt found = bruter_find_key(context, token);
             if (found != -1)
