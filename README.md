@@ -1,11 +1,11 @@
 
 # rawer
 
-  rawer is the bruter-representation(+bruterlang package) little brother, it has less stuff, uses less ram, and is stack-oriented instead 
+  rawer is a bruter-based textual bytecode;
 
 # Library
 
-  rawer is a single header file `rawer.h`, just include and ready to go.
+  rawer is a single header file `rawer.h`, just include and ready to go. 
 
 # Usage
 

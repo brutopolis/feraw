@@ -6,8 +6,15 @@ condition = 1;
 print(str);
 
 print(add(400, 51));
+
+// this
+// push(context, rename([1, 2, 3, 4, 5, 2, 7], "numbers"));
+// is faster than
 numbers = [1, 2, 3, 4, 5, 2, 7];
-print(pop(numbers, 1));
+// because assignment doesn't care if the variable already exists
+// assignment uses bruter_register
+
+print(pop(numbers));
 str2 = buffer(13, 104, 101, 108, 108, 111, 32, 119, 111, 114, 108, 100, 33, 0);
 print(str2);
 

@@ -1,10 +1,11 @@
 name rawer
-version 0.0.7
+version 0.0.8
 description "rawer"
 # files 
 setup()
 {
-    gcc -O3 -Wl,-rpath=/lib -o rawer main.c std.c -g
+    bpm install-from localhost:3000/packages std
+    gcc -O3 -Wl,-rpath=/lib -o rawer main.c .bpm/std/std.c -g
 }
 
 debug()
