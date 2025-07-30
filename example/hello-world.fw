@@ -11,21 +11,22 @@ print(add(0b1010, 0xa));
 // push(context, rename([1, 2, 3, 4, 5, 2, 7], "numbers"));
 // is faster than
 numbers = [1, 2, 3, 4, 5, 2, 7];
-// because assignment doesn't care if the variable already exists
+// because assignment care if the variable already exists
 // assignment uses bruter_register
 
 print(pop(numbers));
 str2 = buffer(13, 104, 101, 108, 108, 111, 32, 119, 111, 114, 108, 100, 33, 0);
 print(str2);
 
-// if?
+// ifgo is the only control structure that exists in feraw
+// we can use it as if:
 ?(condition, conditiontrue);
-// ... else?
+// as else:
 ?(1, conditionfalse);
 
 conditiontrue:
     print("true");
-    // go to aftercondition
+    // as a goto:
     ?(1, aftercondition);
 
 conditionfalse:
@@ -33,10 +34,10 @@ conditionfalse:
 
 aftercondition:
 
-// break;
+// as done/break:
 ?(1, end);
 
-// go to start;
+// goto start;
 ?(1, start);
 
 end:

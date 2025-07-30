@@ -104,7 +104,7 @@ static inline BruterList* parse(BruterList *context, const char* input_str)
             BruterInt found = bruter_find_key(context, token);
             if (found != -1)
             {
-                BruterMetaValue meta = bruter_get_meta(context, found);
+                BruterMeta meta = bruter_get_meta(context, found);
                 meta.key = NULL; // we don't need the key here
                 bruter_push_meta(stack, meta);
             }

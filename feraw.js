@@ -94,6 +94,27 @@ function splitOutsideStrings(input, char = ';')
             i--; // adjust for the loop increment
             continue;
         }
+        else if (c === '{' || c === '}') // lets make sure we don't split inside a obj
+        {
+            let listDepth = c === '{' ? 1 : -1;
+            current += c;
+            i++;
+            while (i < input.length && listDepth !== 0) 
+            {
+                if (input[i] === '{') 
+                {
+                    listDepth++;
+                } 
+                else if (input[i] === '}') 
+                {
+                    listDepth--;
+                }
+                current += input[i];
+                i++;
+            }
+            i--; // adjust for the loop increment
+            continue;
+        }
         else if(c === '/' && input[i + 1] === '/') 
         { // single-line comment
             while (i < input.length && input[i] !== '\n') 
@@ -263,6 +284,11 @@ function tokenize(input)
         tokens.push('!', 'list', itemCount.toString(), ...tempTokens);
     }
 
+    
+    function parseBlock(depth = 0)
+    {
+        // to be used in future, for something i don't know yet
+    }
 
     function parseRawToken() 
     {
@@ -282,16 +308,18 @@ function tokenize(input)
 
         if (input[i] === '"') return parseString();
         if (input[i] === '[') return parseList(depth);
+        
+        // in near future we will use this for something, block name is ilustrative only
         // if (input[i] === '{') return parseBlock(depth);
 
-        // números com suporte a prefixo 0x, 0b, 0o
+        // 0x, 0b, 0o
         if (input[i] === '0') 
         {
             let start = i;
             i++;
             while (
                 i < input.length &&
-                !/\s|[\]\[\(\)\{\},]/.test(input[i]) // separadores
+                !/\s|[\]\[\(\)\{\},]/.test(input[i]) 
             ) {
                 i++;
             }
