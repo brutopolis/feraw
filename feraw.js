@@ -348,7 +348,81 @@ function tokenize(input)
         } 
         else 
         {
-            tokens.push(name);
+            /*
+a[1][2][3][4][5](55, 77, 99, 11 , 33);
+a[1][2](55, 77, 99, 11 , 33)[3][4][5];
+a[1][2][3][4][5] = 11;
+a[1][2][3][4][5](55, 77, 99, 11 , 33) = 1;
+            */
+            let exprTokens = [name];
+
+            while (true) 
+            {
+                skipWhitespace();
+
+                if (input[i] === '(') 
+                {
+                    i++; // skip '('
+                    let argTokens = [];
+                    let safety = 0;
+
+                    while (true) 
+                    {
+                        if (++safety > MAX_TOKENS) throw new Error("parseExpr: function call too long");
+
+                        skipWhitespace();
+                        if (i >= input.length) throw new Error("Function call not closed with )");
+
+                        if (input[i] === ')') 
+                        {
+                            i++;
+                            break;
+                        }
+
+                        parseExpr(depth + 1);
+                        argTokens.push(...tokens.splice(tokens.length - 1));
+                        skipWhitespace();
+                        if (input[i] === ',') i++;
+                    }
+
+                    exprTokens = ['!', ...exprTokens, ...argTokens];
+                    continue;
+                }
+
+                if (input[i] === '[') 
+                {
+                    i++; // skip '['
+                    skipWhitespace();
+
+                    parseExpr(depth + 1);
+                    let indexToken = tokens.splice(tokens.length - 1);
+
+                    skipWhitespace();
+                    if (input[i] !== ']') throw new Error("parseExpr: missing closing ]");
+                    i++; // skip ']'
+
+                    exprTokens = ['!', 'get', ...exprTokens, ...indexToken];
+                    continue;
+                }
+
+                break;
+            }
+
+            skipWhitespace();
+
+            if (input[i] === '=') 
+            {
+                i++; // skip '='
+                skipWhitespace();
+
+                parseExpr(depth + 1);
+                let value = tokens.splice(tokens.length - 1);
+
+                tokens.push('!', 'set', ...value, ...exprTokens);
+                return;
+            }
+
+            tokens.push(...exprTokens);
         }
     }
 
@@ -368,7 +442,7 @@ function tokenize(input)
         {
             i++;
             skipWhitespace();
-            tokens.push("!", "register", "context", "!", "rename");
+            tokens.push("!", "define", "context", "!", "rename");
             parseExpr();
             tokens.push("#" + name);
         } 
