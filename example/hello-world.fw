@@ -14,6 +14,20 @@ numbers = [1, 2, 3, 4, 5, 2, 7];
 // because assignment care if the variable already exists
 // assignment uses bruter_register
 
+macro_print = macro(
+    print($0);
+);
+
+// macro creating + assign it to macro_example name
+macro_example = macro(
+    macro_print($0);
+    macro_print($1);
+);
+
+// call the macro_example macro with 9 and 10 as arguments
+// is expected to print 9 then 10
+macro_example(9, 10);
+
 print(pop(numbers));
 str2 = buffer(13, 104, 101, 108, 108, 111, 32, 119, 111, 114, 108, 100, 33, 0);
 print(str2);

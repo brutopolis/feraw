@@ -523,8 +523,271 @@ function feraw_labelparser(original_input)
     return input;
 }
 
+function expandMacros(input) {
+    const macroMap = new Map();
+    // --- Helper function to find matching closing character ---
+    function findMatching(input, start, openChar, closeChar) {
+        let depth = 1;
+        let inString = false;
+        let stringChar = '';
+        let escapeNext = false;
+        for (let i = start + 1; i < input.length; i++) {
+            let char = input[i];
+            if (escapeNext) {
+                escapeNext = false;
+                continue;
+            }
+            if (char === '\\') {
+                escapeNext = true;
+                continue;
+            }
+            if (!inString && (char === '"' || char === "'")) {
+                inString = true;
+                stringChar = char;
+                continue;
+            } else if (inString && char === stringChar) {
+                inString = false;
+                stringChar = '';
+                continue;
+            }
+            // Ignore delimiters inside strings for nesting calculation
+            if (inString) {
+                continue;
+            }
+            if (char === openChar) {
+                depth++;
+            } else if (char === closeChar) {
+                depth--;
+                if (depth === 0) {
+                    return i;
+                }
+            }
+        }
+        return -1;
+    }
+    // --- Step 1: Extract and Store Macro Definitions (MODIFICADO para usar macro(...)) ---
+    let i = 0;
+    let outputWithoutDefs = '';
+    while (i < input.length) {
+        // Basic string handling for definition parsing
+        if (input[i] === '"' || input[i] === "'") {
+            let stringChar = input[i];
+            outputWithoutDefs += input[i];
+            i++;
+            let escapeNext = false;
+            while (i < input.length) {
+                if (escapeNext) {
+                    outputWithoutDefs += input[i];
+                    escapeNext = false;
+                    i++;
+                    continue;
+                }
+                if (input[i] === '\\') {
+                    outputWithoutDefs += input[i];
+                    escapeNext = true;
+                    i++;
+                    continue;
+                }
+                if (input[i] === stringChar) {
+                    outputWithoutDefs += input[i];
+                    i++;
+                    break;
+                }
+                outputWithoutDefs += input[i];
+                i++;
+            }
+            continue;
+        }
+        // Skip whitespace and comments for definition parsing
+        if (/\s/.test(input[i])) {
+            outputWithoutDefs += input[i];
+            i++;
+            continue;
+        }
+        if (input[i] === '/' && i + 1 < input.length) {
+            if (input[i + 1] === '/') {
+                while (i < input.length && input[i] !== '\n') {
+                    outputWithoutDefs += input[i];
+                    i++;
+                }
+                if (i < input.length) {
+                    outputWithoutDefs += input[i];
+                    i++;
+                }
+                continue;
+            } else if (input[i + 1] === '*') {
+                outputWithoutDefs += input[i]; i++;
+                outputWithoutDefs += input[i]; i++;
+                while (i < input.length) {
+                    if (input[i] === '*' && i + 1 < input.length && input[i + 1] === '/') {
+                        outputWithoutDefs += input[i]; i++;
+                        outputWithoutDefs += input[i]; i++;
+                        break;
+                    }
+                    outputWithoutDefs += input[i];
+                    i++;
+                }
+                continue;
+            }
+        }
+        // --- MODIFICADO: Attempt to Match a Macro Definition: identifier '=' 'macro' '(' ---
+        let potentialStart = i;
+        let nameMatch = /^([a-zA-Z_$][a-zA-Z0-9_$]*)/.exec(input.substring(i));
+        if (nameMatch) {
+            let macroName = nameMatch[1];
+            i += nameMatch[0].length;
+            while (i < input.length && /\s/.test(input[i])) i++;
+            if (i < input.length && input[i] === '=') {
+                i++; // Skip '='
+                while (i < input.length && /\s/.test(input[i])) i++;
+                // Check for 'macro' keyword
+                if (i + 5 <= input.length && input.substring(i, i + 5) === 'macro') {
+                    i += 5; // Skip 'macro'
+                    while (i < input.length && /\s/.test(input[i])) i++;
+                    if (i < input.length && input[i] === '(') {
+                        let bodyStart = i + 1;
+                        let bodyEnd = findMatching(input, i, '(', ')'); // Find matching ')'
+                        if (bodyEnd !== -1) {
+                            let macroBody = input.substring(bodyStart, bodyEnd);
+                            // Store the macro definition
+                            macroMap.set(macroName, macroBody);
+                            // Skip the entire definition including ';'
+                            i = bodyEnd + 1; // Move past ')'
+                            while (i < input.length && /\s/.test(input[i])) i++;
+                            if (i < input.length && input[i] === ';') {
+                                i++; // Skip ';'
+                            } // else maybe warn about missing semicolon?
+                            // Do NOT add this definition to outputWithoutDefs
+                            continue; // Continue processing the *rest* of the input
+                        } else {
+                            console.error("Unterminated macro definition for:", macroName);
+                            i = potentialStart;
+                        }
+                    } else {
+                        // 'macro' not followed by '(', not a definition
+                        i = potentialStart;
+                    }
+                } else {
+                    // '=' not followed by 'macro', not a definition
+                    i = potentialStart;
+                }
+            } else {
+                // Name not followed by '=', not a definition
+                i = potentialStart;
+            }
+        }
+        outputWithoutDefs += input[potentialStart];
+        i = potentialStart + 1;
+    }
+    // Work on the input without definitions
+    input = outputWithoutDefs;
+    // --- Step 2: Expand Macro Calls (Unchanged) ---
+    let previous;
+    do {
+        previous = input;
+        let outputAfterExpansion = '';
+        i = 0;
+        // --- Main Expansion Loop ---
+        while (i < input.length) {
+            // --- Attempt to Match a Macro Call: identifier '(' ---
+            let nameMatch = /^([a-zA-Z_$][a-zA-Z0-9_$]*)/.exec(input.substring(i));
+            if (nameMatch) {
+                let callName = nameMatch[1];
+                let callStart = i + callName.length;
+                // Check if it's a macro call: name '(' (skip whitespace)
+                let tempIndex = callStart;
+                while (tempIndex < input.length && /\s/.test(input[tempIndex])) tempIndex++;
+                if (tempIndex < input.length && input[tempIndex] === '(') {
+                    let argsStart = tempIndex + 1;
+                    let argsEnd = findMatching(input, tempIndex, '(', ')');
+                    if (argsEnd !== -1) {
+                        const macroBody = macroMap.get(callName);
+                        if (macroBody !== undefined) {
+                            let argsStr = input.substring(argsStart, argsEnd);
+                            // --- Split Arguments Robustly ---
+                            function splitArgsRobust(str) {
+                                let args = [];
+                                let current = '';
+                                let depth = 0;
+                                let inArgString = false;
+                                let argStringChar = '';
+                                let argEscapeNext = false;
+                                for (let j = 0; j < str.length; j++) {
+                                    let argChar = str[j];
+                                    if (argEscapeNext) {
+                                        current += argChar;
+                                        argEscapeNext = false;
+                                        continue;
+                                    }
+                                    if (argChar === '\\') {
+                                        current += argChar;
+                                        argEscapeNext = true;
+                                        continue;
+                                    }
+                                    if (!inArgString && (argChar === '"' || argChar === "'")) {
+                                        inArgString = true;
+                                        argStringChar = argChar;
+                                        current += argChar;
+                                        continue;
+                                    } else if (inArgString && argChar === argStringChar) {
+                                        inArgString = false;
+                                        argStringChar = '';
+                                        current += argChar;
+                                        continue;
+                                    }
+                                    if (inArgString) {
+                                        current += argChar;
+                                        continue;
+                                    }
+                                    if (argChar === '(' || argChar === '[' || argChar === '{') {
+                                        depth++;
+                                    } else if (argChar === ')' || argChar === ']' || argChar === '}') {
+                                        depth--;
+                                    }
+                                    if (argChar === ',' && depth === 0) {
+                                        args.push(current.trim());
+                                        current = '';
+                                    } else {
+                                        current += argChar;
+                                    }
+                                }
+                                if (current.trim() !== '' || args.length > 0 || str.endsWith(",")) {
+                                    args.push(current.trim());
+                                }
+                                return args;
+                            }
+                            const args = splitArgsRobust(argsStr);
+                            // --- Perform Substitution on the Macro Body ---
+                            let expanded = macroBody;
+                            // 1. Replace $@ (all arguments joined as-is)
+                            expanded = expanded.replace(/\$@/g, args.join(', '));
+                            // 2. Replace numbered arguments $N from back to front
+                            for (let idx = args.length - 1; idx >= 0; idx--) {
+                                const regExp = new RegExp(`\\$${idx}\\b`, 'g');
+                                expanded = expanded.replace(regExp, args[idx]);
+                            }
+                            outputAfterExpansion += expanded;
+                            i = argsEnd + 1; // Move past the closing ')'
+                            continue; // Continue processing the rest of the input
+                        }
+                    } else {
+                        console.error("Unterminated macro call for:", callName);
+                    }
+                }
+            }
+            // Add current character if it wasn't the start of a recognized macro call
+            outputAfterExpansion += input[i];
+            i++;
+        }
+        input = outputAfterExpansion;
+    } while (previous !== input); // Repeat until no more expansions occur
+    return input;
+}
+
 function feraw_compile(input) 
 {
+    input = expandMacros(input);
+
     let commands = splitOutsideStrings(input, ';');
     let result = [];
     for (let command of commands) 
