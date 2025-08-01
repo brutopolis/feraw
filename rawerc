@@ -4,7 +4,6 @@ ORIGIN=$(pwd)
 SUDO=$(command -v sudo >/dev/null && echo "sudo" || echo "")
 CC=${CC:-"gcc -O3"}
 
-shift
 if [[ $# -lt 1 ]]; then
     echo "[=°~°=]: usage: compile <source_file> [-lnome ...]"
     exit 1
@@ -55,18 +54,15 @@ int main(int argc, char *argv[])
 
     //<functions_init>
     $LIB_INITS
-    init_std(context); // Initialize the standard functions
-
+    
     //<code_initialization>
     const char *embedded_code =
     $ESCAPED_CONTENT
     ;
 
     BruterList *result = parse(context, embedded_code);
-    clear_context(result); // Clear the context to free allocated memory
     bruter_free(result); // Free the result list
 
-    clear_context(context); // Clear the context to free allocated memory
     bruter_free(context); // Free the context after use
     return EXIT_SUCCESS;
 }

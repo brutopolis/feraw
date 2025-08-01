@@ -2,6 +2,7 @@
 
 //<functions>
 init(std);
+init(condition);
 
 int main(int argc, char *argv[])
 {
@@ -16,6 +17,7 @@ int main(int argc, char *argv[])
 
     //<functions_init>
     init_std(context); // Initialize the standard functions
+    init_condition(context); // Initialize the standard condition functions
 
     char* filename = argv[1];
     FILE *file = fopen(filename, "r");
@@ -39,11 +41,9 @@ int main(int argc, char *argv[])
     input_str[length] = '\0'; // null-terminate the string
     fclose(file);
     BruterList *result = parse(context, input_str);
-    clear_context(result); // Clear the context to free allocated memory
     bruter_free(result); // Free the result list
     free(input_str); // Free the input string after use
 
-    clear_context(context); // Clear the context to free allocated memory
     bruter_free(context); // Free the context after use
     return EXIT_SUCCESS;
 }

@@ -24,26 +24,6 @@ enum {
 
 typedef void (*Function)(BruterList *stack);
 
-static inline void clear_context(BruterList *context)
-{
-    for (BruterInt i = 0; i < context->size; i++)
-    {
-        switch (context->types[i])
-        {
-            case BR_TYPE_BUFFER:
-                free(context->data[i].p);
-                break;
-            case BR_TYPE_LIST:
-                bruter_free((BruterList*)context->data[i].p);
-                break;
-        }
-
-        free(context->keys[i]); // Free the key if it was allocated
-        context->keys[i] = NULL; // Set to NULL to avoid dangling pointers
-    }
-    context->size = 0; // Reset the size to 0
-}
-
 static inline BruterList* parse(BruterList *context, const char* input_str)
 {
     BruterList *stack = bruter_new(8, true, true);
@@ -66,7 +46,24 @@ static inline BruterList* parse(BruterList *context, const char* input_str)
             Function func = bruter_pop_pointer(stack);
             func(stack);
         }
-        else if (token[0] == '?') // if-goto, the only control operator
+        else if (token[0] == '@') // stack operator, can reverse the stack or remove a entry from a specific slot then push it to the stack again
+        {
+            if (token[1] == '\0') // if no index is specified, we reverse the stack
+            {
+                bruter_reverse(stack);
+                continue;
+            }
+
+            BruterInt index = strtol(token + 1, NULL, 10);
+            if (index >= stack->size || index < 0)
+            {
+                printf("ERROR: Index out of bounds in stack reorder '%s'\n", token);
+                continue;
+            }
+            BruterMeta value = bruter_remove_meta(stack, stack->size - index - 1);
+            bruter_push_meta(stack, value);
+        }
+        else if (token[0] == '?') // ifgo, the only control operator
         {
             BruterInt condition = bruter_pop_int(stack);
             BruterInt iftrue_position = bruter_pop_int(stack);

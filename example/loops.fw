@@ -1,0 +1,13 @@
+// lets put the index into the stack
+dup(0); 
+start:
+print();
+dup(add(1));
+
+// @ is the stack reorder operator
+// @2 means we want the [size - 3] element
+// @0 is useless, bcause it is already the top of the stack
+// @ alone reverse the stack
+?(less(@2, 100000), start);
+
+end:
