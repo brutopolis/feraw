@@ -347,7 +347,24 @@ function tokenize(input)
             if (["!", "?"].includes(name)) 
             {
                 tokens.push(name);
-            } 
+            }
+            else if (["if", "goto", "else"].includes(name)) 
+            {
+                switch (name)
+                {
+                    case "if":
+                        tokens.push("?");
+                        break;
+                    case "goto":
+                        tokens.push('?', '1');
+                        break;
+                    case "else":
+                        tokens.push('?', '1');
+                        break;
+                    default:
+                        throw new Error("parseExpr: unknown function name: " + name);
+                }
+            }
             else 
             {
                 tokens.push('!', name);

@@ -1,11 +1,28 @@
+// this example, unlike the hello-world example this is probably not so familiar to most people
+// the good part of having no rules at all is that no code is arbitrary, even when it is
+// in this case everything is expected and predictable, so i would not consider it arbitrary
+
 // lets put the index into the stack
+// seems a loose call, but it will stay on the stack until something consumes it or manually removed
+// we will never let the index go out of stack
 dup(0);
 
+// lets label the start of the loop
 start:
+
+// print is receive no arguments, thus it wont push any args to the stack
+// but we already have 2 values on the stack we pushed before, so print will consume one of them
 print();
+// we add 1 to whatever is on the stack, which is the index
+// and then we duplicate it
 dup(add(1));
 
 // & is the stack itself
+// if the index is less than 100000, we go back to the start label, 
+// we manipulate the stack directly(inside itself) bcause we want to reorganize the stack to the ifgo call
 if(less(shift(&), 100000), start);
 
+// end label is where i usually put the free's and such
+// we dont have any here because we didnt allocate any memory(or used any strings)
+// even is those cases i find interesting to have the end label, like to just interrupt(this can also be done safely by going out of bounds)
 end:

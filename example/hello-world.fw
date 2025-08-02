@@ -1,3 +1,7 @@
+// this example is probably what shows the more familiar code for most people
+// assignments, gotos, macro functions, conditions, lists, ifelse(fake ifelse with ifgo), function with arguments, manual memory management, etc
+
+// lets start with a simple print
 print(123);
 
 start:
@@ -36,15 +40,14 @@ loopstart:
 
 // ifgo is the only control structure that exists in feraw
 // we can use it as if:
-?(greater(length(numbers), 0), conditiontrue);
-// as else we can just skip to the end
-?(1, end);
+if(greater(length(numbers), 0), conditiontrue);
+else(end);
 
 conditiontrue:
 print(pop(numbers));
 
 // goto loopstart;
-?(1, loopstart);
+goto(loopstart);
 
 end:
 free(str2);
