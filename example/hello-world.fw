@@ -4,17 +4,22 @@
 // lets start with a simple print
 print(123);
 
+
+sized = macro(
+    $count, $all
+);
+
 start:
 str = "hello world:";
 condition = 1;
 print(str);
 
-print(add(0b1010, 0xa));
+print(add(0b1010, 1e6));
 
 // this
-// push(context, rename([1, 2, 3, 4, 5, 2, 7], "numbers"));
+// push(context, rename(list(sized(1, 2, 3, 4, 5, 2, 7)), "numbers"));
 // is faster than
-numbers = [1, 2, [55, 11, 14], 4, 5, 2, 7];
+numbers = list(sized(1, 2, list(sized(55, 11, 14)), 4, 5, 2, 7));
 // unlike push, assignment care if the variable already exists
 // because assignment uses bruter_define
 
@@ -37,16 +42,12 @@ macro_example = macro(
     macro_print($1);
 );
 
-autosize = macro(
-    $count, $@
-);
-
 // call the macro_example macro with 9 and 10 as arguments
 // is expected to print 9 then 10
 macro_example(9, 10);
 
 print(pop(numbers));
-str2 = buffer(autosize(104, 101, 108, 108, 111, 32, 119, 111, 114, 108, 100, 33, 0));
+str2 = buffer(sized(104, 101, 108, 108, 111, 32, 119, 111, 114, 108, 100, 33, 0));
 print(str2);
 
 loopstart:

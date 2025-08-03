@@ -20,7 +20,7 @@ dup(add(1));
 // & is the stack itself
 // if the index is less than 100000, we go back to the start label, 
 // we manipulate the stack directly(inside itself) bcause we want to reorganize the stack to the ifgo call
-if(less(shift(&), 100000), start);
+if(less(shift(stack), 100000), start);
 
 // end label is where i usually put the free's and such
 // we dont have any here because we didnt allocate any memory(or used any strings)

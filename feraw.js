@@ -243,7 +243,7 @@ function tokenize(input)
         tokens.push('#' + str);
     }
 
-    function parseList(depth = 0) 
+    /*function parseList(depth = 0) 
     {
         i++; // skip [
 
@@ -273,7 +273,7 @@ function tokenize(input)
         }
 
         tokens.push('!', 'list', itemCount.toString(), ...tempTokens);
-    }
+    }*/
 
     
     function parseBlock(depth = 0)
@@ -296,13 +296,13 @@ function tokenize(input)
         if (i >= input.length) return;
 
         if (input[i] === '"') return parseString();
-        if (input[i] === '[') return parseList(depth);
+        // if (input[i] === '[') return parseList(depth);
         
         // in near future we will use this for something, block name is ilustrative only
         // if (input[i] === '{') return parseBlock(depth);
 
-        // 0x, 0b, 0o
-        if (input[i] === '0') 
+        // 0x, 0b, 0o, 1e8 etc
+        if (input[i] >= '0' && input[i] <= '9' || input[i] === '-' || input[i] === '.' )
         {
             let start = i;
             i++;
@@ -822,7 +822,7 @@ function expandMacros(input)
                             let expanded = macroBody;
                             
                             // 1. Replace $@ (all arguments joined as-is)
-                            expanded = expanded.replace(/\$@/g, args.join(', '));
+                            expanded = expanded.replace(/\$all/g, args.join(', '));
 
                             // replace all $count by the argument count
                             expanded = expanded.replace(/\$count/g, args.length.toString());
