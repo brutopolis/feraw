@@ -1,5 +1,5 @@
 name feraw
-version 0.1.0
+version 0.1.1
 description "feraw"
 # files 
 setup()
@@ -11,11 +11,11 @@ setup()
 
 debug()
 {
-    ./ferawc --transpile example/loops.fw > example/loops.rw
+    ./ferawc --transpile example/hello-world.fw > example/hello-world.rw
     valgrind     \
     --leak-check=full     \
     --show-leak-kinds=all     \
     --track-origins=yes     \
     --log-file=./valgrind-out.txt     \
-    --verbose ./feraw example/loops.rw
+    --verbose ./feraw example/hello-world.rw
 }

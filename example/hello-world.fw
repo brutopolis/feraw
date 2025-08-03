@@ -14,9 +14,18 @@ print(add(0b1010, 0xa));
 // this
 // push(context, rename([1, 2, 3, 4, 5, 2, 7], "numbers"));
 // is faster than
-numbers = [1, 2, 3, 4, 5, 2, 7];
+numbers = [1, 2, [55, 11, 14], 4, 5, 2, 7];
 // unlike push, assignment care if the variable already exists
 // because assignment uses bruter_define
+
+print(dup("whatever"));
+free();
+
+print(get(get(numbers, 2), 1));
+numbers; get(shift(stack), 2); get(shift(stack), 1);
+print();
+
+numbers2 = get(numbers, 2);
 
 macro_print = macro(
     print($0);
@@ -28,12 +37,16 @@ macro_example = macro(
     macro_print($1);
 );
 
+autosize = macro(
+    $count, $@
+);
+
 // call the macro_example macro with 9 and 10 as arguments
 // is expected to print 9 then 10
 macro_example(9, 10);
 
 print(pop(numbers));
-str2 = buffer(13, 104, 101, 108, 108, 111, 32, 119, 111, 114, 108, 100, 33, 0);
+str2 = buffer(autosize(104, 101, 108, 108, 111, 32, 119, 111, 114, 108, 100, 33, 0));
 print(str2);
 
 loopstart:
@@ -53,3 +66,4 @@ end:
 free(str2);
 free(str);
 free(numbers);
+free(numbers2);

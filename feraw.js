@@ -168,15 +168,12 @@ function tokenize(input)
 {
     let tokens = [];
     let i = 0;
-    const MAX_TOKENS = 1e6;
-    const MAX_DEPTH = 1000;
 
     function skipWhitespace() 
     {
         let safety = 0;
         while (i < input.length) 
         {
-            if (++safety > MAX_TOKENS) throw new Error("skipWhitespace: loop exceeded safe bounds");
 
             if (/\s/.test(input[i])) 
             {
@@ -187,7 +184,6 @@ function tokenize(input)
                 i += 2;
                 while (i < input.length && input[i] !== '\n') 
                 {
-                    if (++safety > MAX_TOKENS) throw new Error("skipWhitespace: comment loop too long");
                     i++;
                 }
             } 
@@ -196,7 +192,6 @@ function tokenize(input)
                 i += 2;
                 while (i < input.length && !(input[i] === '*' && input[i + 1] === '/')) 
                 {
-                    if (++safety > MAX_TOKENS) throw new Error("skipWhitespace: block comment loop too long");
                     i++;
                 }
                 if (i < input.length) i += 2;
@@ -212,7 +207,6 @@ function tokenize(input)
         let safety = 0;
         while (i < input.length) 
         {
-            if (++safety > MAX_TOKENS) throw new Error("parseString: unterminated string");
 
             if (input[i] === '"') 
             {
@@ -220,7 +214,8 @@ function tokenize(input)
                 break;
             }
 
-            if (input[i] === '\n') str += '\x14';
+            if (input[i] === '#') str += '\x013';
+            else if (input[i] === '\n') str += '\x14';
             else if (input[i] === '\r') str += '\x15';
             else if (input[i] === '\t') str += '\x16';
             else if (input[i] === ' ') str += '\x17';
@@ -244,14 +239,12 @@ function tokenize(input)
             i++;
         }
 
-        if (safety >= MAX_TOKENS) throw new Error("String not terminated");
 
         tokens.push('#' + str);
     }
 
     function parseList(depth = 0) 
     {
-        if (depth > MAX_DEPTH) throw new Error("Max list nesting exceeded");
         i++; // skip [
 
         let tempTokens = [];
@@ -260,8 +253,6 @@ function tokenize(input)
         let safety = 0;
         while (true) 
         {
-            if (++safety > MAX_TOKENS) throw new Error("parseList: unterminated list");
-
             skipWhitespace();
             if (i >= input.length) throw new Error("parseList: unexpected end of input");
             if (input[i] === ']') 
@@ -301,8 +292,6 @@ function tokenize(input)
 
     function parseExpr(depth = 0) 
     {
-        if (depth > MAX_DEPTH) throw new Error("Max expression nesting exceeded");
-
         skipWhitespace();
         if (i >= input.length) return;
 
@@ -335,6 +324,28 @@ function tokenize(input)
         let name = parseRawToken();
         if (!name) throw new Error("parseExpr: invalid or empty token");
 
+        if (["true", "false", "null", "stack", "context"].includes(name))
+        {
+            switch (name)
+            {
+                case "true":
+                    tokens.push('1');
+                    return;
+                case "false":
+                    tokens.push('0');
+                    return;
+                case "null":
+                    tokens.push('!', 'retype', '0', '0');
+                    return;
+                case "stack":
+                    tokens.push('&');
+                    return;
+                case "context":
+                    tokens.push('@');
+                    return;
+            } 
+        }
+
         skipWhitespace();
         if (i >= input.length) 
         {
@@ -342,7 +353,7 @@ function tokenize(input)
             return;
         }
 
-        if (input[i] === '(') 
+        if (input[i] === '(')
         {
             if (["!", "?"].includes(name)) 
             {
@@ -356,13 +367,9 @@ function tokenize(input)
                         tokens.push("?");
                         break;
                     case "goto":
-                        tokens.push('?', '1');
-                        break;
                     case "else":
                         tokens.push('?', '1');
                         break;
-                    default:
-                        throw new Error("parseExpr: unknown function name: " + name);
                 }
             }
             else 
@@ -375,7 +382,6 @@ function tokenize(input)
 
             while (true) 
             {
-                if (++safety > MAX_TOKENS) throw new Error("parseExpr: function call too long");
 
                 skipWhitespace();
                 if (i >= input.length) throw new Error("Function call not closed with )");
@@ -393,12 +399,6 @@ function tokenize(input)
         } 
         else 
         {
-            /*
-a[1][2][3][4][5](55, 77, 99, 11 , 33);
-a[1][2](55, 77, 99, 11 , 33)[3][4][5];
-a[1][2][3][4][5] = 11;
-a[1][2][3][4][5](55, 77, 99, 11 , 33) = 1;
-            */
             let exprTokens = [name];
 
             while (true) 
@@ -413,8 +413,6 @@ a[1][2][3][4][5](55, 77, 99, 11 , 33) = 1;
 
                     while (true) 
                     {
-                        if (++safety > MAX_TOKENS) throw new Error("parseExpr: function call too long");
-
                         skipWhitespace();
                         if (i >= input.length) throw new Error("Function call not closed with )");
 
@@ -431,22 +429,6 @@ a[1][2][3][4][5](55, 77, 99, 11 , 33) = 1;
                     }
 
                     exprTokens = ['!', ...exprTokens, ...argTokens];
-                    continue;
-                }
-
-                if (input[i] === '[') 
-                {
-                    i++; // skip '['
-                    skipWhitespace();
-
-                    parseExpr(depth + 1);
-                    let indexToken = tokens.splice(tokens.length - 1);
-
-                    skipWhitespace();
-                    if (input[i] !== ']') throw new Error("parseExpr: missing closing ]");
-                    i++; // skip ']'
-
-                    exprTokens = ['!', 'get', ...exprTokens, ...indexToken];
                     continue;
                 }
 
@@ -475,7 +457,6 @@ a[1][2][3][4][5](55, 77, 99, 11 , 33) = 1;
     let safety = 0;
     while (i < input.length) 
     {
-        if (++safety > MAX_TOKENS) throw new Error("Main loop exceeded safe bounds");
         skipWhitespace();
         if (i >= input.length) break;
 
@@ -842,6 +823,9 @@ function expandMacros(input)
                             
                             // 1. Replace $@ (all arguments joined as-is)
                             expanded = expanded.replace(/\$@/g, args.join(', '));
+
+                            // replace all $count by the argument count
+                            expanded = expanded.replace(/\$count/g, args.length.toString());
                             
                             // 2. Replace numbered arguments $N from back to front
                             for (let idx = args.length - 1; idx >= 0; idx--) 
