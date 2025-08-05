@@ -3,7 +3,9 @@ function splitOutsideStrings(input, char = ';')
 {
     let parts = [];
     let current = '';
-    let inString = false;
+    let inDoubleQuotes = false;
+    let inSingleQuotes = false;
+    let inBackticks = false;
     let escape = false;
 
     for (let i = 0; i < input.length; i++) 
@@ -26,7 +28,21 @@ function splitOutsideStrings(input, char = ';')
 
         if (c === '"') 
         {
-            inString = !inString;
+            inDoubleQuotes = !inDoubleQuotes;
+            current += c;
+            continue;
+        }
+
+        if (c === "'") 
+        {            
+            inSingleQuotes = !inSingleQuotes;
+            current += c;
+            continue;
+        }
+
+        if (c === '`') 
+        {            
+            inBackticks = !inBackticks;
             current += c;
             continue;
         }
@@ -146,7 +162,7 @@ function splitOutsideStrings(input, char = ';')
             continue;
         }
 
-        if (c === char && !inString) 
+        if (c === char && !inDoubleQuotes && !inSingleQuotes) 
         {
             parts.push(current.trim());
             current = '';
@@ -245,7 +261,7 @@ function tokenize(input)
         }
 
         // check if is a assignment, if not we assume this is a string literal
-        tokens.push(isAssignment ? '#' : '%' + str);
+        tokens.push('#' + str);
     }
 
     /*function parseList(depth = 0) 

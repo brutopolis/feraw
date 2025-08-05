@@ -1,5 +1,5 @@
 name feraw
-version 0.1.1
+version 0.1.2
 description "feraw"
 # files 
 setup()
