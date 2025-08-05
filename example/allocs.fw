@@ -1,0 +1,24 @@
+string = macro(
+    // String ALLOC (salloc)
+    salloc("$0")
+);
+arena = list(1, 0);
+obj = list(1, 0);
+obj[0] = list(4, list(3, 2, 1, 4), 0, 0, 0);
+obj[string(teste)] = list(5, 0, 0, 0, 0, 0);
+push(obj, new(18, string(age), Any));
+push(obj, new(1.5, string(height), Float));
+push(obj, new(string(joao), string(name), Buffer));
+print(obj[string(age)]);
+print(obj[string(name)]);
+print(obj[string(height)]);
+
+obj[string(age)] = 55;
+obj[string(teste)] = "test";
+
+end:
+free(obj[0][0]);
+free(obj[0]);
+free(obj[string(teste)]);
+free(obj);
+free(arena);
