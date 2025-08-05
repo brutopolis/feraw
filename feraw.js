@@ -195,7 +195,8 @@ function tokenize(input)
                     i++;
                 }
                 if (i < input.length) i += 2;
-            } else break;
+            } 
+            else break;
         }
     }
 
@@ -577,6 +578,7 @@ function expandMacros(input)
         return -1;
     }
 
+    // --- Step 1: Find and Store Macro Definitions ---
     let i = 0;
     let outputWithoutDefs = '';
     while (i < input.length) 
@@ -626,13 +628,14 @@ function expandMacros(input)
         {
             if (input[i + 1] === '/') 
             {
+                // Consume single-line comment
                 while (i < input.length && input[i] !== '\n') 
                 {
                     outputWithoutDefs += input[i];
                     i++;
                 }
                 if (i < input.length) 
-                {
+                { // Add the newline if it exists
                     outputWithoutDefs += input[i];
                     i++;
                 }
@@ -640,14 +643,15 @@ function expandMacros(input)
             } 
             else if (input[i + 1] === '*') 
             {
-                outputWithoutDefs += input[i]; i++;
-                outputWithoutDefs += input[i]; i++;
+                // Consume multi-line comment
+                outputWithoutDefs += input[i]; i++; // Add /
+                outputWithoutDefs += input[i]; i++; // Add *
                 while (i < input.length) 
                 {
                     if (input[i] === '*' && i + 1 < input.length && input[i + 1] === '/') 
                     {
-                        outputWithoutDefs += input[i]; i++;
-                        outputWithoutDefs += input[i]; i++;
+                        outputWithoutDefs += input[i]; i++; // Add *
+                        outputWithoutDefs += input[i]; i++; // Add /
                         break;
                     }
                     outputWithoutDefs += input[i];
@@ -656,7 +660,6 @@ function expandMacros(input)
                 continue;
             }
         }
-        
         let potentialStart = i;
         let nameMatch = /^([a-zA-Z_$][a-zA-Z0-9_$]*)/.exec(input.substring(i));
         if (nameMatch) 
@@ -695,7 +698,7 @@ function expandMacros(input)
                         else 
                         {
                             console.error("Unterminated macro definition for:", macroName);
-                            i = potentialStart;
+                            i = potentialStart; // Reset to try parsing normally
                         }
                     } 
                     else 
@@ -719,18 +722,103 @@ function expandMacros(input)
         outputWithoutDefs += input[potentialStart];
         i = potentialStart + 1;
     }
+
+    // --- Step 2: Expand Macro Calls (Corrected) ---
     // Work on the input without definitions
     input = outputWithoutDefs;
-    // --- Step 2: Expand Macro Calls (Unchanged) ---
     let previous;
-    do {
+    do 
+    {
         previous = input;
         let outputAfterExpansion = '';
         i = 0;
+        let inString = false; // Track if inside a string literal
+        let stringChar = '';  // Track the quote character for the current string
+
         // --- Main Expansion Loop ---
         while (i < input.length) 
         {
-            // --- Attempt to Match a Macro Call: identifier '(' ---
+            let char = input[i];
+
+            // --- String Literal Handling ---
+            // Consistently handle strings to prevent misinterpreting comment chars inside them
+            if (!inString && (char === '"' || char === "'")) 
+            {
+                inString = true;
+                stringChar = char;
+                outputAfterExpansion += char;
+                i++;
+                continue;
+            } 
+            else if (inString && char === stringChar) 
+            {
+                // Check for escaped quote?
+                if (i > 0 && input[i-1] === '\\') 
+                {
+                    // The quote is escaped, treat it as a normal character
+                    // The backslash was already added in the 'else' part below or previous iteration
+                    // Just add the quote and continue
+                    outputAfterExpansion += char;
+                    i++;
+                    continue;
+                }
+                inString = false;
+                stringChar = '';
+                outputAfterExpansion += char;
+                i++;
+                continue;
+            }
+            if (inString) 
+            {
+                outputAfterExpansion += char;
+                i++;
+                continue;
+            }
+
+            // --- Comment Handling ---
+            // If not in a string, check for comment start
+            if (char === '/' && i + 1 < input.length) 
+            {
+                if (input[i + 1] === '/') 
+                {
+                    // Copy the entire single-line comment
+                    outputAfterExpansion += char; i++; // Add /
+                    outputAfterExpansion += input[i]; i++; // Add /
+                    while (i < input.length && input[i] !== '\n') 
+                    {
+                        outputAfterExpansion += input[i];
+                        i++;
+                    }
+                    if (i < input.length) 
+                    { // Add the newline if it exists
+                        outputAfterExpansion += input[i];
+                        i++;
+                    }
+                    continue; // Process the next character after the comment
+                } 
+                else if (input[i + 1] === '*') 
+                {
+                    // Copy the entire multi-line comment
+                    outputAfterExpansion += char; i++; // Add /
+                    outputAfterExpansion += input[i]; i++; // Add *
+                    while (i < input.length) 
+                    {
+                        outputAfterExpansion += input[i];
+                        if (input[i] === '*' && i + 1 < input.length && input[i + 1] === '/') 
+                        {
+                            outputAfterExpansion += input[i + 1]; // Add /
+                            i += 2; // Move past */
+                            break;
+                        }
+                        i++;
+                    }
+                    continue; // Process the next character after the comment
+                }
+            }
+
+            // --- Macro Call Expansion ---
+            // If we reach here, we are not in a string or comment.
+            // Attempt to Match a Macro Call: identifier '('
             let nameMatch = /^([a-zA-Z_$][a-zA-Z0-9_$]*)/.exec(input.substring(i));
             if (nameMatch) 
             {
@@ -817,39 +905,43 @@ function expandMacros(input)
                                 return args;
                             }
                             const args = splitArgsRobust(argsStr);
-                            
+
                             // --- Perform Substitution on the Macro Body ---
                             let expanded = macroBody;
-                            
-                            // 1. Replace $@ (all arguments joined as-is)
+                            // 1. Replace $@ (all arguments joined as-is) - Use the version from Pasted_Text_1754372135154.txt
                             expanded = expanded.replace(/\$all/g, args.join(', '));
-
-                            // replace all $count by the argument count
+                            // replace all $count by the argument count - Use the version from Pasted_Text_1754372135154.txt
                             expanded = expanded.replace(/\$count/g, args.length.toString());
-                            
                             // 2. Replace numbered arguments $N from back to front
                             for (let idx = args.length - 1; idx >= 0; idx--) 
                             {
                                 const regExp = new RegExp(`\\$${idx}\\b`, 'g');
                                 expanded = expanded.replace(regExp, args[idx]);
                             }
+                            // Use $@ replacement from Pasted_Text_1754204706745.txt
+                            expanded = expanded.replace(/\$@/g, args.join(', '));
+
                             outputAfterExpansion += expanded;
                             i = argsEnd + 1; // Move past the closing ')'
                             continue; // Continue processing the rest of the input
                         }
-                    } 
+                        // If macro not found, fall through to add the characters normally
+                    }
                     else 
                     {
                         console.error("Unterminated macro call for:", callName);
+                        // Fall through to add characters normally or handle error
                     }
                 }
+                // If it's not a '(' or the call is malformed, fall through
             }
-            // Add current character if it wasn't the start of a recognized macro call
+            // Add current character if it wasn't the start of a string, comment, or recognized macro call
             outputAfterExpansion += input[i];
             i++;
         }
         input = outputAfterExpansion;
     } while (previous !== input); // Repeat until no more expansions occur
+
     return input;
 }
 
