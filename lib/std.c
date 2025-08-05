@@ -345,6 +345,14 @@ function(feraw_list_reverse)
     bruter_reverse(list);
 }
 
+function(feraw_list_alloc)
+{
+    BruterList *arena = bruter_pop_pointer(stack);
+    BruterInt size = bruter_pop_int(stack);
+    void *ptr = bruter_alloc(arena, size);
+    bruter_push_pointer(stack, ptr, NULL, BRUTER_TYPE_BUFFER);
+}
+
 function(feraw_dup)
 {
     BruterMeta value = bruter_pop_meta(stack);
@@ -376,6 +384,24 @@ function(feraw_create)
     char* key = bruter_pop_pointer(stack);
     BruterInt type = bruter_pop_int(stack);
     bruter_push_meta(stack, (BruterMeta){.value = value.value, .key = key, .type = type});
+}
+
+function(feraw_free)
+{
+    void *ptr = bruter_pop_pointer(stack);
+    if (ptr != NULL)
+    {
+        free(ptr); // Free the pointer if it was allocated
+    }
+}
+
+function(feraw_clear)
+{
+    BruterList *list = bruter_pop_pointer(stack);
+    while (list->size > 0)
+    {
+        bruter_pop_int(list); // Pop each item from the list
+    }
 }
 
 function(feraw_free)
@@ -418,10 +444,12 @@ init(std)
     bruter_push_pointer(context, feraw_list_concat, "concat", BRUTER_TYPE_FUNCTION);
     bruter_push_pointer(context, feraw_list_swap, "swap", BRUTER_TYPE_FUNCTION);
     bruter_push_pointer(context, feraw_list_reverse, "reverse", BRUTER_TYPE_FUNCTION);
+    bruter_push_pointer(context, feraw_list_alloc, "alloc", BRUTER_TYPE_FUNCTION);
 
     bruter_push_pointer(context, feraw_dup, "dup", BRUTER_TYPE_FUNCTION);
     bruter_push_pointer(context, feraw_buffer, "buffer", BRUTER_TYPE_FUNCTION);
     bruter_push_pointer(context, feraw_create, "new", BRUTER_TYPE_FUNCTION);
+    bruter_push_pointer(context, feraw_clear, "clear", BRUTER_TYPE_FUNCTION);
     bruter_push_pointer(context, feraw_free, "free", BRUTER_TYPE_FUNCTION);
 
     bruter_push_int(context, BRUTER_TYPE_NULL, "Null", BRUTER_TYPE_ANY);
