@@ -202,13 +202,17 @@ function tokenize(input)
 
     function parseString() 
     {
+        let isAssignment = false;
         let str = '';
         i++; // skip opening "
 
-        let safety = 0;
-        while (i < input.length) 
+        if (!input.includes('='))
         {
+            isAssignment = true; // if there is no =, we assume this is a string assignment
+        }
 
+        while (i < input.length)
+        {
             if (input[i] === '"') 
             {
                 i++;
@@ -240,8 +244,8 @@ function tokenize(input)
             i++;
         }
 
-
-        tokens.push('#' + str);
+        // check if is a assignment, if not we assume this is a string literal
+        tokens.push(isAssignment ? '#' : '%' + str);
     }
 
     /*function parseList(depth = 0) 
@@ -397,62 +401,112 @@ function tokenize(input)
                 skipWhitespace();
                 if (input[i] === ',') i++;
             }
+                // ... (code inside parseExpr before the main else block) ...
+                // ... (code inside parseExpr before the main else block) ...
         } 
         else 
         {
-            let exprTokens = [name];
+            // This section handles expressions like:
+            // name, name(args...), name[index], name[index](args...), name()[index], etc.
+            // We build up exprTokens to represent the chain of operations.
 
+            // Start with the initial identifier
+            let exprTokens = [name]; 
+
+            // --- WHILE LOOP FOR CHAIN PROCESSING ---
+            // This loop continues processing the expression as long as it finds
+            // function calls '(...)' or list indices '[...]' appended to it.
             while (true) 
             {
                 skipWhitespace();
-
+                // --- Handle Function Calls: expr(...) ---
                 if (input[i] === '(') 
                 {
                     i++; // skip '('
                     let argTokens = [];
-                    let safety = 0;
-
+                    // Parse arguments inside the parentheses
+                    // (Logic for parsing arguments inside (...) remains the same)
                     while (true) 
                     {
                         skipWhitespace();
                         if (i >= input.length) throw new Error("Function call not closed with )");
-
                         if (input[i] === ')') 
                         {
-                            i++;
+                            i++; // skip ')'
                             break;
                         }
-
-                        parseExpr(depth + 1);
-                        argTokens.push(...tokens.splice(tokens.length - 1));
+                        parseExpr(depth + 1); // Parse the argument expression
+                        // Take the tokens generated for the argument
+                        argTokens.push(...tokens.splice(tokens.length - 1)); 
                         skipWhitespace();
-                        if (input[i] === ',') i++;
+                        if (input[i] === ',') i++; // skip ','
+                        // If it's not ',', it must be ')' to break the loop
                     }
-
-                    exprTokens = ['!', ...exprTokens, ...argTokens];
-                    continue;
+                    // Update exprTokens to represent: !(previous_expression)(arguments...)
+                    exprTokens = ['!', ...exprTokens, ...argTokens]; 
+                    continue; // Continue processing the chain (e.g., handle [index] after (...))
                 }
-
-                break;
+                // --- Handle List Indexing: expr[index] ---
+                // *** THIS IS THE CRITICAL PART THAT WAS MISSING ***
+                if (input[i] === '[') 
+                {
+                    i++; // skip '['
+                    skipWhitespace();
+                    // Parse the expression inside the brackets (the index)
+                    parseExpr(depth + 1); 
+                    // Take the tokens generated for the index expression
+                    let indexToken = tokens.splice(tokens.length - 1); 
+                    skipWhitespace();
+                    // Ensure the closing bracket exists
+                    if (input[i] !== ']') throw new Error("parseExpr: missing closing ]");
+                    i++; // skip ']'
+                    // Update exprTokens to represent: !(get)(previous_expression)(index_expression)
+                    // This builds the prefix notation for accessing a list element.
+                    exprTokens = ['!', 'get', ...exprTokens, ...indexToken]; 
+                    continue; // Continue processing the chain (e.g., handle another [index] or (...) after this [index])
+                }
+                // --- Break Condition ---
+                // If the next character is neither '(' nor '[', the chain ends.
+                break; 
             }
+            // --- END WHILE LOOP FOR CHAIN PROCESSING ---
 
             skipWhitespace();
-
+            
+            // --- Handle Assignment: expr = value ---
             if (input[i] === '=') 
             {
                 i++; // skip '='
                 skipWhitespace();
-
-                parseExpr(depth + 1);
-                let value = tokens.splice(tokens.length - 1);
-
-                tokens.push('!', 'set', ...value, ...exprTokens);
-                return;
+                // Parse the Right-Hand Side (RHS) of the assignment
+                parseExpr(depth + 1); 
+                
+                if (exprTokens.length >= 4 && exprTokens[0] === '!' && exprTokens[1] === 'get') 
+                {
+                    // It's a list assignment like target[index] = value or target[index1][index2]... = value
+                    
+                    exprTokens.shift(); // Remove '!' from the start
+                    exprTokens.shift(); // Remove 'get' from the start
+                    // Extract the final index (the index for the last 'get' operation)
+                    let finalIndexToken = exprTokens.pop(); // e.g., '0' or '1'
+                    let objname = exprTokens.shift(); // e.g., 'obj' or 'obj[0]'
+                    tokens.unshift('!', 'set', objname, ...exprTokens,finalIndexToken);                    
+                } 
+                else 
+                {
+                    // This handles assignments to simple variables
+                    // e.g., a = value;  
+                    // Push in the order: value, variable_name, !, set
+                    tokens.push(valueToken, ...exprTokens, '!', 'set');
+                }
+                return; // Crucial: Stop parsing this expression after handling assignment
             }
-
+            
+            // --- Not an Assignment ---
+            // Push the accumulated expression tokens (representing the access chain)
             tokens.push(...exprTokens);
         }
-    }
+    } // End of parseExpr function
 
 
     let safety = 0;

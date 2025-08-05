@@ -11,11 +11,11 @@ setup()
 
 debug()
 {
-    ./ferawc --transpile example/hello-world.fw > example/hello-world.rw
+    ./ferawc --transpile example/object.fw > example/object.rw
     valgrind     \
     --leak-check=full     \
     --show-leak-kinds=all     \
     --track-origins=yes     \
     --log-file=./valgrind-out.txt     \
-    --verbose ./feraw example/hello-world.rw
+    --verbose ./feraw example/object.rw
 }

@@ -235,16 +235,37 @@ function(feraw_list_get)
 function(feraw_list_set)
 {
     BruterList* list = bruter_pop_pointer(stack);
-    BruterInt index = bruter_pop_int(stack);
+    BruterMeta index = bruter_pop_meta(stack);
     BruterMeta value = bruter_pop_meta(stack);
 
-    if (index < 0 || index >= list->size)
+    switch (index.type)
     {
-        fprintf(stderr, "ERROR: Index out of bounds for list set\n");
-        exit(EXIT_FAILURE);
+        case BRUTER_TYPE_ANY:
+            if (index.value.i >= list->size)
+            {
+                while (list->size <= index.value.i)
+                {
+                    bruter_push_meta(list, (BruterMeta){.value = {.i = 0}, .key = NULL, .type = BRUTER_TYPE_ANY});
+                }
+            }
+            list->data[index.value.i] = value.value; // Directly set the value
+            break;
+        case BRUTER_TYPE_BUFFER:
+        {
+            BruterInt found_index = bruter_find_key(list, (char*)index.value.p);
+            if (found_index < 0)
+            {
+                value.key = strdup((char*)index.value.p); // Preserve the key if not found
+                bruter_push_meta(list, value); // Push the value to the list
+            }
+            else 
+            {
+                value.key = list->keys[found_index]; // Preserve the key
+                list->data[found_index] = value.value; // Update the existing entry
+            }
+        }
+        break;
     }
-
-    bruter_set_meta(list, index, value);
 }
 
 function(feraw_list_find)
@@ -287,6 +308,41 @@ function(feraw_list_length)
 {
     BruterList* list = bruter_pop_pointer(stack);
     bruter_push_int(stack, list->size, NULL, BRUTER_TYPE_ANY);
+}
+
+function(feraw_list_copy)
+{
+    BruterList* list = bruter_pop_pointer(stack);
+    BruterList* new_list = bruter_copy(list);
+}
+
+function(feraw_list_concat)
+{
+    BruterList* list1 = bruter_pop_pointer(stack);
+    BruterList* list2 = bruter_pop_pointer(stack);
+    bruter_concat(list1, list2);
+    bruter_push_pointer(stack, list1, NULL, BRUTER_TYPE_LIST);
+}
+
+function(feraw_list_swap)
+{
+    BruterList* list = bruter_pop_pointer(stack);
+    BruterInt index1 = bruter_pop_int(stack);
+    BruterInt index2 = bruter_pop_int(stack);
+
+    if (index1 < 0 || index1 >= list->size || index2 < 0 || index2 >= list->size)
+    {
+        fprintf(stderr, "ERROR: Index out of bounds for list swap\n");
+        exit(EXIT_FAILURE);
+    }
+
+    bruter_swap(list, index1, index2);
+}
+
+function(feraw_list_reverse)
+{
+    BruterList* list = bruter_pop_pointer(stack);
+    bruter_reverse(list);
 }
 
 function(feraw_dup)
@@ -358,10 +414,14 @@ init(std)
     bruter_push_pointer(context, feraw_list_find, "where", BRUTER_TYPE_FUNCTION);
     bruter_push_pointer(context, feraw_list_find_key, "find", BRUTER_TYPE_FUNCTION);
     bruter_push_pointer(context, feraw_list_length, "length", BRUTER_TYPE_FUNCTION);
+    bruter_push_pointer(context, feraw_list_copy, "copy", BRUTER_TYPE_FUNCTION);
+    bruter_push_pointer(context, feraw_list_concat, "concat", BRUTER_TYPE_FUNCTION);
+    bruter_push_pointer(context, feraw_list_swap, "swap", BRUTER_TYPE_FUNCTION);
+    bruter_push_pointer(context, feraw_list_reverse, "reverse", BRUTER_TYPE_FUNCTION);
 
     bruter_push_pointer(context, feraw_dup, "dup", BRUTER_TYPE_FUNCTION);
     bruter_push_pointer(context, feraw_buffer, "buffer", BRUTER_TYPE_FUNCTION);
-    bruter_push_pointer(context, feraw_create, "create", BRUTER_TYPE_FUNCTION);
+    bruter_push_pointer(context, feraw_create, "new", BRUTER_TYPE_FUNCTION);
     bruter_push_pointer(context, feraw_free, "free", BRUTER_TYPE_FUNCTION);
 
     bruter_push_int(context, BRUTER_TYPE_NULL, "Null", BRUTER_TYPE_ANY);
