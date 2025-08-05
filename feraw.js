@@ -218,7 +218,6 @@ function tokenize(input)
 
     function parseString() 
     {
-        let isAssignment = false;
         let str = '';
         i++; // skip opening "
 
@@ -263,39 +262,6 @@ function tokenize(input)
         // check if is a assignment, if not we assume this is a string literal
         tokens.push('#' + str);
     }
-
-    /*function parseList(depth = 0) 
-    {
-        i++; // skip [
-
-        let tempTokens = [];
-        let itemCount = 0;
-
-        let safety = 0;
-        while (true) 
-        {
-            skipWhitespace();
-            if (i >= input.length) throw new Error("parseList: unexpected end of input");
-            if (input[i] === ']') 
-            {
-                i++;
-                break;
-            }
-
-            let saved = tokens;
-            tokens = [];
-            parseExpr(depth + 1);
-            tempTokens.push(...tokens);
-            itemCount++;
-            tokens = saved;
-
-            skipWhitespace();
-            if (input[i] === ',') i++;
-        }
-
-        tokens.push('!', 'list', itemCount.toString(), ...tempTokens);
-    }*/
-
     
     function parseBlock(depth = 0)
     {
