@@ -1,6 +1,7 @@
 name feraw
 version 0.1.2
 description "feraw"
+FILENAME="allocs"
 # files 
 setup()
 {
@@ -11,11 +12,11 @@ setup()
 
 debug()
 {
-    ./ferawc --transpile example/object.fw > example/object.rw
+    ./ferawc --transpile "example/$FILENAME.fw" > "example/$FILENAME.br"
     valgrind     \
     --leak-check=full     \
     --show-leak-kinds=all     \
     --track-origins=yes     \
     --log-file=./valgrind-out.txt     \
-    --verbose ./feraw example/object.rw
+    --verbose ./feraw "example/$FILENAME.br"
 }

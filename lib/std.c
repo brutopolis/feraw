@@ -173,7 +173,7 @@ function(feraw_list_insert)
 
     if (index < 0 || index > list->size)
     {
-        fprintf(stderr, "ERROR: Index out of bounds for list insertion\n");
+        fprintf(stderr, "ERROR: cant insert index %" PRIdPTR " out of range in list of size %" PRIdPTR "\n", index, list->size);
         exit(EXIT_FAILURE);
     }
 
@@ -187,7 +187,7 @@ function(feraw_list_remove)
 
     if (index < 0 || index >= list->size)
     {
-        fprintf(stderr, "ERROR: Index out of bounds for list removal\n");
+        fprintf(stderr, "ERROR: cant remove, index %" PRIdPTR " out of range in list of size %" PRIdPTR "\n", index, list->size);
         exit(EXIT_FAILURE);
     }
 
@@ -225,7 +225,7 @@ function(feraw_list_get)
 
     if (index < 0 || index >= list->size)
     {
-        fprintf(stderr, "ERROR: Index out of bounds for list access\n");
+        fprintf(stderr, "ERROR: cant get, index %" PRIdPTR " out of range in list of size %" PRIdPTR "\n", index, list->size);
         exit(EXIT_FAILURE);
     }
 
@@ -255,13 +255,26 @@ function(feraw_list_set)
             BruterInt found_index = bruter_find_key(list, (char*)index.value.p);
             if (found_index < 0)
             {
-                value.key = strdup((char*)index.value.p); // Preserve the key if not found
+                value.key = index.value.p;
                 bruter_push_meta(list, value); // Push the value to the list
             }
             else 
             {
-                value.key = list->keys[found_index]; // Preserve the key
-                list->data[found_index] = value.value; // Update the existing entry
+                list->data[found_index] = value.value; // Directly set the value
+                if (list->keys != NULL)
+                {
+                    if (list->keys[found_index] != NULL)
+                    {
+                        free(list->keys[found_index]); // Free the old key if it was allocated
+                    }
+                    list->keys[found_index] = index.value.p; // Set the new key
+                }
+                if (list->types != NULL)
+                {
+                    list->types[found_index] = value.type; // Set the type   
+                }
+
+
             }
         }
         break;
@@ -332,7 +345,7 @@ function(feraw_list_swap)
 
     if (index1 < 0 || index1 >= list->size || index2 < 0 || index2 >= list->size)
     {
-        fprintf(stderr, "ERROR: Index out of bounds for list swap\n");
+        fprintf(stderr, "ERROR: cannot swap, index %" PRIdPTR " or %" PRIdPTR " out of range in list of size %" PRIdPTR "\n", index1, index2, list->size);
         exit(EXIT_FAILURE);
     }
 
@@ -350,6 +363,21 @@ function(feraw_list_alloc)
     BruterList *arena = bruter_pop_pointer(stack);
     BruterInt size = bruter_pop_int(stack);
     void *ptr = bruter_alloc(arena, size);
+    bruter_push_pointer(stack, ptr, NULL, BRUTER_TYPE_BUFFER);
+}
+
+function(feraw_list_salloc)
+{
+    BruterList *arena = bruter_pop_pointer(stack);
+    char* str = bruter_pop_pointer(stack);
+    BruterInt size = strlen(str) + 1; // Include null terminator
+    void *ptr = bruter_alloc(arena, size);
+    if (ptr == NULL)
+    {
+        fprintf(stderr, "ERROR: Memory allocation failed for string buffer\n");
+        exit(EXIT_FAILURE);
+    }
+    strncpy((char*)ptr, str, size); // Copy the string into the allocated buffer
     bruter_push_pointer(stack, ptr, NULL, BRUTER_TYPE_BUFFER);
 }
 
@@ -384,15 +412,6 @@ function(feraw_create)
     char* key = bruter_pop_pointer(stack);
     BruterInt type = bruter_pop_int(stack);
     bruter_push_meta(stack, (BruterMeta){.value = value.value, .key = key, .type = type});
-}
-
-function(feraw_free)
-{
-    void *ptr = bruter_pop_pointer(stack);
-    if (ptr != NULL)
-    {
-        free(ptr); // Free the pointer if it was allocated
-    }
 }
 
 function(feraw_clear)
@@ -445,6 +464,7 @@ init(std)
     bruter_push_pointer(context, feraw_list_swap, "swap", BRUTER_TYPE_FUNCTION);
     bruter_push_pointer(context, feraw_list_reverse, "reverse", BRUTER_TYPE_FUNCTION);
     bruter_push_pointer(context, feraw_list_alloc, "alloc", BRUTER_TYPE_FUNCTION);
+    bruter_push_pointer(context, feraw_list_salloc, "salloc", BRUTER_TYPE_FUNCTION);
 
     bruter_push_pointer(context, feraw_dup, "dup", BRUTER_TYPE_FUNCTION);
     bruter_push_pointer(context, feraw_buffer, "buffer", BRUTER_TYPE_FUNCTION);

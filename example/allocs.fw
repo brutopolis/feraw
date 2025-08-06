@@ -1,24 +1,21 @@
-string = macro(
-    // String ALLOC (salloc)
-    salloc("$0")
-);
-arena = list(1, 0);
+
 obj = list(1, 0);
 obj[0] = list(4, list(3, 2, 1, 4), 0, 0, 0);
-obj[string(teste)] = list(5, 0, 0, 0, 0, 0);
-push(obj, new(18, string(age), Any));
-push(obj, new(1.5, string(height), Float));
-push(obj, new(string(joao), string(name), Buffer));
-print(obj[string(age)]);
-print(obj[string(name)]);
-print(obj[string(height)]);
+obj["teste"] = list(5, 0, 0, 0, 0, 0);
+push(obj, new(18, "age", Any));
+push(obj, new(1.5, "height", Float));
+push(obj, new("joao", "name", Buffer));
 
-obj[string(age)] = 55;
-obj[string(teste)] = "test";
+print(obj["age"]);
+print(obj["name"]);
+print(obj["height"]);
 
+obj["age"] = 55;
+free(obj["teste"]);
+obj["teste"] = "a";
+print(obj["teste"]);
 end:
 free(obj[0][0]);
 free(obj[0]);
-free(obj[string(teste)]);
+free(obj["teste"]);
 free(obj);
-free(arena);

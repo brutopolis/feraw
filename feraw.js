@@ -1,3 +1,42 @@
+function replaceIdentifiersOutsideStrings(code) {
+    let result = '';
+    let inString = false;
+    let escape = false;
+    let i = 0;
+
+    while (i < code.length) {
+        const c = code[i];
+
+        if (inString) {
+            result += c;
+            if (escape) {
+                escape = false;
+            } else if (c === '\\') {
+                escape = true;
+            } else if (c === '"') {
+                inString = false;
+            }
+            i++;
+        } else {
+            if (c === '"') {
+                inString = true;
+                result += c;
+                i++;
+            } else {
+                const match = code.slice(i).match(/^([a-zA-Z_]\w*):/);
+                if (match) {
+                    result += match[0] + ';'; 
+                    i += match[0].length;
+                } else {
+                    result += c;
+                    i++;
+                }
+            }
+        }
+    }
+
+    return result;
+}
 
 function splitOutsideStrings(input, char = ';') 
 {
@@ -383,31 +422,17 @@ function tokenize(input)
                 skipWhitespace();
                 if (input[i] === ',') i++;
             }
-                // ... (code inside parseExpr before the main else block) ...
-                // ... (code inside parseExpr before the main else block) ...
         } 
         else 
         {
-            // This section handles expressions like:
-            // name, name(args...), name[index], name[index](args...), name()[index], etc.
-            // We build up exprTokens to represent the chain of operations.
-
-            // Start with the initial identifier
             let exprTokens = [name]; 
-
-            // --- WHILE LOOP FOR CHAIN PROCESSING ---
-            // This loop continues processing the expression as long as it finds
-            // function calls '(...)' or list indices '[...]' appended to it.
             while (true) 
             {
                 skipWhitespace();
-                // --- Handle Function Calls: expr(...) ---
                 if (input[i] === '(') 
                 {
                     i++; // skip '('
                     let argTokens = [];
-                    // Parse arguments inside the parentheses
-                    // (Logic for parsing arguments inside (...) remains the same)
                     while (true) 
                     {
                         skipWhitespace();
@@ -422,30 +447,46 @@ function tokenize(input)
                         argTokens.push(...tokens.splice(tokens.length - 1)); 
                         skipWhitespace();
                         if (input[i] === ',') i++; // skip ','
-                        // If it's not ',', it must be ')' to break the loop
                     }
-                    // Update exprTokens to represent: !(previous_expression)(arguments...)
+
                     exprTokens = ['!', ...exprTokens, ...argTokens]; 
-                    continue; // Continue processing the chain (e.g., handle [index] after (...))
+                    continue; 
                 }
-                // --- Handle List Indexing: expr[index] ---
-                // *** THIS IS THE CRITICAL PART THAT WAS MISSING ***
+
                 if (input[i] === '[') 
                 {
+                    let start = i;
                     i++; // skip '['
                     skipWhitespace();
                     // Parse the expression inside the brackets (the index)
-                    parseExpr(depth + 1); 
-                    // Take the tokens generated for the index expression
-                    let indexToken = tokens.splice(tokens.length - 1); 
+                    parseExpr(depth + 1);
                     skipWhitespace();
                     // Ensure the closing bracket exists
                     if (input[i] !== ']') throw new Error("parseExpr: missing closing ]");
                     i++; // skip ']'
-                    // Update exprTokens to represent: !(get)(previous_expression)(index_expression)
-                    // This builds the prefix notation for accessing a list element.
-                    exprTokens = ['!', 'get', ...exprTokens, ...indexToken]; 
-                    continue; // Continue processing the chain (e.g., handle another [index] or (...) after this [index])
+
+                    // lets check if we are under a funcion call
+                    let discount = 0;
+                    for (let j = start - 1; j >= 0; j--) 
+                    {
+                        if (input[j] === '(')
+                        {
+                            discount--;
+                        }
+                        else if (input[j] === ')')
+                        {
+                            discount++;
+                        }
+                    }
+                    let tokensDiscounted = [];
+                    for (let j = 0; j < -discount; j++) 
+                    {
+                        tokensDiscounted.push(tokens.shift());
+                        tokensDiscounted.push(tokens.shift());
+                    }
+                    tokens = [...tokensDiscounted, '!', 'get', ...exprTokens, ...tokens];
+                    exprTokens = [];
+                    continue;
                 }
                 // --- Break Condition ---
                 // If the next character is neither '(' nor '[', the chain ends.
@@ -463,7 +504,7 @@ function tokenize(input)
                 // Parse the Right-Hand Side (RHS) of the assignment
                 parseExpr(depth + 1); 
                 
-                if (exprTokens.length >= 4 && exprTokens[0] === '!' && exprTokens[1] === 'get') 
+                if (exprTokens.length >= 4 && exprTokens[0] === '!' && exprTokens[1] === 'get')
                 {
                     // It's a list assignment like target[index] = value or target[index1][index2]... = value
                     
@@ -479,7 +520,9 @@ function tokenize(input)
                     // This handles assignments to simple variables
                     // e.g., a = value;  
                     // Push in the order: value, variable_name, !, set
-                    tokens.push(valueToken, ...exprTokens, '!', 'set');
+                    tokens.shift(); // Remove '!' from the start
+                    tokens.shift(); // Remove 'get' from the start
+                    tokens = ['!', 'set', ...tokens, ...exprTokens];
                 }
                 return; // Crucial: Stop parsing this expression after handling assignment
             }
@@ -558,7 +601,7 @@ function feraw_labelparser(original_input)
     return input;
 }
 
-function expandMacros(input) 
+function feraw_expand_macros(input) 
 {
     const macroMap = new Map();
     // --- Helper function to find matching closing character ---
@@ -981,9 +1024,60 @@ function expandMacros(input)
     return input;
 }
 
+function analyzeCode(code) {
+    const lines = code.split('\n');
+    const declared = new Set();
+    const errors = [];
+
+    const isAssignment = /^\s*([a-zA-Z_]\w*)\s*=/;
+    const validFuncs = new Set(['list', 'macro', 'string', 'push', 'new', 'free', 'print']);
+    
+    for (let i = 0; i < lines.length; i++) {
+        let line = lines[i].trim();
+
+        // Detect declarations
+        let match = line.match(isAssignment);
+        if (match) {
+            declared.add(match[1]);
+        }
+
+        // Remove string literals
+        let clean = line.replace(/"[^"]*"/g, '');
+
+        // Detect variable usage
+        let tokens = clean.match(/\b[a-zA-Z_]\w*\b/g);
+        if (tokens) {
+            for (let token of tokens) {
+                if (
+                    !declared.has(token) &&
+                    !validFuncs.has(token) &&
+                    token !== 'end' &&
+                    isNaN(Number(token)) &&
+                    token !== 'Any' && token !== 'Float' && token !== 'Buffer'
+                ) 
+                {
+                    errors.push(`Possível uso de variável não declarada: "${token}" na linha ${i + 1}`);
+                }
+            }
+        }
+    }
+
+    return errors;
+}
+
+function feraw_analyze(input)
+{
+    input = feraw_expand_macros(input);
+    analyzeCode(input).forEach(error => {
+        console.warn(error);
+    });
+    return input;
+}
+
 function feraw_compile(input) 
 {
-    input = expandMacros(input);
+    input = replaceIdentifiersOutsideStrings(input);
+    input = feraw_expand_macros(input);
 
     let commands = splitOutsideStrings(input, ';');
     let result = [];
