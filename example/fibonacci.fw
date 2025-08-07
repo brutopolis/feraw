@@ -1,0 +1,17 @@
+number = 20;
+n1 = 0;
+n2 = 1;
+nextTerm = 0;
+i = -1;
+
+start:
+i = add(i, 1);
+print(n1);
+nextTerm = add(n1, n2);
+n1 = n2;
+n2 = nextTerm;
+// if i is less than number - 1, we go back to the start label
+if(less(i, sub(number, 1)), start);
+end:
+
+print(n1);
