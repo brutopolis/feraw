@@ -115,7 +115,7 @@ function(feraw_rename)
     {
         free(value.key); // Free the old key if it was allocated
     }
-    value.key = new_key;
+    value.key = strdup(new_key);
     bruter_push_meta(stack, value);
 }
 
@@ -129,6 +129,7 @@ function(feraw_retype)
 
 function(feraw_list)
 {
+    printf("Creating a new list\n");
     BruterInt size = bruter_pop_int(stack);
     BruterList *list = bruter_new(8, true, true);
     for (BruterInt i = 0; i < size; i++)
@@ -255,7 +256,7 @@ function(feraw_list_set)
             BruterInt found_index = bruter_find_key(list, (char*)index.value.p);
             if (found_index < 0)
             {
-                value.key = index.value.p;
+                value.key = strdup(index.value.p);
                 bruter_push_meta(list, value); // Push the value to the list
             }
             else 
@@ -263,18 +264,20 @@ function(feraw_list_set)
                 list->data[found_index] = value.value; // Directly set the value
                 if (list->keys != NULL)
                 {
-                    if (list->keys[found_index] != NULL)
+                    if (list->keys[found_index] == NULL)
                     {
-                        free(list->keys[found_index]); // Free the old key if it was allocated
+                        list->keys[found_index] = strdup(index.value.p); // Set the new key
                     }
-                    list->keys[found_index] = index.value.p; // Set the new key
+                    else if (strcmp(list->keys[found_index], index.value.p) != 0)
+                    {
+                        free(list->keys[found_index]); // Free the old key
+                        list->keys[found_index] = strdup(index.value.p); // Set the new key
+                    }
                 }
                 if (list->types != NULL)
                 {
                     list->types[found_index] = value.type; // Set the type   
                 }
-
-
             }
         }
         break;
@@ -406,14 +409,6 @@ function(feraw_buffer)
     bruter_push_pointer(stack, str, NULL, BRUTER_TYPE_BUFFER);
 }
 
-function(feraw_create)
-{
-    BruterMeta value = bruter_pop_meta(stack);
-    char* key = bruter_pop_pointer(stack);
-    BruterInt type = bruter_pop_int(stack);
-    bruter_push_meta(stack, (BruterMeta){.value = value.value, .key = key, .type = type});
-}
-
 function(feraw_clear)
 {
     BruterList *list = bruter_pop_pointer(stack);
@@ -430,7 +425,7 @@ function(feraw_free)
     {
         free(value.value.p); // Free the buffer if it was allocated
     }
-    else if (value.type == BRUTER_TYPE_LIST)
+    else
     {
         bruter_free((BruterList*)value.value.p); // Free the list if it was allocated
     }
@@ -468,7 +463,6 @@ init(std)
 
     bruter_push_pointer(context, feraw_dup, "dup", BRUTER_TYPE_FUNCTION);
     bruter_push_pointer(context, feraw_buffer, "buffer", BRUTER_TYPE_FUNCTION);
-    bruter_push_pointer(context, feraw_create, "new", BRUTER_TYPE_FUNCTION);
     bruter_push_pointer(context, feraw_clear, "clear", BRUTER_TYPE_FUNCTION);
     bruter_push_pointer(context, feraw_free, "free", BRUTER_TYPE_FUNCTION);
 

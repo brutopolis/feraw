@@ -1,13 +1,13 @@
 name feraw
-version 0.1.2
+version 0.1.3
 description "feraw"
-FILENAME="allocs"
+FILENAME="hello-world"
 # files 
 setup()
 {
     ./ferawc --interpreter lib/* > interpreter.c
     gcc -o feraw interpreter.c -O3 -g
-    rm interpreter.c
+    # rm interpreter.c
 }
 
 debug()
