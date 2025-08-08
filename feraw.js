@@ -13,12 +13,12 @@ function replaceIdentifiersOutsideStrings(code) {
                 escape = false;
             } else if (c === '\\') {
                 escape = true;
-            } else if (c === '"') {
+            } else if (c === '"' || c === "'") {
                 inString = false;
             }
             i++;
         } else {
-            if (c === '"') {
+            if (c === '"' || c === "'") {
                 inString = true;
                 result += c;
                 i++;
@@ -322,9 +322,26 @@ function tokenize(input)
         if (i >= input.length) return;
 
         if (input[i] === '"') return parseString();
+        if (input[i] === "'") // char as int
+        {
+            i++; // skip opening '
+            let char = input[i++];
+            if (char === '\\') 
+            {
+                char = input[i++];
+                if (char === 'n') char = '\n';
+                else if (char === 't') char = '\t';
+                else if (char === '"') char = '"';
+                else if (char === '\'') char = '\'';
+                else if (char === '\\') char = '\\';
+            }
+            i++;
+            tokens.push('' + char.charCodeAt(0));
+            return;
+        }
+        
         // if (input[i] === '[') return parseList(depth);
         
-        // in near future we will use this for something, block name is ilustrative only
         // if (input[i] === '{') return parseBlock(depth);
 
         // 0x, 0b, 0o, 1e8 etc
@@ -385,7 +402,7 @@ function tokenize(input)
             {
                 tokens.push(name);
             }
-            else if (["if", "goto", "else"].includes(name)) 
+            else if (["if", "goto", "else", "new"].includes(name)) 
             {
                 switch (name)
                 {
@@ -395,6 +412,9 @@ function tokenize(input)
                     case "goto":
                     case "else":
                         tokens.push('?', '1');
+                        break;
+                    case "new":
+                        tokens.push('!', 'list', '0');
                         break;
                 }
             }
@@ -548,9 +568,9 @@ function tokenize(input)
         {
             i++;
             skipWhitespace();
-            tokens.push("!", "define", "@", "!", "rename");
-            parseExpr();
+            tokens.push("!", "set", "@");
             tokens.push("#" + name);
+            parseExpr();
         } 
         else 
         {
@@ -1021,56 +1041,6 @@ function feraw_expand_macros(input)
         input = outputAfterExpansion;
     } while (previous !== input); // Repeat until no more expansions occur
 
-    return input;
-}
-
-function analyzeCode(code) {
-    const lines = code.split('\n');
-    const declared = new Set();
-    const errors = [];
-
-    const isAssignment = /^\s*([a-zA-Z_]\w*)\s*=/;
-    const validFuncs = new Set(['list', 'macro', 'string', 'push', 'new', 'free', 'print']);
-    
-    for (let i = 0; i < lines.length; i++) {
-        let line = lines[i].trim();
-
-        // Detect declarations
-        let match = line.match(isAssignment);
-        if (match) {
-            declared.add(match[1]);
-        }
-
-        // Remove string literals
-        let clean = line.replace(/"[^"]*"/g, '');
-
-        // Detect variable usage
-        let tokens = clean.match(/\b[a-zA-Z_]\w*\b/g);
-        if (tokens) {
-            for (let token of tokens) {
-                if (
-                    !declared.has(token) &&
-                    !validFuncs.has(token) &&
-                    token !== 'end' &&
-                    isNaN(Number(token)) &&
-                    token !== 'Any' && token !== 'Float' && token !== 'Buffer'
-                ) 
-                {
-                    errors.push(`Possível uso de variável não declarada: "${token}" na linha ${i + 1}`);
-                }
-            }
-        }
-    }
-
-    return errors;
-}
-
-function feraw_analyze(input)
-{
-    input = feraw_expand_macros(input);
-    analyzeCode(input).forEach(error => {
-        console.warn(error);
-    });
     return input;
 }
 

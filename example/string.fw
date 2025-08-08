@@ -1,0 +1,26 @@
+// string in feraw
+
+start:
+
+// every string that is not created by strdup is a literal string
+// literals here are mutable, but you cant change the length
+// literal contents are essentially a entry of the code splited, so they are a delocated pointer
+// you dont need to worry about freeing them, they are freed when the code is freed
+str = "abcdefghijklmnopqrstuvwxyz";
+print(str);
+print(str[1]);
+str[1] = 'B';
+print(str);
+
+str = strdup(str);
+print(str);
+str[2] = 'C';
+print(str);
+str[3] = 'D';
+print(str);
+str[4] = 'E';
+print(str);
+print(str[4]);
+end:
+
+free(str);

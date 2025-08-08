@@ -3,10 +3,9 @@ obj = list(1, 0);
 obj[0] = list(4, list(3, 2, 1, 4), 0, 0, 0);
 obj["teste"] = list(5, 0, 0, 0, 0, 0);
 
-push(obj, rename(18, "age"));
-push(obj, rename(1.5, "height"));
-push(obj, rename("joao", "name"));
-
+obj["age"] = 18;
+obj["height"] = 1.75;
+obj["name"] = "joao";
 
 print(obj["age"]);
 print(obj["name"]);
