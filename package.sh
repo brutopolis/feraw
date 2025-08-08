@@ -12,7 +12,7 @@ setup()
 
 debug()
 {
-    ./ferawc --transpile "example/$FILENAME.fw" > "example/$FILENAME.br"
+    ./ferawc --transpile "example/$FILENAME.feraw" > "example/$FILENAME.br"
     valgrind     \
     --leak-check=full     \
     --show-leak-kinds=all     \
