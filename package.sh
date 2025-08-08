@@ -1,7 +1,7 @@
 name feraw
 version 0.1.4
 description "feraw"
-FILENAME="fibonacci"
+FILENAME="string"
 # files 
 setup()
 {

@@ -246,6 +246,8 @@ function(feraw_list_set)
         BruterList* list = (BruterList*)list_meta.value.p;
         switch (index.type)
         {
+            case BRUTER_TYPE_FLOAT:
+                index.value.i = (BruterInt)index.value.f;
             case BRUTER_TYPE_ANY:
                 if (index.value.i >= list->size)
                 {

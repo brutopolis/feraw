@@ -259,7 +259,7 @@ function tokenize(input)
     {
         let str = '';
         i++; // skip opening "
-
+        let needCompaction = false;
         if (!input.includes('='))
         {
             isAssignment = true; // if there is no =, we assume this is a string assignment
@@ -273,12 +273,41 @@ function tokenize(input)
                 break;
             }
 
-            if (input[i] === '#') str += '\x013';
-            else if (input[i] === '\n') str += '\x14';
-            else if (input[i] === '\r') str += '\x15';
-            else if (input[i] === '\t') str += '\x16';
-            else if (input[i] === ' ') str += '\x17';
-            else if (input[i] === ':') str += '\x18';
+            if (input[i] === ',') 
+            {
+                str += String.fromCharCode(24);
+                needCompaction = true;
+            }
+            else if (input[i] === ';')
+            {
+                str += String.fromCharCode(25); // semicolon
+                needCompaction = true;
+            }
+            else if (input[i] === '\n')
+            {
+                str += String.fromCharCode(26); // newline
+                needCompaction = true;
+            }
+            else if (input[i] === '\r')
+            {
+                str += String.fromCharCode(28); // carriage return
+                needCompaction = true;
+            }
+            else if (input[i] === '\t')
+            {
+                str += String.fromCharCode(29); // tab
+                needCompaction = true;
+            }
+            else if (input[i] === ' ')
+            {
+                str += String.fromCharCode(30); // space
+                needCompaction = true;
+            }
+            else if (input[i] === ':')
+            {
+                str += String.fromCharCode(31); // colon
+                needCompaction = true;
+            }
             else if (input[i] === '\\') 
             {
                 i++;
@@ -298,8 +327,16 @@ function tokenize(input)
             i++;
         }
 
-        // check if is a assignment, if not we assume this is a string literal
-        tokens.push('#' + str);
+        // if it need to be compacted to a single token we mark it with a comma bcause it will needto be corrected before used
+        if (needCompaction)
+        {
+            tokens.push(',' + str);
+        }
+        // if it is a simple string without any special characters, we can mark it with a semicolon, this avoid the parser trying to correct the string
+        else 
+        {
+            tokens.push(';' + str); 
+        }
     }
     
     function parseBlock(depth = 0)
@@ -569,7 +606,15 @@ function tokenize(input)
             i++;
             skipWhitespace();
             tokens.push("!", "set", "@");
-            tokens.push("#" + name);
+            if (name.includes(31) || name.includes(30) || name.includes(29) || name.includes(28) || name.includes(26) || name.includes(25) || name.includes(24))
+            {
+                // if the name has any special character, we need to compact it
+                tokens.push("," + name);
+            }
+            else 
+            {
+                tokens.push(";" + name);
+            }
             parseExpr();
         } 
         else 
@@ -592,7 +637,6 @@ function feraw_labelparser(original_input)
     
     let input = original_input.map(tokens => tokens.reverse().join(' '))
         .join('\n').toString();
-
 
     // remove empty strings
     splited = splited.filter(token => token.trim() !== '');
@@ -1060,5 +1104,14 @@ function feraw_compile(input)
     }
 
     let result_string = feraw_labelparser(result);
+    result_string = result_string.replaceAll("\n\n", "\n"); // Remove double newlines
+    if (result_string.startsWith("\n")) 
+    {
+        result_string = result_string.slice(1); // Remove leading newline
+    }
+    if (result_string.endsWith("\n")) 
+    {
+        result_string = result_string.slice(0, -1); // Remove trailing newline
+    }
     return result_string;
 }

@@ -16,16 +16,6 @@ function(feraw_strdup)
         exit(EXIT_FAILURE);
     }
 
-    for (char* p = str; *p; p++) 
-    {
-        if (*p == '\x13') *p = '#'; // Replace ASCII 19 with #
-        else if (*p == '\x14') *p = '\n'; // Replace ASCII 20 with newline
-        else if (*p == '\x15') *p = '\r'; // Replace ASCII 21 with carriage return
-        else if (*p == '\x16') *p = '\t'; // Replace ASCII 22 with tab
-        else if (*p == '\x17') *p = ' '; // Replace ASCII 23 with space
-        else if (*p == '\x18') *p = ':'; // Replace ASCII 24 with colon
-    }
-    
     bruter_push_pointer(stack, new_str, NULL, BRUTER_TYPE_BUFFER);
 }
 
