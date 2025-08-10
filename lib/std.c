@@ -67,7 +67,9 @@ function(feraw_list)
 function(feraw_list_pop)
 {
     BruterList* list = bruter_pop_pointer(stack);
-    bruter_push_meta(stack, bruter_pop_meta(list));
+    BruterMeta value = bruter_pop_meta(list);
+    free(value.key); // Free the key if it exists
+    bruter_push_meta(stack, value); // Push the popped value back to the stack
 }
 
 function(feraw_list_push)
@@ -80,7 +82,9 @@ function(feraw_list_push)
 function(feraw_list_shift)
 {
     BruterList* list = bruter_pop_pointer(stack);
-    bruter_push_meta(stack, bruter_shift_meta(list));
+    BruterMeta value = bruter_shift_meta(list);
+    free(value.key); // Free the key if it exists
+    bruter_push_meta(stack, value); // Push the shifted value back to the stack
 }
 
 function(feraw_list_unshift)
@@ -117,6 +121,7 @@ function(feraw_list_remove)
     }
 
     BruterMeta removed_value = bruter_remove_meta(list, index);
+    free(removed_value.key); // Free the key if it exists
     bruter_push_meta(stack, removed_value); // Push the removed value back to the stack
 }
 

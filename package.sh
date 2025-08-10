@@ -1,7 +1,7 @@
 PACKAGE="feraw"
 VERSION="0.1.5"
 
-FILENAME="object"
+FILENAME="simple"
 
 setup()
 {
