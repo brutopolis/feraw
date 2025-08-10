@@ -1,23 +1,22 @@
+start:
+    obj = list(1, 0);
+    obj[0] = list(4, list(3, 2, 1, 4), 0, 0, 0);
+    obj["teste"] = list(5, 0, 0, 0, 0, 0);
 
-obj = list(1, 0);
-obj[0] = list(4, list(3, 2, 1, 4), 0, 0, 0);
-obj["teste"] = list(5, 0, 0, 0, 0, 0);
+    obj["age"] = 18;
+    obj["height"] = 1.75;
+    obj["name"] = "joao";
 
-obj["age"] = 18;
-obj["height"] = 1.75;
-obj["name"] = "joao";
+    print(obj["age"]);
+    print(obj["name"]);
+    print(obj["height"]);
 
-print(obj["age"]);
-print(obj["name"]);
-print(obj["height"]);
-
-obj["age"] = 55;
-free(obj["teste"]);
-obj["teste"] = "a";
-print(obj["teste"]);
-
+    obj["age"] = 55;
+    free(obj["teste"]);
+    obj["teste"] = "a";
+    print(obj["teste"]);
+    ls(context);
 end:
-free(obj[0][0]);
-free(obj[0]);
-
-free(obj);
+    free(obj[0][0]);
+    free(obj[0]);
+    free(obj);

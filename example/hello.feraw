@@ -64,6 +64,5 @@ goto(loopstart);
 
 end:
 free(str2);
-
 free(numbers);
 free(numbers2);

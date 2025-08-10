@@ -44,68 +44,6 @@ function(feraw_print)
     }
 }
 
-function(feraw_add)
-{
-    BruterMeta a = bruter_pop_meta(stack);
-    BruterMeta b = bruter_pop_meta(stack);
-    switch (a.type)
-    {
-        case BRUTER_TYPE_FLOAT:
-            switch (b.type)
-            {
-                case BRUTER_TYPE_FLOAT:
-                    bruter_push_float(stack, a.value.f + b.value.f, NULL, BRUTER_TYPE_FLOAT);
-                    break;
-                default:
-                    bruter_push_float(stack, a.value.f + b.value.i, NULL, BRUTER_TYPE_FLOAT);
-                    break;
-            }
-            break;
-        default:
-            switch (b.type)
-            {
-                case BRUTER_TYPE_FLOAT:
-                    bruter_push_float(stack, a.value.i + b.value.f, NULL, BRUTER_TYPE_FLOAT);
-                    break;
-                default:
-                    bruter_push_int(stack, a.value.i + b.value.i, NULL, 0);
-                    break;
-            }
-            break;
-    }
-}
-
-function(feraw_sub)
-{
-    BruterMeta a = bruter_pop_meta(stack);
-    BruterMeta b = bruter_pop_meta(stack);
-    switch (a.type)
-    {
-        case BRUTER_TYPE_FLOAT:
-            switch (b.type)
-            {
-                case BRUTER_TYPE_FLOAT:
-                    bruter_push_float(stack, a.value.f - b.value.f, NULL, BRUTER_TYPE_FLOAT);
-                    break;
-                default:
-                    bruter_push_float(stack, a.value.f - b.value.i, NULL, BRUTER_TYPE_FLOAT);
-                    break;
-            }
-            break;
-        default:
-            switch (b.type)
-            {
-                case BRUTER_TYPE_FLOAT:
-                    bruter_push_float(stack, a.value.i - b.value.f, NULL, BRUTER_TYPE_FLOAT);
-                    break;
-                default:
-                    bruter_push_int(stack, a.value.i - b.value.i, NULL, 0);
-                    break;
-            }
-            break;
-    }
-}
-
 function(feraw_retype)
 {
     BruterInt new_type = bruter_pop_int(stack);
@@ -376,44 +314,11 @@ function(feraw_list_alloc)
     bruter_push_pointer(stack, ptr, NULL, BRUTER_TYPE_BUFFER);
 }
 
-function(feraw_list_salloc)
-{
-    BruterList *arena = bruter_pop_pointer(stack);
-    char* str = bruter_pop_pointer(stack);
-    BruterInt size = strlen(str) + 1; // Include null terminator
-    void *ptr = bruter_alloc(arena, size);
-    if (ptr == NULL)
-    {
-        fprintf(stderr, "ERROR: Memory allocation failed for string buffer\n");
-        exit(EXIT_FAILURE);
-    }
-    strncpy((char*)ptr, str, size); // Copy the string into the allocated buffer
-    bruter_push_pointer(stack, ptr, NULL, BRUTER_TYPE_BUFFER);
-}
-
 function(feraw_dup)
 {
     BruterMeta value = bruter_pop_meta(stack);
     bruter_push_meta(stack, value); // Push the value back to the stack
     bruter_push_meta(stack, value); // Duplicate it
-}
-
-function(feraw_buffer)
-{
-    BruterInt size = bruter_pop_int(stack);
-    char* str = (char*)malloc(size);
-    if (str == NULL)
-    {
-        fprintf(stderr, "ERROR: Memory allocation failed for buffer\n");
-        exit(EXIT_FAILURE);
-    }
-
-    for (BruterInt i = 0; i < size; i++)
-    {
-        str[i] = (char)bruter_pop_int(stack);
-    }
-
-    bruter_push_pointer(stack, str, NULL, BRUTER_TYPE_BUFFER);
 }
 
 function(feraw_clear)
@@ -439,11 +344,42 @@ function(feraw_free)
     // No action needed for other types, as they are not dynamically allocated
 }
 
+function(feraw_list_print)
+{
+    // [index, type, "name"] = value;
+    BruterList* list = bruter_pop_pointer(stack);
+    for (BruterInt i = 0; i < list->size; i++)
+    {
+        if (list->keys != NULL && list->keys[i] != NULL)
+        {
+            printf("[%ld, %d, \"%s\"] = ", i, list->types[i], list->keys[i]);
+        }
+        else
+        {
+            printf("[%ld, %d] = ", i, list->types[i]);
+        }
+
+        switch (list->types[i])
+        {
+            case BRUTER_TYPE_FLOAT:
+                printf("%f\n", list->data[i].f);
+                break;
+            case BRUTER_TYPE_BUFFER:
+                printf("%s\n", (char*)list->data[i].p);
+                break;
+            case BRUTER_TYPE_LIST:
+                printf("[List]\n");
+                break;
+            default:
+                printf("%ld\n", list->data[i].i);
+                break;
+        }
+    }
+}
+
 init(std)
 {
     bruter_push_pointer(context, feraw_print, "print", BRUTER_TYPE_FUNCTION);
-    bruter_push_pointer(context, feraw_add, "add", BRUTER_TYPE_FUNCTION);
-    bruter_push_pointer(context, feraw_sub, "sub", BRUTER_TYPE_FUNCTION);
     bruter_push_pointer(context, feraw_retype, "retype", BRUTER_TYPE_FUNCTION);
     
     bruter_push_pointer(context, feraw_list, "list", BRUTER_TYPE_FUNCTION);
@@ -457,18 +393,17 @@ init(std)
     bruter_push_pointer(context, feraw_list_set, "set", BRUTER_TYPE_FUNCTION);
     bruter_push_pointer(context, feraw_list_find, "where", BRUTER_TYPE_FUNCTION);
     bruter_push_pointer(context, feraw_list_find_key, "find", BRUTER_TYPE_FUNCTION);
-    bruter_push_pointer(context, feraw_list_length, "length", BRUTER_TYPE_FUNCTION);
+    bruter_push_pointer(context, feraw_list_length, "len", BRUTER_TYPE_FUNCTION);
     bruter_push_pointer(context, feraw_list_copy, "copy", BRUTER_TYPE_FUNCTION);
     bruter_push_pointer(context, feraw_list_concat, "concat", BRUTER_TYPE_FUNCTION);
     bruter_push_pointer(context, feraw_list_swap, "swap", BRUTER_TYPE_FUNCTION);
     bruter_push_pointer(context, feraw_list_reverse, "reverse", BRUTER_TYPE_FUNCTION);
     bruter_push_pointer(context, feraw_list_alloc, "alloc", BRUTER_TYPE_FUNCTION);
-    bruter_push_pointer(context, feraw_list_salloc, "salloc", BRUTER_TYPE_FUNCTION);
 
     bruter_push_pointer(context, feraw_dup, "dup", BRUTER_TYPE_FUNCTION);
-    bruter_push_pointer(context, feraw_buffer, "buffer", BRUTER_TYPE_FUNCTION);
     bruter_push_pointer(context, feraw_clear, "clear", BRUTER_TYPE_FUNCTION);
     bruter_push_pointer(context, feraw_free, "free", BRUTER_TYPE_FUNCTION);
+    bruter_push_pointer(context, feraw_list_print, "ls", BRUTER_TYPE_FUNCTION);
 
     bruter_push_int(context, BRUTER_TYPE_NULL, "Null", BRUTER_TYPE_ANY);
     bruter_push_int(context, BRUTER_TYPE_ANY, "Any", BRUTER_TYPE_ANY);

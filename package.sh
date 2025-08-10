@@ -1,12 +1,12 @@
 name feraw
-version 0.1.4
+version 0.1.5
 description "feraw"
-FILENAME="string"
+FILENAME="object"
 # files 
 setup()
 {
     ./ferawc --interpreter lib/* > interpreter.c
-    gcc -o feraw interpreter.c -O3 -g
+    gcc -o feraw interpreter.c -O3 -g -lm
     # rm interpreter.c
 }
 

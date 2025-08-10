@@ -79,11 +79,25 @@ function (feraw_strcmp)
     bruter_push_int(stack, result, NULL, BRUTER_TYPE_ANY);
 }
 
+function(feraw_strlen)
+{
+    char* str = bruter_pop_pointer(stack);
+    
+    if (str == NULL)
+    {
+        bruter_push_int(stack, 0, NULL, BRUTER_TYPE_ANY);
+        return;
+    }
+    
+    BruterInt length = strlen(str);
+    bruter_push_int(stack, length, NULL, BRUTER_TYPE_ANY);
+}
+
 init(string)
 {
     bruter_push_pointer(context, feraw_strdup, "strdup", BRUTER_TYPE_FUNCTION);
     bruter_push_pointer(context, feraw_strcat, "strcat", BRUTER_TYPE_FUNCTION);
     bruter_push_pointer(context, feraw_strncpy, "strncpy", BRUTER_TYPE_FUNCTION);
     bruter_push_pointer(context, feraw_strcmp, "strcmp", BRUTER_TYPE_FUNCTION);
-    
+    bruter_push_pointer(context, feraw_strlen, "strlen", BRUTER_TYPE_FUNCTION);
 }
