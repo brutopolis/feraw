@@ -1,8 +1,8 @@
-name feraw
-version 0.1.5
-description "feraw"
+PACKAGE="feraw"
+VERSION="0.1.5"
+
 FILENAME="object"
-# files 
+
 setup()
 {
     ./ferawc --interpreter lib/* > interpreter.c
@@ -20,3 +20,5 @@ debug()
     --log-file=./valgrind-out.txt     \
     --verbose ./feraw "example/$FILENAME.br"
 }
+
+"$@"
