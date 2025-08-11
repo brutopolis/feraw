@@ -1,0 +1,101 @@
+// this example is probably what shows the more familiar code for most people
+// assignments, gotos, macro functions, conditions, lists, ifelse(fake ifelse with ifgo), function with arguments, manual memory management, etc
+
+// lets start with a simple print
+print(123);
+
+
+sized = macro(
+    $count, $all
+);
+
+start:
+str = "hello world:";
+condition = 1;
+print(str);
+
+print(add(0b1010, 1e6));
+
+// this
+// push(context, rename(list(sized(1, 2, 3, 4, 5, 2, 7)), "numbers"));
+// is faster than
+numbers = list(sized(1, 2, list(sized(55, 11, 14)), 4, 5, 2, 7));
+// unlike push, assignment care if the variable already exists
+// because assignment uses bruter_define
+
+a = 5;
+b = 5;
+
+if (equals(a, b)) 
+{
+    print("a is equal to b");
+}
+else 
+{
+    if (equals(a, b)) 
+    {
+        print("a is equal to b");
+    }
+    else 
+    {
+        print("a is not equal to b");
+    }
+}
+
+print("whatever");
+
+print(get(get(numbers, 2), 1));
+numbers; get(shift(stack), 2); get(shift(stack), 1);
+print();
+
+numbers2 = get(numbers, 2);
+
+macro_print = macro(
+    print($0);
+);
+
+// macro creating + assign it to macro_example name
+macro_example = macro(
+    macro_print($0);
+    macro_print($1);
+);
+
+// call the macro_example macro with 9 and 10 as arguments
+// is expected to print 9 then 10
+macro_example(9, 10);
+
+print(pop(numbers));
+str2 = malloc(13);
+// 104, 101, 108, 108, 111, 32, 119, 111, 114, 108, 100, 33, 0
+str2[0] = 104;
+str2[1] = 101;
+str2[2] = 108;
+str2[3] = 108;
+str2[4] = 111;
+str2[5] = 32;
+str2[6] = 119;
+str2[7] = 111;
+str2[8] = 114;
+str2[9] = 108;
+str2[10] = 100;
+str2[11] = 33;
+str2[12] = 0;
+// should print "hello world!"
+print(str2);
+
+print("length of numbers: ");
+print(len(numbers));
+
+// ifgo is the only control structure that exists in feraw
+// we can use it as if:
+while(greater(len(numbers), 0))
+{
+    print(pop(numbers));
+    print("length of numbers: ");
+    print(len(numbers));
+}
+
+end:
+free(str2);
+free(numbers);
+free(numbers2);
