@@ -23,6 +23,25 @@ numbers = list(sized(1, 2, list(sized(55, 11, 14)), 4, 5, 2, 7));
 // unlike push, assignment care if the variable already exists
 // because assignment uses bruter_define
 
+a = 5;
+b = 5;
+
+if (equals(a, b)) 
+{
+    print("a is equal to b");
+}
+else 
+{
+    if (equals(a, b)) 
+    {
+        print("a is equal to b");
+    }
+    else 
+    {
+        print("a is not equal to b");
+    }
+}
+
 print("whatever");
 
 print(get(get(numbers, 2), 1));
@@ -46,21 +65,35 @@ macro_example = macro(
 macro_example(9, 10);
 
 print(pop(numbers));
-str2 = buffer(sized(104, 101, 108, 108, 111, 32, 119, 111, 114, 108, 100, 33, 0));
+str2 = malloc(13);
+// 104, 101, 108, 108, 111, 32, 119, 111, 114, 108, 100, 33, 0
+str2[0] = 104;
+str2[1] = 101;
+str2[2] = 108;
+str2[3] = 108;
+str2[4] = 111;
+str2[5] = 32;
+str2[6] = 119;
+str2[7] = 111;
+str2[8] = 114;
+str2[9] = 108;
+str2[10] = 100;
+str2[11] = 33;
+str2[12] = 0;
+// should print "hello world!"
 print(str2);
 
-loopstart:
+print("length of numbers: ");
+print(len(numbers));
 
 // ifgo is the only control structure that exists in feraw
 // we can use it as if:
-if(greater(length(numbers), 0), conditiontrue);
-else(end);
-
-conditiontrue:
-print(pop(numbers));
-
-// goto loopstart;
-goto(loopstart);
+while(greater(len(numbers), 0))
+{
+    print(pop(numbers));
+    print("length of numbers: ");
+    print(len(numbers));
+}
 
 end:
 free(str2);

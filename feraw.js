@@ -1,3 +1,7 @@
+let feraw_if_counter = 0;
+let feraw_while_counter = 0;
+let feraw_for_counter = 0;
+
 function replaceIdentifiersOutsideStrings(code) {
     let result = '';
     let inString = false;
@@ -439,13 +443,10 @@ function tokenize(input)
             {
                 tokens.push(name);
             }
-            else if (["if", "goto", "else", "new"].includes(name)) 
+            else if (["goto", "else", "new"].includes(name)) 
             {
                 switch (name)
                 {
-                    case "if":
-                        tokens.push("?");
-                        break;
                     case "goto":
                     case "else":
                         tokens.push('?', '1');
@@ -665,63 +666,62 @@ function feraw_labelparser(original_input)
     return input;
 }
 
+function findMatching(input, start, openChar, closeChar) 
+{
+    let depth = 1;
+    let inString = false;
+    let stringChar = '';
+    let escapeNext = false;
+    for (let i = start + 1; i < input.length; i++) 
+    {
+        let char = input[i];
+        if (escapeNext) 
+        {
+            escapeNext = false;
+            continue;
+        }
+        if (char === '\\') 
+        {
+            escapeNext = true;
+            continue;
+        }
+        if (!inString && (char === '"' || char === "'")) 
+        {
+            inString = true;
+            stringChar = char;
+            continue;
+        } 
+        else if (inString && char === stringChar) 
+        {
+            inString = false;
+            stringChar = '';
+            continue;
+        }
+        // Ignore delimiters inside strings for nesting calculation
+        if (inString) 
+        {
+            continue;
+        }
+        if (char === openChar)
+        {
+            depth++;
+        } 
+        else if (char === closeChar) 
+        {
+            depth--;
+            if (depth === 0) 
+            {
+                return i;
+            }
+        }
+    }
+    return -1;
+}
+
 function feraw_expand_macros(input) 
 {
     const macroMap = new Map();
-    // --- Helper function to find matching closing character ---
-    function findMatching(input, start, openChar, closeChar) 
-    {
-        let depth = 1;
-        let inString = false;
-        let stringChar = '';
-        let escapeNext = false;
-        for (let i = start + 1; i < input.length; i++) 
-        {
-            let char = input[i];
-            if (escapeNext) 
-            {
-                escapeNext = false;
-                continue;
-            }
-            if (char === '\\') 
-            {
-                escapeNext = true;
-                continue;
-            }
-            if (!inString && (char === '"' || char === "'")) 
-            {
-                inString = true;
-                stringChar = char;
-                continue;
-            } 
-            else if (inString && char === stringChar) 
-            {
-                inString = false;
-                stringChar = '';
-                continue;
-            }
-            // Ignore delimiters inside strings for nesting calculation
-            if (inString) 
-            {
-                continue;
-            }
-            if (char === openChar)
-            {
-                depth++;
-            } 
-            else if (char === closeChar) 
-            {
-                depth--;
-                if (depth === 0) 
-                {
-                    return i;
-                }
-            }
-        }
-        return -1;
-    }
 
-    // --- Step 1: Find and Store Macro Definitions ---
     let i = 0;
     let outputWithoutDefs = '';
     while (i < input.length) 
@@ -1088,10 +1088,279 @@ function feraw_expand_macros(input)
     return input;
 }
 
+function feraw_expand_ifs(input) 
+{
+    let i = 0;
+    let out = '';
+
+    // Percorre todo o código fonte
+    while (i < input.length) 
+    {
+        // Detecta "if" seguido de parênteses (fora de strings/comentários)
+        if (/^if\s*\(/.test(input.slice(i))) 
+        {
+            // Cria identificadores únicos para cada bloco if
+            let id = feraw_if_counter++;
+            
+            // Avança além do "if"
+            i += 2;
+
+            // Pula espaços
+            while (/\s/.test(input[i])) 
+            {
+                i++;
+            }
+
+            // Se não houver parêntese, não é um if válido
+            if (input[i] !== '(') 
+            {
+                out += 'if';
+                continue;
+            }
+
+            // --- Captura a condição ---
+            let condStart = i;
+            let condEnd = findMatching(input, i, '(', ')');
+            let cond = input.slice(condStart + 1, condEnd);
+            i = condEnd + 1;
+
+            // Pula espaços
+            while (/\s/.test(input[i])) 
+            {
+                i++;
+            }
+
+            // Se não houver bloco { ... }, trata como if inválido
+            if (input[i] !== '{') 
+            {
+                out += `if(${cond})`;
+                continue;
+            }
+
+            // --- Captura o bloco do if ---
+            let ifBlockEnd = findMatching(input, i, '{', '}');
+            let ifBlock = input.slice(i + 1, ifBlockEnd);
+            i = ifBlockEnd + 1;
+
+            // Pula espaços
+            while (/\s/.test(input[i])) 
+            {
+                i++;
+            }
+
+            // --- Captura o bloco do else (se existir) ---
+            let elseBlock = '';
+            if (/^else\b/.test(input.slice(i))) 
+            {
+                // Avança além do "else"
+                i += 4;
+
+                // Pula espaços
+                while (/\s/.test(input[i])) 
+                {
+                    i++;
+                }
+
+                // Se existir bloco { ... }
+                if (input[i] === '{') 
+                {
+                    let elseEnd = findMatching(input, i, '{', '}');
+                    elseBlock = input.slice(i + 1, elseEnd);
+                    i = elseEnd + 1;
+                }
+            }
+
+            ifBlock = feraw_expand_fors(feraw_expand_ifs(feraw_expand_macros(ifBlock)));
+            if (elseBlock) 
+            {
+                elseBlock = feraw_expand_fors(feraw_expand_ifs(feraw_expand_macros(elseBlock)));
+            }
+
+            let ifTrueLabel  = `if${id}_true`;
+            let ifAfterLabel = `if${id}_after`;
+
+            out += `?(${cond}, ${ifTrueLabel});\n`;
+
+            if (elseBlock) 
+            {
+                out += elseBlock + '\n';
+                out += `?(1, ${ifAfterLabel});\n`;
+            }
+
+            out += `${ifTrueLabel}:\n`;
+            out += ifBlock + '\n';
+
+            out += `${ifAfterLabel}:\n`;
+
+            continue;
+        }
+
+        // Copia caractere normal
+        out += input[i++];
+    }
+
+    return out;
+}
+
+function feraw_expand_whiles(input) 
+{
+    let i = 0;
+    let out = '';
+
+    while (i < input.length) 
+    {
+        if (/^while\s*\(/.test(input.slice(i))) 
+        {
+            let id = feraw_while_counter++;
+            
+            i += 5;
+
+            while (/\s/.test(input[i])) 
+            {
+                i++;
+            }
+
+            if (input[i] !== '(') 
+            {
+                out += 'while';
+                continue;
+            }
+
+            let condStart = i;
+            let condEnd = findMatching(input, i, '(', ')');
+            let cond = input.slice(condStart + 1, condEnd);
+            i = condEnd + 1;
+
+            while (/\s/.test(input[i])) 
+            {
+                i++;
+            }
+
+            if (input[i] !== '{') 
+            {
+                out += `while(${cond})`;
+                continue;
+            }
+
+            let whileBlockEnd = findMatching(input, i, '{', '}');
+            let whileBlock = input.slice(i + 1, whileBlockEnd);
+            i = whileBlockEnd + 1;
+
+            while (/\s/.test(input[i])) 
+            {
+                i++;
+            }
+
+            whileBlock = feraw_expand_fors(feraw_expand_whiles(feraw_expand_ifs(whileBlock)));
+
+            let whileTrueLabel  = `while${id}_true`;
+            let whileAfterLabel = `while${id}_after`;
+            let whileStartLabel = `while${id}_start`;
+
+            out += `${whileStartLabel}:\n`;
+
+            out += `?(${cond}, ${whileTrueLabel});\n`;
+            out += `?(1, ${whileAfterLabel});\n`;
+
+            out += `${whileTrueLabel}:\n`;
+            out += whileBlock + '\n';
+            out += `?(1, ${whileStartLabel});\n`; // Loop back to start
+            out += `${whileAfterLabel}:\n`;
+
+            continue;
+        }
+
+        // Copia caractere normal
+        out += input[i++];
+    }
+
+    return out;
+}
+
+function feraw_expand_fors(input) 
+{
+    let i = 0;
+    let out = '';
+    while (i < input.length) 
+    {
+        if (/^for\s*\(/.test(input.slice(i))) 
+        {
+            let id = feraw_for_counter++;
+            
+            i += 3;
+
+            while (/\s/.test(input[i])) 
+            {
+                i++;
+            }
+
+            if (input[i] !== '(') 
+            {
+                out += 'for';
+                continue;
+            }
+
+            let headerStart = i;
+            let headerEnd = findMatching(input, i, '(', ')');
+            let header = input.slice(headerStart + 1, headerEnd);
+            i = headerEnd + 1;
+
+            while (/\s/.test(input[i])) 
+            {
+                i++;
+            }
+
+            if (input[i] !== '{') 
+            {
+                out += `for(${header})`;
+                continue;
+            }
+
+            let forBlockEnd = findMatching(input, i, '{', '}');
+            let forBlock = input.slice(i + 1, forBlockEnd);
+            i = forBlockEnd + 1;
+
+            while (/\s/.test(input[i])) 
+            {
+                i++;
+            }
+
+            let [init, cond, iter] = header.split(';').map(s => s.trim());
+            if (!cond) cond = '1'; // Default to infinite loop if no condition
+
+            forBlock = feraw_expand_fors(feraw_expand_whiles(feraw_expand_ifs(forBlock)));
+
+            let forStartLabel = `for${id}_start`;
+            let forTrueLabel  = `for${id}_true`;
+            let forAfterLabel = `for${id}_after`;
+
+            out += init ? `${init};\n` : '';
+            out += `${forStartLabel}:\n`;
+            out += `?(${cond}, ${forTrueLabel});\n`;
+            out += `?(1, ${forAfterLabel});\n`;
+            out += `${forTrueLabel}:\n`;
+            out += forBlock + '\n';
+            out += iter ? `${iter};\n` : '';
+            out += `?(1, ${forStartLabel});\n`; // Loop back to start
+            out += `${forAfterLabel}:\n`;
+
+            continue;
+        }
+
+        // Copia caractere normal
+        out += input[i++];
+    }
+    return out;
+}
+
+
 function feraw_compile(input) 
 {
     input = replaceIdentifiersOutsideStrings(input);
     input = feraw_expand_macros(input);
+    input = feraw_expand_ifs(input);
+    input = feraw_expand_whiles(input);
+    input = feraw_expand_fors(input);
 
     let commands = splitOutsideStrings(input, ';');
     let result = [];

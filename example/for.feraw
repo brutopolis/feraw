@@ -1,0 +1,4 @@
+for(i = 0; less(i, 5); i = add(i, 1))
+{
+    print(i);
+}

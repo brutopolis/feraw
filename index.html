@@ -232,7 +232,7 @@
     editorInput.on("change", () => {
       const inputCode = editorInput.getValue();
       const compiled = feraw_compile(inputCode);
-      const expanded = feraw_expand_macros(inputCode);
+      const expanded = feraw_expand_fors(feraw_expand_whiles(feraw_expand_ifs(feraw_expand_macros(inputCode))));
       editorOutput.setValue(compiled);
       expandedInput.setValue(expanded);
     });

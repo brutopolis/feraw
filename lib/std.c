@@ -149,12 +149,6 @@ function(feraw_list_get)
             index = bruter_find_key(list_meta.value.p, (char*)index_meta.value.p);
         }
 
-        if (index < 0 || index >= list->size)
-        {
-            fprintf(stderr, "ERROR: cant get, index %" PRIdPTR " out of range in list of size %" PRIdPTR "\n", index, list->size);
-            exit(EXIT_FAILURE);
-        }
-
         bruter_push_meta(stack, bruter_get_meta(list, index));
     }
 }
@@ -174,12 +168,6 @@ function(feraw_list_set)
         else if (index.type == BRUTER_TYPE_BUFFER)
         {
             index.value.i = bruter_find_key(list_meta.value.p, (char*)index.value.p);
-        }
-
-        if (index.value.i < 0 || index.value.i >= strlen(buffer))
-        {
-            fprintf(stderr, "ERROR: cant set, index %" PRIdPTR " out of range in buffer of size %" PRIdPTR "\n", index.value.i, strlen(buffer));
-            exit(EXIT_FAILURE);
         }
 
         buffer[index.value.i] = value.value.i; // Directly set the value in the buffer
