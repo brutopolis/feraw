@@ -1,12 +1,12 @@
 PACKAGE="feraw"
-VERSION="0.1.6"
+VERSION="0.1.7"
 
 FILENAME="if"
 
 setup()
 {
     ./ferawc --interpreter lib/* > interpreter.c
-    gcc -o feraw interpreter.c -O3 -g -lm
+    gcc -o feraw interpreter.c -O3 -g -lm -Wno-unused-result
     # rm interpreter.c
 }
 

@@ -387,7 +387,7 @@ function tokenize(input)
         // if (input[i] === '{') return parseBlock(depth);
 
         // 0x, 0b, 0o, 1e8 etc
-        if (input[i] >= '0' && input[i] <= '9' || input[i] === '-' || input[i] === '.' )
+        if (input[i] >= '0' && input[i] <= '9' || (input[i] === '-' && (i + 1 < input.length && input[i + 1] >= '0' && input[i + 1] <= '9')) || input[i] == '.')
         {
             let start = i;
             i++;
@@ -444,16 +444,25 @@ function tokenize(input)
             {
                 tokens.push(name);
             }
-            else if (["goto", "else", "new"].includes(name)) 
+            else if (["goto", "new", "br"].includes(name)) 
             {
                 switch (name)
                 {
                     case "goto":
-                    case "else":
                         tokens.push('?', '1');
                         break;
                     case "new":
                         tokens.push('!', 'list', '0');
+                        break;
+                    case "br":
+                        // lets find the end of the parentesis
+                        let endParen = findMatching(input, i, '(', ')');
+                        // now we simply put the content as it is
+                        if (endParen === -1) throw new Error("parseExpr: missing closing ) for br");
+                        let content = input.slice(i + 1, endParen);
+                        tokens.push(content);
+                        i = endParen + 1; // move the index to after the closing parenthesis
+                        return;
                         break;
                 }
             }

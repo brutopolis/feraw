@@ -63,7 +63,10 @@ if [[ "$MODE" == "transpile" ]]; then
     exit 0
 fi
 
-ESCAPED_CONTENT=$(sed 's/\\/\\\\/g; s/"/\\"/g; s/^/"/; s/$/\\n"/' "$SRC_FILE")
+# if has source file do
+if [[ -n "$SRC_FILE" ]]; then
+    ESCAPED_CONTENT=$(sed 's/\\/\\\\/g; s/"/\\"/g; s/^/"/; s/$/\\n"/' "$SRC_FILE")
+fi
 
 # Geração de código final
 if [[ "$MODE" == "embed" ]]; then

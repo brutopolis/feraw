@@ -1,0 +1,2 @@
+// inline bruter-code
+print(br(0.5 20 2 3 add ! sub ! mul !));
