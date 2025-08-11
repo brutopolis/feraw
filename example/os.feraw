@@ -2,15 +2,17 @@ start:
 
     content = file.read("./example/os.feraw");
 
-    if (not_equals(content, null), aftercondition);
+    if (not_equals(content, null))
+    {
+        print("File content read successfully.");
+        print(content);
+    }
+    else
+    {
+        print("ERROR: could not read file.");
+        goto(end);
+    }
 
-    print("ERROR: could not read file.");
-    goto(end);
-
-aftercondition:
-
-    print("File content read successfully.");
-    print(content);
+    
 end:
-
     free(content);
