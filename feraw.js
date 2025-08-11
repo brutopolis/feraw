@@ -1,6 +1,7 @@
 let feraw_if_counter = 0;
 let feraw_while_counter = 0;
 let feraw_for_counter = 0;
+let feraw_switch_counter = 0;
 
 function replaceIdentifiersOutsideStrings(code) {
     let result = '';
@@ -1088,109 +1089,132 @@ function feraw_expand_macros(input)
     return input;
 }
 
-function feraw_expand_ifs(input) 
-{
+function feraw_expand_ifs(input) {
     let i = 0;
     let out = '';
 
-    // Percorre todo o código fonte
-    while (i < input.length) 
-    {
-        // Detecta "if" seguido de parênteses (fora de strings/comentários)
-        if (/^if\s*\(/.test(input.slice(i))) 
-        {
-            // Cria identificadores únicos para cada bloco if
+    while (i < input.length) {
+        if (/^if\s*\(/.test(input.slice(i))) {
             let id = feraw_if_counter++;
-            
-            // Avança além do "if"
+
+            // Avançar além do "if"
             i += 2;
 
-            // Pula espaços
-            while (/\s/.test(input[i])) 
-            {
-                i++;
-            }
+            // Pular espaços
+            while (/\s/.test(input[i])) i++;
 
-            // Se não houver parêntese, não é um if válido
-            if (input[i] !== '(') 
-            {
+            if (input[i] !== '(') {
                 out += 'if';
                 continue;
             }
 
-            // --- Captura a condição ---
+            // Capturar condição
             let condStart = i;
             let condEnd = findMatching(input, i, '(', ')');
             let cond = input.slice(condStart + 1, condEnd);
             i = condEnd + 1;
 
-            // Pula espaços
-            while (/\s/.test(input[i])) 
-            {
-                i++;
-            }
+            // Pular espaços
+            while (/\s/.test(input[i])) i++;
 
-            // Se não houver bloco { ... }, trata como if inválido
-            if (input[i] !== '{') 
-            {
+            if (input[i] !== '{') {
                 out += `if(${cond})`;
                 continue;
             }
 
-            // --- Captura o bloco do if ---
+            // Capturar bloco do if
             let ifBlockEnd = findMatching(input, i, '{', '}');
             let ifBlock = input.slice(i + 1, ifBlockEnd);
             i = ifBlockEnd + 1;
 
-            // Pula espaços
-            while (/\s/.test(input[i])) 
-            {
-                i++;
-            }
+            // Pular espaços
+            while (/\s/.test(input[i])) i++;
 
-            // --- Captura o bloco do else (se existir) ---
+            // Inicializar lista de condições e blocos
+            let chain = [{ cond, block: ifBlock }];
             let elseBlock = '';
-            if (/^else\b/.test(input.slice(i))) 
-            {
-                // Avança além do "else"
-                i += 4;
 
-                // Pula espaços
-                while (/\s/.test(input[i])) 
-                {
-                    i++;
-                }
+            // Verificar se há else/if
+            while (/^else\b/.test(input.slice(i))) {
+                i += 4; // pula "else"
 
-                // Se existir bloco { ... }
-                if (input[i] === '{') 
-                {
+                // Pular espaços
+                while (/\s/.test(input[i])) i++;
+
+                if (/^if\s*\(/.test(input.slice(i))) {
+                    // É um else if
+                    i += 2; // pula "if"
+
+                    // Pular espaços
+                    while (/\s/.test(input[i])) i++;
+
+                    if (input[i] !== '(') break;
+
+                    let condStart = i;
+                    let condEnd = findMatching(input, i, '(', ')');
+                    let cond = input.slice(condStart + 1, condEnd);
+                    i = condEnd + 1;
+
+                    while (/\s/.test(input[i])) i++;
+
+                    if (input[i] !== '{') break;
+
+                    let blockEnd = findMatching(input, i, '{', '}');
+                    let block = input.slice(i + 1, blockEnd);
+                    i = blockEnd + 1;
+
+                    chain.push({ cond, block });
+                } else if (input[i] === '{') {
+                    // É um else final
                     let elseEnd = findMatching(input, i, '{', '}');
                     elseBlock = input.slice(i + 1, elseEnd);
                     i = elseEnd + 1;
+                    break;
+                } else {
+                    break;
+                }
+
+                // Pular espaços
+                while (/\s/.test(input[i])) i++;
+            }
+
+            // Expandir blocos
+            for (let j = 0; j < chain.length; j++) {
+                chain[j].block = feraw_expand_all(chain[j].block);
+            }
+            if (elseBlock) {
+                elseBlock = feraw_expand_all(elseBlock);
+            }
+
+            // Gerar labels
+            let trueLabels = chain.map((_, idx) => `if${id}_true_${idx}`);
+            let afterLabel = `if${id}_after`;
+
+            // Primeira condição
+            out += `?(${chain[0].cond}, ${trueLabels[0]});\n`;
+
+            // Se houver else, vai para ele
+            if (elseBlock) {
+                out += elseBlock + '\n';
+                out += `?(1, ${afterLabel});\n`;
+            } else {
+                // Se não houver else, vai direto para o final
+                out += `?(1, ${afterLabel});\n`;
+            }
+
+            // Processar else if
+            for (let j = 0; j < chain.length; j++) {
+                out += `${trueLabels[j]}:\n`;
+                out += chain[j].block + '\n';
+
+                if (j + 1 < chain.length) {
+                    // Próximo else if
+                    out += `?(${chain[j + 1].cond}, ${trueLabels[j + 1]});\n`;
+                    out += `?(1, ${afterLabel});\n`; // fallback
                 }
             }
 
-            ifBlock = feraw_expand_fors(feraw_expand_ifs(feraw_expand_macros(ifBlock)));
-            if (elseBlock) 
-            {
-                elseBlock = feraw_expand_fors(feraw_expand_ifs(feraw_expand_macros(elseBlock)));
-            }
-
-            let ifTrueLabel  = `if${id}_true`;
-            let ifAfterLabel = `if${id}_after`;
-
-            out += `?(${cond}, ${ifTrueLabel});\n`;
-
-            if (elseBlock) 
-            {
-                out += elseBlock + '\n';
-                out += `?(1, ${ifAfterLabel});\n`;
-            }
-
-            out += `${ifTrueLabel}:\n`;
-            out += ifBlock + '\n';
-
-            out += `${ifAfterLabel}:\n`;
+            out += `${afterLabel}:\n`;
 
             continue;
         }
@@ -1251,7 +1275,7 @@ function feraw_expand_whiles(input)
                 i++;
             }
 
-            whileBlock = feraw_expand_fors(feraw_expand_whiles(feraw_expand_ifs(whileBlock)));
+            whileBlock = feraw_expand_all(whileBlock);
 
             let whileTrueLabel  = `while${id}_true`;
             let whileAfterLabel = `while${id}_after`;
@@ -1328,7 +1352,7 @@ function feraw_expand_fors(input)
             let [init, cond, iter] = header.split(';').map(s => s.trim());
             if (!cond) cond = '1'; // Default to infinite loop if no condition
 
-            forBlock = feraw_expand_fors(feraw_expand_whiles(feraw_expand_ifs(forBlock)));
+            forBlock = feraw_expand_all(forBlock);
 
             let forStartLabel = `for${id}_start`;
             let forTrueLabel  = `for${id}_true`;
@@ -1353,15 +1377,19 @@ function feraw_expand_fors(input)
     return out;
 }
 
-
-function feraw_compile(input) 
+function feraw_expand_all(input)
 {
     input = replaceIdentifiersOutsideStrings(input);
     input = feraw_expand_macros(input);
     input = feraw_expand_ifs(input);
     input = feraw_expand_whiles(input);
     input = feraw_expand_fors(input);
+    return input;
+}
 
+function feraw_compile(input) 
+{
+    input = feraw_expand_all(input);
     let commands = splitOutsideStrings(input, ';');
     let result = [];
     for (let command of commands) 

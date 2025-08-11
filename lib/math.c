@@ -306,6 +306,107 @@ function(feraw_rand)
     bruter_push_int(stack, result, NULL, 0);
 }
 
+function(feraw_inc)
+{
+    BruterMeta a = bruter_pop_meta(stack);
+    if (a.type == BRUTER_TYPE_FLOAT)
+    {
+        a.value.f += 1.0;
+        bruter_push_float(stack, a.value.f, NULL, BRUTER_TYPE_FLOAT);
+    }
+    else
+    {
+        a.value.i += 1;
+        bruter_push_int(stack, a.value.i, NULL, 0);
+    }
+}
+
+function(feraw_dec)
+{
+    BruterMeta a = bruter_pop_meta(stack);
+    if (a.type == BRUTER_TYPE_FLOAT)
+    {
+        a.value.f -= 1.0;
+        bruter_push_float(stack, a.value.f, NULL, BRUTER_TYPE_FLOAT);
+    }
+    else
+    {
+        a.value.i -= 1;
+        bruter_push_int(stack, a.value.i, NULL, 0);
+    }
+}
+
+function(feraw_bit_and)
+{
+    BruterMeta a = bruter_pop_meta(stack);
+    BruterMeta b = bruter_pop_meta(stack);
+    if (a.type == BRUTER_TYPE_FLOAT || b.type == BRUTER_TYPE_FLOAT)
+    {
+        fprintf(stderr, "ERROR: Bitwise AND operator not supported for float types\n");
+        exit(EXIT_FAILURE);
+    }
+    bruter_push_int(stack, a.value.i & b.value.i, NULL, 0);
+}
+
+function(feraw_bit_or)
+{
+    BruterMeta a = bruter_pop_meta(stack);
+    BruterMeta b = bruter_pop_meta(stack);
+    if (a.type == BRUTER_TYPE_FLOAT || b.type == BRUTER_TYPE_FLOAT)
+    {
+        fprintf(stderr, "ERROR: Bitwise OR operator not supported for float types\n");
+        exit(EXIT_FAILURE);
+    }
+    bruter_push_int(stack, a.value.i | b.value.i, NULL, 0);
+}
+
+function(feraw_bit_xor)
+{
+    BruterMeta a = bruter_pop_meta(stack);
+    BruterMeta b = bruter_pop_meta(stack);
+    if (a.type == BRUTER_TYPE_FLOAT || b.type == BRUTER_TYPE_FLOAT)
+    {
+        fprintf(stderr, "ERROR: Bitwise XOR operator not supported for float types\n");
+        exit(EXIT_FAILURE);
+    }
+    bruter_push_int(stack, a.value.i ^ b.value.i, NULL, 0);
+}
+
+function(feraw_bit_not)
+{
+    BruterMeta a = bruter_pop_meta(stack);
+    if (a.type == BRUTER_TYPE_FLOAT)
+    {
+        fprintf(stderr, "ERROR: Bitwise NOT operator not supported for float types\n");
+        exit(EXIT_FAILURE);
+    }
+    bruter_push_int(stack, ~a.value.i, NULL, 0);
+}
+
+function(feraw_bit_shift_left)
+{
+    BruterMeta a = bruter_pop_meta(stack);
+    BruterMeta b = bruter_pop_meta(stack);
+    if (a.type == BRUTER_TYPE_FLOAT || b.type == BRUTER_TYPE_FLOAT)
+    {
+        fprintf(stderr, "ERROR: Bitwise shift operators not supported for float types\n");
+        exit(EXIT_FAILURE);
+    }
+    bruter_push_int(stack, a.value.i << b.value.i, NULL, 0);
+}
+
+function(feraw_bit_shift_right)
+{
+    BruterMeta a = bruter_pop_meta(stack);
+    BruterMeta b = bruter_pop_meta(stack);
+    if (a.type == BRUTER_TYPE_FLOAT || b.type == BRUTER_TYPE_FLOAT)
+    {
+        fprintf(stderr, "ERROR: Bitwise shift operators not supported for float types\n");
+        exit(EXIT_FAILURE);
+    }
+    bruter_push_int(stack, a.value.i >> b.value.i, NULL, 0);
+}
+
 init(math)
 {
     // register functions
@@ -324,4 +425,14 @@ init(math)
     bruter_push_pointer(context, feraw_tan, "tan", BRUTER_TYPE_FUNCTION);
     bruter_push_pointer(context, feraw_seed, "seed", BRUTER_TYPE_FUNCTION);
     bruter_push_pointer(context, feraw_rand, "rand", BRUTER_TYPE_FUNCTION);
+    bruter_push_pointer(context, feraw_inc, "inc", BRUTER_TYPE_FUNCTION);
+    bruter_push_pointer(context, feraw_dec, "dec", BRUTER_TYPE_FUNCTION);
+
+    // bitwise operations
+    bruter_push_pointer(context, feraw_bit_and, "bitwise_and", BRUTER_TYPE_FUNCTION);
+    bruter_push_pointer(context, feraw_bit_or, "bitwise_or", BRUTER_TYPE_FUNCTION);
+    bruter_push_pointer(context, feraw_bit_xor, "bitwise_xor", BRUTER_TYPE_FUNCTION);
+    bruter_push_pointer(context, feraw_bit_not, "bitwise_not", BRUTER_TYPE_FUNCTION);
+    bruter_push_pointer(context, feraw_bit_shift_left, "lshift", BRUTER_TYPE_FUNCTION);
+    bruter_push_pointer(context, feraw_bit_shift_right, "rshift", BRUTER_TYPE_FUNCTION);
 }
