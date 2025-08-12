@@ -11,3 +11,8 @@ massif*
 *.rw
 *.br
 interpreter.c
+ferawtemplate.c
+web/*.wasm
+web/*.js
+example/*.js
+example/*.wasm

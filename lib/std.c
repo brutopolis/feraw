@@ -160,7 +160,7 @@ function(feraw_list_set)
     BruterMeta value = bruter_pop_meta(stack);
     if (list_meta.type == BRUTER_TYPE_BUFFER)
     {
-        char* buffer = (char*)list_meta.value.p;
+        unsigned char* buffer = (unsigned char*)list_meta.value.p;
         if (index.type == BRUTER_TYPE_FLOAT)
         {
             index.value.i = (BruterInt)index.value.f; // Convert float to integer if necessary

@@ -4,7 +4,7 @@ ORIGIN=$(pwd)
 SUDO=$(command -v sudo >/dev/null && echo "sudo" || echo "")
 CC=${CC:-"gcc -O3"}
 
-MODE="embed"
+MODE="lib"
 SRC_FILE=""
 LIB_HEADERS=""
 LIB_INITS=""
@@ -17,6 +17,9 @@ for arg in "$@"; do
             ;;
         --transpile)
             MODE="transpile"
+            ;;
+        --embed)
+            MODE="embed"
             ;;
         -*)
             echo "[=°~°=]: unknown option: $arg"
@@ -90,7 +93,7 @@ $ESCAPED_CONTENT
 }
 EOF
 
-else  # interpreter
+elif [[ "$MODE" == "interpreter" ]]; then
     cat <<EOF
 #include "bruter.h"
 
@@ -131,6 +134,19 @@ $LIB_INITS
     free(input_str);
     bruter_free(context);
     return EXIT_SUCCESS;
+}
+EOF
+
+else
+    
+        cat <<EOF
+#include "bruter.h"
+
+$LIB_HEADERS
+
+void init_all(BruterList* context)
+{
+$LIB_INITS
 }
 EOF
 
