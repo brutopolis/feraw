@@ -1,33 +1,79 @@
 fill_buffer = macro(
     for (i = 0; less(i, mul(get($0, "x"), get($0, "y"))); i += 1) 
     {
-        set(get($0, "buffer"), i, $1);
+        $0["buffer"][i] = $1;
     }
 );
 
 print_map = macro(
-    for (i = 0; less(i, $0["y"]); i += i 1)
+    for (i = 0; less(i, $0["y"]); i += 1)
     {
         for (j = 0; less(j, $0["x"]); j += 1) 
         {
-            print(get(get($0, "buffer"), add(mul(i, get($0, "x")), j)));
+            print($0["buffer"][add(mul(i, $0["x"]), j)]);
         }
         print("\n");
     };
-)
+);
+
+/* 
+
+// yet to implement runtime-defined functions
+
+print_map = function(
+    for (i = 0; less(i, $0["y"]); i += 1)
+    {
+        for (j = 0; less(j, $0["x"]); j += 1) 
+        {
+            print($0["buffer"][add(mul(i, $0["x"]), j)]);
+        }
+        print("\n");
+    };
+);
+
+*/
+
+new_creature = macro(
+    c = new();
+    c["x"] = $1;
+    c["y"] = $2;
+    c["hp"] = $3;
+
+    if (greater($count, 4)) 
+    {
+        c["name"] = $4;
+    }
+    else 
+    {
+        c["name"] = "unamed";
+    };
+    push($0, c);
+    c;
+);
+    
+
 start:
     map = new();
-    map["x"] = 16;
-    map["y"] = 16;
+    map["x"] = 64;
+    map["y"] = 64;
+    creatures = new();
 
-    println(map["y"]);
+    new_creature(creatures, 4, 4, 100, "player");
+    player =;
+
+    println(player["name"]);
 
 
     map["buffer"] = malloc(mul(map["x"], map["y"])); // allocate a buffer for the map
     fill_buffer(map, 1);
     print_map(map);
-end:
 
-    free(get(map, "buffer")); // free the allocated buffer
+end:
+    free(map["buffer"]); // free the map buffer
+    for (i = 0; less(i, len(creatures)); i += 1) 
+    {
+        free(creatures[i]); // free each creature object
+    };
+    free(creatures); // free the creatures array
     ls(stack); // list the stack contents
     free(map); // free the map object
