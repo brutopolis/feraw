@@ -144,9 +144,11 @@ else
 
 $LIB_HEADERS
 
-void init_all(BruterList* context)
+BruterList* new_context()
 {
+    BruterList *context = bruter_new(8, true, true);
 $LIB_INITS
+    return context;
 }
 EOF
 

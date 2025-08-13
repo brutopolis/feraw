@@ -5,16 +5,16 @@
 // functions
 // functions
 
-function(feraw_print)
+function (feraw_print)
 {
     BruterMeta value = bruter_pop_meta(stack);
     switch (value.type)
     {
         case BRUTER_TYPE_FLOAT:
-            printf("%f\n", value.value.f);
+            printf("%f", value.value.f);
             break;
         case BRUTER_TYPE_BUFFER:
-            printf("%s\n", (char*)value.value.p);
+            printf("%s", (char*)value.value.p);
             break;
         case BRUTER_TYPE_LIST:
             for (BruterInt i = 0; i < ((BruterList*)value.value.p)->size; i++)
@@ -36,12 +36,17 @@ function(feraw_print)
                         break;
                 }
             }
-            printf("\n");
             break;
         default:
-            printf("%ld\n", value.value.i);
+            printf("%ld", value.value.i);
             break;
     }
+}
+
+function(feraw_println)
+{
+    feraw_print(stack);
+    printf("\n");
 }
 
 function(feraw_retype)
@@ -129,6 +134,35 @@ function(feraw_list_get)
 {
     BruterMeta list_meta = bruter_pop_meta(stack);
     BruterMeta index_meta = bruter_pop_meta(stack);
+    BruterInt index = index_meta.value.i;
+    
+    if (list_meta.type == BRUTER_TYPE_BUFFER)
+    {
+        char* buffer = (char*)list_meta.value.p;
+        bruter_push_int(stack, buffer[index], NULL, BRUTER_TYPE_ANY);
+        return;
+    }
+    else
+    {
+        BruterList* list = (BruterList*)list_meta.value.p;
+        if (index_meta.type == BRUTER_TYPE_FLOAT)
+        {
+            index = (BruterInt)index_meta.value.f; // Convert float to integer if necessary
+        }
+        else if (index_meta.type == BRUTER_TYPE_BUFFER)
+        {
+            index = bruter_find_key(list_meta.value.p, (char*)index_meta.value.p);
+        }
+
+        bruter_push_meta(stack, bruter_get_meta(list, index));
+    }
+}
+
+
+function(feraw_list_rget)
+{
+    BruterMeta index_meta = bruter_pop_meta(stack);
+    BruterMeta list_meta = bruter_pop_meta(stack);
     BruterInt index = index_meta.value.i;
     
     if (list_meta.type == BRUTER_TYPE_BUFFER)
@@ -373,6 +407,7 @@ function(feraw_list_print)
 init(std)
 {
     bruter_push_pointer(context, feraw_print, "print", BRUTER_TYPE_FUNCTION);
+    bruter_push_pointer(context, feraw_println, "println", BRUTER_TYPE_FUNCTION);
     bruter_push_pointer(context, feraw_retype, "retype", BRUTER_TYPE_FUNCTION);
     
     bruter_push_pointer(context, feraw_list, "list", BRUTER_TYPE_FUNCTION);
@@ -383,6 +418,7 @@ init(std)
     bruter_push_pointer(context, feraw_list_insert, "insert", BRUTER_TYPE_FUNCTION);
     bruter_push_pointer(context, feraw_list_remove, "remove", BRUTER_TYPE_FUNCTION);
     bruter_push_pointer(context, feraw_list_get, "get", BRUTER_TYPE_FUNCTION);
+    bruter_push_pointer(context, feraw_list_rget, "rget", BRUTER_TYPE_FUNCTION);
     bruter_push_pointer(context, feraw_list_set, "set", BRUTER_TYPE_FUNCTION);
     bruter_push_pointer(context, feraw_list_find, "where", BRUTER_TYPE_FUNCTION);
     bruter_push_pointer(context, feraw_list_find_key, "find", BRUTER_TYPE_FUNCTION);

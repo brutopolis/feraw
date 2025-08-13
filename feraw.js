@@ -3,7 +3,7 @@ let feraw_while_counter = 0;
 let feraw_for_counter = 0;
 let feraw_switch_counter = 0;
 
-function replaceIdentifiersOutsideStrings(code) {
+function feraw_isolate_labels(code) {
     let result = '';
     let inString = false;
     let escape = false;
@@ -333,7 +333,7 @@ function tokenize(input)
         }
 
         // if it need to be compacted to a single token we mark it with a comma bcause it will needto be corrected before used
-        if (needCompaction)
+        if (needCompaction || str.includes('\\'))
         {
             tokens.push(',' + str);
         }
@@ -520,42 +520,6 @@ function tokenize(input)
                     exprTokens = ['!', ...exprTokens, ...argTokens]; 
                     continue; 
                 }
-
-                if (input[i] === '[') 
-                {
-                    let start = i;
-                    i++; // skip '['
-                    skipWhitespace();
-                    // Parse the expression inside the brackets (the index)
-                    parseExpr(depth + 1);
-                    skipWhitespace();
-                    // Ensure the closing bracket exists
-                    if (input[i] !== ']') throw new Error("parseExpr: missing closing ]");
-                    i++; // skip ']'
-
-                    // lets check if we are under a funcion call
-                    let discount = 0;
-                    for (let j = start - 1; j >= 0; j--) 
-                    {
-                        if (input[j] === '(')
-                        {
-                            discount--;
-                        }
-                        else if (input[j] === ')')
-                        {
-                            discount++;
-                        }
-                    }
-                    let tokensDiscounted = [];
-                    for (let j = 0; j < -discount; j++) 
-                    {
-                        tokensDiscounted.push(tokens.shift());
-                        tokensDiscounted.push(tokens.shift());
-                    }
-                    tokens = [...tokensDiscounted, '!', 'get', ...exprTokens, ...tokens];
-                    exprTokens = [];
-                    continue;
-                }
                 // --- Break Condition ---
                 // If the next character is neither '(' nor '[', the chain ends.
                 break; 
@@ -572,26 +536,13 @@ function tokenize(input)
                 // Parse the Right-Hand Side (RHS) of the assignment
                 parseExpr(depth + 1); 
                 
-                if (exprTokens.length >= 4 && exprTokens[0] === '!' && exprTokens[1] === 'get')
-                {
-                    // It's a list assignment like target[index] = value or target[index1][index2]... = value
-                    
-                    exprTokens.shift(); // Remove '!' from the start
-                    exprTokens.shift(); // Remove 'get' from the start
-                    // Extract the final index (the index for the last 'get' operation)
-                    let finalIndexToken = exprTokens.pop(); // e.g., '0' or '1'
-                    let objname = exprTokens.shift(); // e.g., 'obj' or 'obj[0]'
-                    tokens.unshift('!', 'set', objname, ...exprTokens,finalIndexToken);                    
-                } 
-                else 
-                {
-                    // This handles assignments to simple variables
-                    // e.g., a = value;  
-                    // Push in the order: value, variable_name, !, set
-                    tokens.shift(); // Remove '!' from the start
-                    tokens.shift(); // Remove 'get' from the start
-                    tokens = ['!', 'set', ...tokens, ...exprTokens];
-                }
+                // This handles assignments to simple variables
+                // e.g., a = value;  
+                // Push in the order: value, variable_name, !, set
+                tokens.shift(); // Remove '!' from the start
+                tokens.shift(); // Remove 'get' from the start
+                tokens = ['!', 'set', ...tokens, ...exprTokens];
+
                 return; // Crucial: Stop parsing this expression after handling assignment
             }
             
@@ -1386,9 +1337,79 @@ function feraw_expand_fors(input)
     return out;
 }
 
+function feraw_expand_brackets(str) {
+    let out = '';
+    let i = 0;
+
+    while (i < str.length) {
+        let nameMatch = /^([a-zA-Z_$][a-zA-Z0-9_$]*)/.exec(str.slice(i));
+        if (nameMatch) {
+            let base = nameMatch[1];
+            i += base.length;
+
+            let indexes = [];
+            while (i < str.length && str[i] === '[') {
+                let end = findMatching(str, i, '[', ']');
+                if (end === -1) break;
+                let inner = str.slice(i + 1, end);
+                indexes.push(inner);
+                i = end + 1;
+            }
+
+            if (indexes.length > 0) {
+                // olhar adiante até o próximo ;
+                let lookaheadEnd = str.indexOf(';', i);
+                if (lookaheadEnd === -1) lookaheadEnd = str.length;
+                let rightSide = str.slice(i, lookaheadEnd);
+
+                // remover espaços do início
+                let trimmedRight = rightSide.trimStart();
+                if (trimmedRight.startsWith('=')) {
+                    // tem atribuição: a[b][c] = ...
+                    let valueExpr = trimmedRight.slice(1).trim(); // remove '='
+                    // processa valor recursivamente pra pegar gets internos
+                    valueExpr = feraw_expand_brackets(valueExpr);
+
+                    if (indexes.length === 1) {
+                        // caso simples: a[b] = X
+                        out += `set(${base}, ${indexes[0]}, ${valueExpr})`;
+                    } else {
+                        // último índice vira chave final, os anteriores viram get encadeado
+                        let objExpr = base;
+                        for (let j = 0; j < indexes.length - 1; j++) {
+                            objExpr = `get(${objExpr}, ${indexes[j]})`;
+                        }
+                        let lastKey = indexes[indexes.length - 1];
+                        out += `set(${objExpr}, ${lastKey}, ${valueExpr})`;
+                    }
+                    i = lookaheadEnd; // pular até ;
+                    continue;
+                } else {
+                    // sem atribuição → só get encadeado
+                    let expr = base;
+                    for (let idx of indexes) {
+                        expr = `get(${expr}, ${idx})`;
+                    }
+                    out += expr;
+                    continue;
+                }
+            } else {
+                out += base;
+                continue;
+            }
+        }
+        out += str[i++];
+    }
+
+    return out;
+}
+
+
+
 function feraw_expand_all(input)
 {
-    input = replaceIdentifiersOutsideStrings(input);
+    input = feraw_isolate_labels(input);
+    input = feraw_expand_brackets(input);
     input = feraw_expand_macros(input);
     input = feraw_expand_ifs(input);
     input = feraw_expand_whiles(input);

@@ -5,6 +5,7 @@
 #define HEIGHT 256
 
 uint8_t *framebuffer;
+BruterList *bruter_context;
 
 EM_JS(void, draw_frame, (int ptr), {
     imgData.data.set(HEAPU8.subarray(ptr, ptr + fb_size));
@@ -44,14 +45,18 @@ void render_frame()
         }
     }
 
-    // EM_ASM({ draw_frame(); });
     draw_frame((int)framebuffer);
 }
 
 int main()
 {
+    bruter_context = new_context();
+    
     framebuffer = malloc(WIDTH * HEIGHT * 4);
 
+    bruter_push_pointer(bruter_context, framebuffer, "framebuffer", BRUTER_TYPE_BUFFER);
+    bruter_free(bruter_parse(bruter_context, "0 ;frame @ set !"));
+    
     EM_ASM({
         canvas = document.createElement('canvas');
         canvas.id = 'c';
