@@ -1,31 +1,29 @@
 fill_buffer = macro(
-    for (i = 0; less(i, mul(get($0, "x"), get($0, "y"))); i = add(i, 1)) 
+    for (i = 0; less(i, mul(get($0, "x"), get($0, "y"))); i += 1) 
     {
         set(get($0, "buffer"), i, $1);
     }
 );
 
 print_map = macro(
-    for (i = 0; less(i, get($0, "y")); i = add(i, 1)) 
+    for (i = 0; less(i, $0["y"]); i += i 1)
     {
-        for (j = 0; less(j, get($0, "x")); j = add(j, 1)) 
+        for (j = 0; less(j, $0["x"]); j += 1) 
         {
             print(get(get($0, "buffer"), add(mul(i, get($0, "x")), j)));
         }
-        print("
-");
+        print("\n");
     };
-);
-
+)
 start:
     map = new();
     map["x"] = 16;
     map["y"] = 16;
-    
+
     println(map["y"]);
 
 
-    set(map, "buffer", malloc(mul(map["x"], map["y"]))); // allocate a buffer for the map
+    map["buffer"] = malloc(mul(map["x"], map["y"])); // allocate a buffer for the map
     fill_buffer(map, 1);
     print_map(map);
 end:

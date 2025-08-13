@@ -313,17 +313,6 @@ function tokenize(input)
                 str += String.fromCharCode(31); // colon
                 needCompaction = true;
             }
-            else if (input[i] === '\\') 
-            {
-                i++;
-                const esc = input[i++];
-                if (esc === 'n') str += '\n';
-                else if (esc === 't') str += '\t';
-                else if (esc === '"') str += '"';
-                else if (esc === '\\') str += '\\';
-                else str += esc;
-                continue;
-            } 
             else 
             {
                 str += input[i];
@@ -1404,7 +1393,47 @@ function feraw_expand_brackets(str) {
     return out;
 }
 
+function feraw_expand_compound_assignments(str) {
+    const opMap = {
+        '+': 'add',
+        '-': 'sub',
+        '*': 'mul',
+        '/': 'div',
+        '%': 'mod',
+        '^': 'xor',
+        '~': 'bitnot', // atenção: não existe operador composto "~=", mas mantive
+        '&': 'and',
+        '|': 'or',
+        '!': 'not', // idem
+        '&&': 'andand',
+        '||': 'oror',
+        '>>': 'shr',
+        '<<': 'shl',
+        '>': 'greater',
+        '<': 'less',
+        '>=': 'greater_equal',
+        '<=': 'less_equal'
+    };
 
+    // ordena por tamanho decrescente para evitar confusões (">=" antes de ">")
+    const opsSorted = Object.keys(opMap).sort((a, b) => b.length - a.length);
+    const pattern = new RegExp(
+        String.raw`(^|[^a-zA-Z0-9_$])` + // não ser parte de um nome antes
+        `([a-zA-Z_$][a-zA-Z0-9_$]*)\\s*(` +
+        opsSorted.map(op => escapeRegex(op)).join('|') +
+        `)=\\s*([^;]+)`, 'g'
+    );
+
+    return str.replace(pattern, (match, prefix, varName, op, expr) => {
+        const funcName = opMap[op];
+        if (!funcName) return match; // se não tiver mapeamento, mantém
+        return `${prefix}${varName} = ${funcName}(${varName}, ${expr})`;
+    });
+}
+
+function escapeRegex(str) {
+    return str.replace(/[-/\\^$*+?.()|[\]{}]/g, '\\$&');
+}
 
 function feraw_expand_all(input)
 {
@@ -1414,6 +1443,7 @@ function feraw_expand_all(input)
     input = feraw_expand_ifs(input);
     input = feraw_expand_whiles(input);
     input = feraw_expand_fors(input);
+    input = feraw_expand_compound_assignments(input);
     return input;
 }
 
