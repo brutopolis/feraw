@@ -1,0 +1,13 @@
+cc{
+    function(cc_test)
+    {
+        bruter_push_int(stack, 420, NULL, BRUTER_TYPE_ANY);
+    }
+};
+
+cc_test();
+cc_test();
+cc_test();
+ls(&);
+print();
+print("\n")

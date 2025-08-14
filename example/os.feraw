@@ -10,7 +10,7 @@ start:
     else
     {
         print("ERROR: could not read file.");
-        goto(end);
+        ?(true, end);
     }
 
     

@@ -427,27 +427,16 @@ function tokenize(input)
             {
                 tokens.push(name);
             }
-            else if (["goto", "new", "br"].includes(name)) 
+            else if (name == "inline") 
             {
-                switch (name)
-                {
-                    case "goto":
-                        tokens.push('?', '1');
-                        break;
-                    case "new":
-                        tokens.push('!', 'list', '0');
-                        break;
-                    case "br":
-                        // lets find the end of the parentesis
-                        let endParen = findMatching(input, i, '(', ')');
-                        // now we simply put the content as it is
-                        if (endParen === -1) throw new Error("parseExpr: missing closing ) for br");
-                        let content = input.slice(i + 1, endParen);
-                        tokens.push(content);
-                        i = endParen + 1; // move the index to after the closing parenthesis
-                        return;
-                        break;
-                }
+                // lets find the end of the parentesis
+                let endParen = findMatching(input, i, '(', ')');
+                // now we simply put the content as it is
+                if (endParen === -1) throw new Error("parseExpr: missing closing ) for br");
+                let content = input.slice(i + 1, endParen);
+                tokens.push(content);
+                i = endParen + 1; // move the index to after the closing parenthesis
+                return;
             }
             else 
             {
@@ -763,10 +752,10 @@ function feraw_expand_macros(input)
                 {
                     i += 5; // Skip 'macro'
                     while (i < input.length && /\s/.test(input[i])) i++;
-                    if (i < input.length && input[i] === '(') 
+                    if (i < input.length && input[i] === '{') 
                     {
                         let bodyStart = i + 1;
-                        let bodyEnd = findMatching(input, i, '(', ')'); // Find matching ')'
+                        let bodyEnd = findMatching(input, i, '{', '}'); // Find matching ')'
                         if (bodyEnd !== -1) 
                         {
                             let macroBody = input.substring(bodyStart, bodyEnd);
@@ -1387,6 +1376,77 @@ function feraw_expand_brackets(str) {
     return out;
 }
 
+function feraw_expand_cc(input) 
+{
+    let i = 0;
+    let out = '';
+
+    while (i < input.length) {
+        if (/^cc\s*\{/.test(input.slice(i))) 
+        {
+            i += 2; // skip "cc"
+
+            while (/\s/.test(input[i])) i++;
+
+            if (input[i] !== '{') 
+            {
+                out += 'cc';
+                continue;
+            }
+
+            let argsStart = i;
+            let argsEnd = findMatching(input, i, '{', '}');
+            let args = input.slice(argsStart + 1, argsEnd);
+
+            let escaped = args
+                .replace(/\\/g, '\\\\')
+                .replace(/"/g, '\\"')
+                .replace(/\n/g, '\\n');
+
+            out += `cc(@, "${escaped}")`;
+            i = argsEnd + 1;
+            continue;
+        }
+
+        out += input[i++];
+    }
+
+    return out;
+}
+
+function feraw_expand_inline_br(input)
+{
+    let i = 0;
+    let out = '';
+
+    while (i < input.length) {
+        if (/^br\s*\{/.test(input.slice(i))) 
+        {
+            i += 2; // skip "br"
+
+            while (/\s/.test(input[i])) i++;
+
+            if (input[i] !== '{') 
+            {
+                out += 'br';
+                continue;
+            }
+
+            let argsStart = i;
+            let argsEnd = findMatching(input, i, '{', '}');
+            let args = input.slice(argsStart + 1, argsEnd);
+
+            out += `inline(${args})`;
+            i = argsEnd + 1;
+            continue;
+        }
+
+        out += input[i++];
+    }
+
+    return out;
+}
+
 function feraw_expand_compound_assignments(str) {
     const opMap = {
         '+': 'add',
@@ -1437,6 +1497,8 @@ function feraw_expand_all(input)
     input = feraw_expand_ifs(input);
     input = feraw_expand_whiles(input);
     input = feraw_expand_fors(input);
+    input = feraw_expand_cc(input);
+    input = feraw_expand_inline_br(input);
     input = feraw_expand_compound_assignments(input);
     return input;
 }

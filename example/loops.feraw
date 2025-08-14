@@ -18,7 +18,7 @@ while(less(shift(stack), 100000))
     // we add 1 to whatever is on the stack, which is the index
     // and then we duplicate it
     dup(add(1));
-}
+};
 
 // end label is where i usually put the free's and such
 // we dont have any here because we didnt allocate any memory(or used any strings)

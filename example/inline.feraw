@@ -1,2 +1,9 @@
 // inline bruter-code
-print(br(0.5 20 2 3 add ! sub ! mul !));
+print(inline(0.5 20 2 3 add ! sub ! mul !));
+// or
+print(
+    br
+    {
+        0.5 20 2 3 add ! sub ! mul !
+    }
+);

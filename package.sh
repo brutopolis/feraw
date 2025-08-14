@@ -1,12 +1,12 @@
 PACKAGE="feraw"
 VERSION="0.1.9"
 
-FILENAME="roguelike"
+FILENAME="simple2"
 
 setup()
 {
     ./ferawc --interpreter lib/* > interpreter.c
-    gcc -o feraw interpreter.c -O3 -g -lm -Wno-unused-result
+    gcc -o feraw interpreter.c -O3 -g -lm -Wno-unused-result -ltcc
 }
 
 # ./package.sh buildweb example/web_example.c
