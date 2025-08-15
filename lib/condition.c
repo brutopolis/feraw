@@ -56,6 +56,13 @@ function(feraw_condition_or)
     bruter_push_int(stack, a || b ? 1 : 0, NULL, BRUTER_TYPE_ANY);
 }
 
+function(feraw_condition_includes)
+{
+    BruterInt a = bruter_pop_int(stack);
+    BruterInt b = bruter_pop_int(stack);
+    bruter_push_int(stack, a || b ? 1 : 0, NULL, BRUTER_TYPE_ANY);
+}
+
 init(condition)
 {
     bruter_push_pointer(context, feraw_condition_equals, "equals", BRUTER_TYPE_FUNCTION);
@@ -66,4 +73,7 @@ init(condition)
     bruter_push_pointer(context, feraw_condition_less_equal, "less_equal", BRUTER_TYPE_FUNCTION);
     bruter_push_pointer(context, feraw_condition_and, "and", BRUTER_TYPE_FUNCTION);
     bruter_push_pointer(context, feraw_condition_or, "or", BRUTER_TYPE_FUNCTION);
+    
+    // 
+    bruter_push_pointer(context, feraw_condition_includes, "includes", BRUTER_TYPE_FUNCTION);
 }

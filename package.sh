@@ -1,7 +1,7 @@
 PACKAGE="feraw"
 VERSION="0.1.9"
 
-FILENAME="simple2"
+FILENAME="math"
 
 setup()
 {
