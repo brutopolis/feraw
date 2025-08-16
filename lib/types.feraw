@@ -1,4 +1,4 @@
-// just the types definition
+/// just the types definition
 Null = 0;
 Any = 1;
 Float = 2;

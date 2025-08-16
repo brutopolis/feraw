@@ -1,4 +1,11 @@
+cc{
+    include("../lib/std.c");
+    include("../lib/math.c");
+    include("../lib/condition.c");
+};
+
+
 for(i = 0; less(i, 5); i = add(i, 1))
 {
-    print(i);
+    println(i);
 }

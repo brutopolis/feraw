@@ -1376,44 +1376,6 @@ function feraw_expand_brackets(str) {
     return out;
 }
 
-function feraw_expand_cc(input) 
-{
-    let i = 0;
-    let out = '';
-
-    while (i < input.length) {
-        if (/^cc\s*\{/.test(input.slice(i))) 
-        {
-            i += 2; // skip "cc"
-
-            while (/\s/.test(input[i])) i++;
-
-            if (input[i] !== '{') 
-            {
-                out += 'cc';
-                continue;
-            }
-
-            let argsStart = i;
-            let argsEnd = findMatching(input, i, '{', '}');
-            let args = input.slice(argsStart + 1, argsEnd);
-
-            let escaped = args
-                .replace(/\\/g, '\\\\')
-                .replace(/"/g, '\\"')
-                .replace(/\n/g, '\\n');
-
-            out += `cc(@, "${escaped}")`;
-            i = argsEnd + 1;
-            continue;
-        }
-
-        out += input[i++];
-    }
-
-    return out;
-}
-
 function feraw_expand_inline_br(input)
 {
     let i = 0;
@@ -1447,48 +1409,6 @@ function feraw_expand_inline_br(input)
     return out;
 }
 
-function feraw_expand_compound_assignments(str) {
-    const opMap = {
-        '+': 'add',
-        '-': 'sub',
-        '*': 'mul',
-        '/': 'div',
-        '%': 'mod',
-        '^': 'xor',
-        '~': 'bitnot', // atenção: não existe operador composto "~=", mas mantive
-        '&': 'and',
-        '|': 'or',
-        '!': 'not', // idem
-        '&&': 'andand',
-        '||': 'oror',
-        '>>': 'shr',
-        '<<': 'shl',
-        '>': 'greater',
-        '<': 'less',
-        '>=': 'greater_equal',
-        '<=': 'less_equal'
-    };
-
-    // ordena por tamanho decrescente para evitar confusões (">=" antes de ">")
-    const opsSorted = Object.keys(opMap).sort((a, b) => b.length - a.length);
-    const pattern = new RegExp(
-        String.raw`(^|[^a-zA-Z0-9_$])` + // não ser parte de um nome antes
-        `([a-zA-Z_$][a-zA-Z0-9_$]*)\\s*(` +
-        opsSorted.map(op => escapeRegex(op)).join('|') +
-        `)=\\s*([^;]+)`, 'g'
-    );
-
-    return str.replace(pattern, (match, prefix, varName, op, expr) => {
-        const funcName = opMap[op];
-        if (!funcName) return match; // se não tiver mapeamento, mantém
-        return `${prefix}${varName} = ${funcName}(${varName}, ${expr})`;
-    });
-}
-
-function escapeRegex(str) {
-    return str.replace(/[-/\\^$*+?.()|[\]{}]/g, '\\$&');
-}
-
 function feraw_expand_all(input)
 {
     input = feraw_isolate_labels(input);
@@ -1497,9 +1417,7 @@ function feraw_expand_all(input)
     input = feraw_expand_ifs(input);
     input = feraw_expand_whiles(input);
     input = feraw_expand_fors(input);
-    input = feraw_expand_cc(input);
     input = feraw_expand_inline_br(input);
-    input = feraw_expand_compound_assignments(input);
     return input;
 }
 

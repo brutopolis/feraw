@@ -1,3 +1,13 @@
+cc {
+include("../lib/std.c");
+include("../lib/string.c");
+include("../lib/condition.c");
+include("../lib/math.c");
+};
+
+include("../lib/types.feraw");
+
+
 // this is a literal string, a pointer to the code itself
 str = "hello world!";
 str[0] = 'H'; // str is now "Hello world!"
@@ -5,7 +15,7 @@ str[6] = 'W'; // str is now "Hello World!"
 
 // this is a allocated string
 str2 = strdup(str); // str2 is now a allocated copy of str
-print(str2); // prints "Hello World!"
+println(str2); // prints "Hello World!"
 free(str2); // free the allocated string
 
 // this is a list
@@ -16,15 +26,14 @@ push(list, "new item"); // add a new item to the end of the list
 
 // lists can also act as objects
 list["key"] = "value"; // set the key "key" to "value"
-print(list["key"]); // prints "value"
+println(list["key"]); // prints "value"
 
 
 loopstart:
 
 
-print(pop(list)); // print and remove the last item from the list
-
-condition = equals(len(list), 0); // condition is true if list length is 0
+println(pop(list)); // print and remove the last item from the list
+condition = equals(length(list), 0); // condition is true if list length is 0
 
 ?(condition, end); // if condition is true go to end label
 

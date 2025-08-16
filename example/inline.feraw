@@ -1,7 +1,12 @@
+cc{
+    include("../lib/std.c");
+    include("../lib/math.c");
+};
+
 // inline bruter-code
-print(inline(0.5 20 2 3 add ! sub ! mul !));
+println(inline(0.5 20 2 3 add ! sub ! mul !));
 // or
-print(
+println(
     br
     {
         0.5 20 2 3 add ! sub ! mul !

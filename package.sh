@@ -7,7 +7,7 @@ else
     FILENAME="$2"
 fi
 
-# ./package.sh buildweb example/web_example.c
+# buildweb needs fix
 buildweb()
 {
     modname="$1_Module"

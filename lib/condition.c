@@ -14,7 +14,7 @@ function(feraw_not_equals)
     bruter_push_int(stack, a != b ? 1 : 0, NULL, BRUTER_TYPE_ANY);
 }
 
-function(feraw_greater_than)
+function(feraw_greater)
 {
     BruterInt a = bruter_pop_int(stack);
     BruterInt b = bruter_pop_int(stack);
@@ -28,7 +28,7 @@ function(feraw_greater_equal)
     bruter_push_int(stack, a >= b ? 1 : 0, NULL, BRUTER_TYPE_ANY);
 }
 
-function(feraw_less_than)
+function(feraw_less)
 {
     BruterInt a = bruter_pop_int(stack);
     BruterInt b = bruter_pop_int(stack);

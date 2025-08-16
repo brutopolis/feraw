@@ -1,18 +1,29 @@
+cc{
+    include("../lib/std.c");
+    include("../lib/string.c");
+    include("../lib/condition.c");
+};
+
+cc{
+    include("../lib/math.c");
+    include("../lib/mem.c");
+};
+
 new = macro{
     list(0)
 };
 
 fill_buffer = macro{
-    for (i = 0; less(i, mul(get($0, "x"), get($0, "y"))); i += 1) 
+    for (i = 0; less(i, mul(get($0, "x"), get($0, "y"))); i = add(i, 1)) 
     {
         $0["buffer"][i] = $1;
     }
 };
 
 print_map = macro{
-    for (i = 0; less(i, $0["y"]); i += 1)
+    for (i = 0; less(i, $0["y"]); i = add(i, 1))
     {
-        for (j = 0; less(j, $0["x"]); j += 1) 
+        for (j = 0; less(j, $0["x"]); j = add(j, 1)) 
         {
             print($0["buffer"][add(mul(i, $0["x"]), j)]);
         }
@@ -57,7 +68,7 @@ start:
 
 end:
     free(map["buffer"]); // free the map buffer
-    for (i = 0; less(i, len(creatures)); i += 1) 
+    for (i = 0; less(i, length(creatures)); i = add(i, 1)) 
     {
         free(creatures[i]); // free each creature object
     };

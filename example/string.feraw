@@ -1,3 +1,8 @@
+cc {
+include("../lib/std.c");
+include("../lib/string.c");
+};
+
 // string in feraw
 
 start:
@@ -7,20 +12,20 @@ start:
 // literal contents are essentially a entry of the code splited, so they are a delocated pointer
 // you dont need to worry about freeing them, they are freed when the code is freed
 str = "abcdefghijklmnopqrstuvwxyz";
-print(str);
-print(str[1]);
+println(str);
+println(str[1]);
 str[1] = 'B';
-print(str);
+println(str);
 
 str = strdup(str);
-print(str);
+println(str);
 str[2] = 'C';
-print(str);
+println(str);
 str[3] = 'D';
-print(str);
+println(str);
 str[4] = 'E';
-print(str);
-print(str[4]);
+println(str);
+println(str[4]);
 end:
 
 free(str);
