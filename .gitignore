@@ -16,3 +16,4 @@ web/*.wasm
 web/*.js
 example/*.js
 example/*.wasm
+*.debug.c

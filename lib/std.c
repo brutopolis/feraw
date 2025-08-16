@@ -69,7 +69,7 @@ function(feraw_list)
     bruter_push_pointer(stack, list, NULL, BRUTER_TYPE_LIST);
 }
 
-function(feraw_list_pop)
+function(feraw_pop)
 {
     BruterList* list = bruter_pop_pointer(stack);
     BruterMeta value = bruter_pop_meta(list);
@@ -77,14 +77,14 @@ function(feraw_list_pop)
     bruter_push_meta(stack, value); // Push the popped value back to the stack
 }
 
-function(feraw_list_push)
+function(feraw_push)
 {
     BruterList* list = bruter_pop_pointer(stack);
     BruterMeta value = bruter_pop_meta(stack);
     bruter_push_meta(list, value);
 }
 
-function(feraw_list_shift)
+function(feraw_shift)
 {
     BruterList* list = bruter_pop_pointer(stack);
     BruterMeta value = bruter_shift_meta(list);
@@ -92,14 +92,14 @@ function(feraw_list_shift)
     bruter_push_meta(stack, value); // Push the shifted value back to the stack
 }
 
-function(feraw_list_unshift)
+function(feraw_unshift)
 {
     BruterList* list = bruter_pop_pointer(stack);
     BruterMeta value = bruter_pop_meta(stack);
     bruter_unshift_meta(list, value);
 }
 
-function(feraw_list_insert)
+function(feraw_insert)
 {
     BruterList* list = bruter_pop_pointer(stack);
     BruterInt index = bruter_pop_int(stack);
@@ -114,7 +114,7 @@ function(feraw_list_insert)
     bruter_insert_meta(list, index, value);
 }
 
-function(feraw_list_remove)
+function(feraw_remove)
 {
     BruterList* list = bruter_pop_pointer(stack);
     BruterInt index = bruter_pop_int(stack);
@@ -130,7 +130,7 @@ function(feraw_list_remove)
     bruter_push_meta(stack, removed_value); // Push the removed value back to the stack
 }
 
-function(feraw_list_get)
+function(feraw_get)
 {
     BruterMeta list_meta = bruter_pop_meta(stack);
     BruterMeta index_meta = bruter_pop_meta(stack);
@@ -159,7 +159,7 @@ function(feraw_list_get)
 }
 
 
-function(feraw_list_rget)
+function(feraw_rget)
 {
     BruterMeta index_meta = bruter_pop_meta(stack);
     BruterMeta list_meta = bruter_pop_meta(stack);
@@ -187,7 +187,7 @@ function(feraw_list_rget)
     }
 }
 
-function(feraw_list_set)
+function(feraw_set)
 {
     BruterMeta list_meta = bruter_pop_meta(stack);
     BruterMeta index = bruter_pop_meta(stack);
@@ -256,7 +256,7 @@ function(feraw_list_set)
     }
 }
 
-function(feraw_list_find)
+function(feraw_where)
 {
     BruterList* list = bruter_pop_pointer(stack);
     BruterMeta value = bruter_pop_meta(stack);
@@ -274,7 +274,7 @@ function(feraw_list_find)
     bruter_push_int(stack, found_index, NULL, BRUTER_TYPE_ANY);
 }
 
-function(feraw_list_find_key)
+function(feraw_find)
 {
     BruterList* list = bruter_pop_pointer(stack);
     char* key = bruter_pop_pointer(stack);
@@ -292,19 +292,19 @@ function(feraw_list_find_key)
     bruter_push_int(stack, found_index, NULL, BRUTER_TYPE_ANY);
 }
 
-function(feraw_list_length)
+function(feraw_length)
 {
     BruterList* list = bruter_pop_pointer(stack);
     bruter_push_int(stack, list->size, NULL, BRUTER_TYPE_ANY);
 }
 
-function(feraw_list_copy)
+function(feraw_copy)
 {
     BruterList* list = bruter_pop_pointer(stack);
     BruterList* new_list = bruter_copy(list);
 }
 
-function(feraw_list_concat)
+function(feraw_concat)
 {
     BruterList* list1 = bruter_pop_pointer(stack);
     BruterList* list2 = bruter_pop_pointer(stack);
@@ -312,7 +312,7 @@ function(feraw_list_concat)
     bruter_push_pointer(stack, list1, NULL, BRUTER_TYPE_LIST);
 }
 
-function(feraw_list_swap)
+function(feraw_swap)
 {
     BruterList* list = bruter_pop_pointer(stack);
     BruterInt index1 = bruter_pop_int(stack);
@@ -327,13 +327,13 @@ function(feraw_list_swap)
     bruter_swap(list, index1, index2);
 }
 
-function(feraw_list_reverse)
+function(feraw_reverse)
 {
     BruterList* list = bruter_pop_pointer(stack);
     bruter_reverse(list);
 }
 
-function(feraw_list_alloc)
+function(feraw_alloc)
 {
     BruterList *arena = bruter_pop_pointer(stack);
     BruterInt size = bruter_pop_int(stack);
@@ -371,7 +371,7 @@ function(feraw_free)
     // No action needed for other types, as they are not dynamically allocated
 }
 
-function(feraw_list_print)
+function(feraw_ls)
 {
     // [index, type, "name"] = value;
     BruterList* list = bruter_pop_pointer(stack);
@@ -402,44 +402,4 @@ function(feraw_list_print)
                 break;
         }
     }
-}
-
-init(std)
-{
-    bruter_push_pointer(context, feraw_print, "print", BRUTER_TYPE_FUNCTION);
-    bruter_push_pointer(context, feraw_println, "println", BRUTER_TYPE_FUNCTION);
-    bruter_push_pointer(context, feraw_retype, "retype", BRUTER_TYPE_FUNCTION);
-    
-    bruter_push_pointer(context, feraw_list, "list", BRUTER_TYPE_FUNCTION);
-    bruter_push_pointer(context, feraw_list_pop, "pop", BRUTER_TYPE_FUNCTION);
-    bruter_push_pointer(context, feraw_list_push, "push", BRUTER_TYPE_FUNCTION);
-    bruter_push_pointer(context, feraw_list_shift, "shift", BRUTER_TYPE_FUNCTION);
-    bruter_push_pointer(context, feraw_list_unshift, "unshift", BRUTER_TYPE_FUNCTION);
-    bruter_push_pointer(context, feraw_list_insert, "insert", BRUTER_TYPE_FUNCTION);
-    bruter_push_pointer(context, feraw_list_remove, "remove", BRUTER_TYPE_FUNCTION);
-    bruter_push_pointer(context, feraw_list_get, "get", BRUTER_TYPE_FUNCTION);
-    bruter_push_pointer(context, feraw_list_rget, "rget", BRUTER_TYPE_FUNCTION);
-    bruter_push_pointer(context, feraw_list_set, "set", BRUTER_TYPE_FUNCTION);
-    bruter_push_pointer(context, feraw_list_find, "where", BRUTER_TYPE_FUNCTION);
-    bruter_push_pointer(context, feraw_list_find_key, "find", BRUTER_TYPE_FUNCTION);
-    bruter_push_pointer(context, feraw_list_length, "len", BRUTER_TYPE_FUNCTION);
-    bruter_push_pointer(context, feraw_list_copy, "copy", BRUTER_TYPE_FUNCTION);
-    bruter_push_pointer(context, feraw_list_concat, "concat", BRUTER_TYPE_FUNCTION);
-    bruter_push_pointer(context, feraw_list_swap, "swap", BRUTER_TYPE_FUNCTION);
-    bruter_push_pointer(context, feraw_list_reverse, "reverse", BRUTER_TYPE_FUNCTION);
-    bruter_push_pointer(context, feraw_list_alloc, "alloc", BRUTER_TYPE_FUNCTION);
-
-    bruter_push_pointer(context, feraw_dup, "dup", BRUTER_TYPE_FUNCTION);
-    bruter_push_pointer(context, feraw_clear, "clear", BRUTER_TYPE_FUNCTION);
-    bruter_push_pointer(context, feraw_free, "free", BRUTER_TYPE_FUNCTION);
-    bruter_push_pointer(context, feraw_list_print, "ls", BRUTER_TYPE_FUNCTION);
-
-    bruter_push_int(context, BRUTER_TYPE_NULL, "Null", BRUTER_TYPE_ANY);
-    bruter_push_int(context, BRUTER_TYPE_ANY, "Any", BRUTER_TYPE_ANY);
-    bruter_push_int(context, BRUTER_TYPE_FLOAT, "Float", BRUTER_TYPE_ANY);
-    bruter_push_int(context, BRUTER_TYPE_BUFFER, "Buffer", BRUTER_TYPE_ANY);
-    bruter_push_int(context, BRUTER_TYPE_LIST, "List", BRUTER_TYPE_ANY);
-    bruter_push_int(context, BRUTER_TYPE_FUNCTION, "Function", BRUTER_TYPE_ANY);
-
-    bruter_push_pointer(context, NULL, "null", BRUTER_TYPE_NULL);
 }

@@ -125,16 +125,3 @@ function(feraw_strstr)
     char* result = strstr(str1, str2);
     bruter_push_pointer(stack, result, NULL, BRUTER_TYPE_BUFFER);
 }
-
-init(string)
-{
-    bruter_push_pointer(context, feraw_strdup, "strdup", BRUTER_TYPE_FUNCTION);
-    bruter_push_pointer(context, feraw_strcat, "strcat", BRUTER_TYPE_FUNCTION);
-    bruter_push_pointer(context, feraw_strcpy, "strcpy", BRUTER_TYPE_FUNCTION);
-    bruter_push_pointer(context, feraw_strncpy, "strncpy", BRUTER_TYPE_FUNCTION);
-    bruter_push_pointer(context, feraw_strcmp, "strcmp", BRUTER_TYPE_FUNCTION);
-    bruter_push_pointer(context, feraw_strlen, "strlen", BRUTER_TYPE_FUNCTION);
-    bruter_push_pointer(context, feraw_strchr, "strchr", BRUTER_TYPE_FUNCTION);
-    bruter_push_pointer(context, feraw_strstr, "strstr", BRUTER_TYPE_FUNCTION);
-
-}

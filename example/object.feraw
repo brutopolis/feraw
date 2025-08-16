@@ -1,3 +1,6 @@
+cc {
+include("../lib/std.c");
+};
 start:
     obj = list(1, 0);
     obj[0] = list(4, list(3, 2, 1, 4), 0, 0, 0);

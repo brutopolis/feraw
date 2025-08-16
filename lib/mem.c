@@ -98,14 +98,3 @@ function(feraw_memmove)
     
     memmove(dest, src, size);
 }
-
-init(mem)
-{
-    bruter_push_pointer(context, feraw_malloc, "malloc", BRUTER_TYPE_FUNCTION);
-    bruter_push_pointer(context, feraw_calloc, "calloc", BRUTER_TYPE_FUNCTION);
-    bruter_push_pointer(context, feraw_realloc, "realloc", BRUTER_TYPE_FUNCTION);
-    bruter_push_pointer(context, feraw_memset, "memset", BRUTER_TYPE_FUNCTION);
-    bruter_push_pointer(context, feraw_memcpy, "memcpy", BRUTER_TYPE_FUNCTION);
-    bruter_push_pointer(context, feraw_memcmp, "memcmp", BRUTER_TYPE_FUNCTION);
-    bruter_push_pointer(context, feraw_memmove, "memmove", BRUTER_TYPE_FUNCTION);
-}

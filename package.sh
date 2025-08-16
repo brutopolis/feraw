@@ -1,13 +1,11 @@
 PACKAGE="feraw"
-VERSION="0.1.9"
+VERSION="0.2.0"
 
-FILENAME="math"
-
-setup()
-{
-    ./ferawc --interpreter lib/* > interpreter.c
-    gcc -o feraw interpreter.c -O3 -g -lm -Wno-unused-result -ltcc
-}
+if [ -z "$2" ]; then
+    FILENAME="object"
+else
+    FILENAME="$2"
+fi
 
 # ./package.sh buildweb example/web_example.c
 buildweb()
@@ -31,13 +29,14 @@ buildweb()
 
 debug()
 {
-    ./ferawc --transpile "example/$FILENAME.feraw" > "example/$FILENAME.br"
+    node feraw.js "example/$FILENAME.feraw" "example/$FILENAME.debug.c"
+    gcc -o $FILENAME.exe "example/$FILENAME.debug.c" -O3 -g -lm 
     valgrind \
     --leak-check=full \
     --show-leak-kinds=all \
     --track-origins=yes \
     --log-file=./valgrind-out.txt \
-    --verbose ./feraw "example/$FILENAME.br"
+    --verbose ./$FILENAME.exe
 }
 
 "$@"

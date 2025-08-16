@@ -1,79 +1,64 @@
 #include "bruter.h"
 
-function(feraw_condition_equals)
+function(feraw_equals)
 {
     BruterInt a = bruter_pop_int(stack);
     BruterInt b = bruter_pop_int(stack);
     bruter_push_int(stack, a == b ? 1 : 0, NULL, BRUTER_TYPE_ANY);
 }
 
-function(feraw_condition_not_equals)
+function(feraw_not_equals)
 {
     BruterInt a = bruter_pop_int(stack);
     BruterInt b = bruter_pop_int(stack);
     bruter_push_int(stack, a != b ? 1 : 0, NULL, BRUTER_TYPE_ANY);
 }
 
-function(feraw_condition_greater_than)
+function(feraw_greater_than)
 {
     BruterInt a = bruter_pop_int(stack);
     BruterInt b = bruter_pop_int(stack);
     bruter_push_int(stack, a > b ? 1 : 0, NULL, BRUTER_TYPE_ANY);
 }
 
-function(feraw_condition_greater_equal)
+function(feraw_greater_equal)
 {
     BruterInt a = bruter_pop_int(stack);
     BruterInt b = bruter_pop_int(stack);
     bruter_push_int(stack, a >= b ? 1 : 0, NULL, BRUTER_TYPE_ANY);
 }
 
-function(feraw_condition_less_than)
+function(feraw_less_than)
 {
     BruterInt a = bruter_pop_int(stack);
     BruterInt b = bruter_pop_int(stack);
     bruter_push_int(stack, a < b ? 1 : 0, NULL, BRUTER_TYPE_ANY);
 }
 
-function(feraw_condition_less_equal)
+function(feraw_less_equal)
 {
     BruterInt a = bruter_pop_int(stack);
     BruterInt b = bruter_pop_int(stack);
     bruter_push_int(stack, a <= b ? 1 : 0, NULL, BRUTER_TYPE_ANY);
 }
 
-function(feraw_condition_and)
+function(feraw_and)
 {
     BruterInt a = bruter_pop_int(stack);
     BruterInt b = bruter_pop_int(stack);
     bruter_push_int(stack, a && b ? 1 : 0, NULL, BRUTER_TYPE_ANY);
 }
 
-function(feraw_condition_or)
+function(feraw_or)
 {
     BruterInt a = bruter_pop_int(stack);
     BruterInt b = bruter_pop_int(stack);
     bruter_push_int(stack, a || b ? 1 : 0, NULL, BRUTER_TYPE_ANY);
 }
 
-function(feraw_condition_includes)
+function(feraw_includes)
 {
     BruterInt a = bruter_pop_int(stack);
     BruterInt b = bruter_pop_int(stack);
     bruter_push_int(stack, a || b ? 1 : 0, NULL, BRUTER_TYPE_ANY);
-}
-
-init(condition)
-{
-    bruter_push_pointer(context, feraw_condition_equals, "equals", BRUTER_TYPE_FUNCTION);
-    bruter_push_pointer(context, feraw_condition_not_equals, "not_equals", BRUTER_TYPE_FUNCTION);
-    bruter_push_pointer(context, feraw_condition_greater_than, "greater", BRUTER_TYPE_FUNCTION);
-    bruter_push_pointer(context, feraw_condition_greater_equal, "greater_equal", BRUTER_TYPE_FUNCTION);
-    bruter_push_pointer(context, feraw_condition_less_than, "less", BRUTER_TYPE_FUNCTION);
-    bruter_push_pointer(context, feraw_condition_less_equal, "less_equal", BRUTER_TYPE_FUNCTION);
-    bruter_push_pointer(context, feraw_condition_and, "and", BRUTER_TYPE_FUNCTION);
-    bruter_push_pointer(context, feraw_condition_or, "or", BRUTER_TYPE_FUNCTION);
-    
-    // 
-    bruter_push_pointer(context, feraw_condition_includes, "includes", BRUTER_TYPE_FUNCTION);
 }

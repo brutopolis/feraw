@@ -1,0 +1,8 @@
+// just the types definition
+Null = 0;
+Any = 1;
+Float = 2;
+Buffer = 3;
+List = 4;
+Function = 5;
+null = retype(0, Null);

@@ -66,31 +66,23 @@ bool file_exists(char* filename)
     return true;
 }
 
-function(_read_file)
+function(feraw_read_file)
 {
     char *filename = bruter_pop_pointer(stack);
     char *content = file_read(filename);
     bruter_push_pointer(stack, content, NULL, BRUTER_TYPE_BUFFER);
 }
 
-function(_write_file)
+function(feraw_write_file)
 {
     char *filename = bruter_pop_pointer(stack);
     char *content = bruter_pop_pointer(stack);
     file_write(filename, content);
 }
 
-function(_file_exists)
+function(feraw_file_exists)
 {
     char *filename = bruter_pop_pointer(stack);
     bool exists = file_exists(filename);
     bruter_push_int(stack, exists ? 1 : 0, NULL, BRUTER_TYPE_ANY); // Push 1 if exists, 0 if not
-}
-
-init(os)
-{
-    // register functions
-    bruter_push_pointer(context, _read_file, "file.read", BRUTER_TYPE_FUNCTION);
-    bruter_push_pointer(context, _write_file, "file.write", BRUTER_TYPE_FUNCTION);
-    bruter_push_pointer(context, _file_exists, "file.exists", BRUTER_TYPE_FUNCTION);
 }

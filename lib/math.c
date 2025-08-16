@@ -438,7 +438,7 @@ function(feraw_bit_not)
     bruter_push_int(stack, ~a.value.i, NULL, BRUTER_TYPE_ANY);
 }
 
-function(feraw_bit_shift_left)
+function(feraw_lshift)
 {
     BruterMeta a = bruter_pop_meta(stack);
     BruterMeta b = bruter_pop_meta(stack);
@@ -450,7 +450,7 @@ function(feraw_bit_shift_left)
     bruter_push_int(stack, a.value.i << b.value.i, NULL, BRUTER_TYPE_ANY);
 }
 
-function(feraw_bit_shift_right)
+function(feraw_rshift)
 {
     BruterMeta a = bruter_pop_meta(stack);
     BruterMeta b = bruter_pop_meta(stack);
@@ -511,8 +511,8 @@ init(math)
     bruter_push_pointer(context, feraw_bit_or, "bitwise_or", BRUTER_TYPE_FUNCTION);
     bruter_push_pointer(context, feraw_bit_xor, "bitwise_xor", BRUTER_TYPE_FUNCTION);
     bruter_push_pointer(context, feraw_bit_not, "bitwise_not", BRUTER_TYPE_FUNCTION);
-    bruter_push_pointer(context, feraw_bit_shift_left, "lshift", BRUTER_TYPE_FUNCTION);
-    bruter_push_pointer(context, feraw_bit_shift_right, "rshift", BRUTER_TYPE_FUNCTION);
+    bruter_push_pointer(context, feraw_lshift, "lshift", BRUTER_TYPE_FUNCTION);
+    bruter_push_pointer(context, feraw_rshift, "rshift", BRUTER_TYPE_FUNCTION);
 
     // time
     bruter_push_pointer(context, feraw_time, "time", BRUTER_TYPE_FUNCTION);

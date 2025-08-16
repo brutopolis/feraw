@@ -1,3 +1,9 @@
+cc {
+include("../lib/std.c");
+include("../lib/math.c");
+};
+
+
 a = 50;
 b = 500.123;
 c = 1000.123456789;

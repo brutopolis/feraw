@@ -100,18 +100,3 @@ static void _terminate_tcc_at_exit_handler()
         dycc_state_list = NULL;
     }
 }
-
-init(dycc)
-{
-    dycc_state_list = bruter_new(0, false, false);
-    if (dycc_state_list == NULL)
-    {
-        fprintf(stderr, "ERROR: Could not create dycc state list\n");
-        exit(EXIT_FAILURE);
-    }
-
-    bruter_push_pointer(context, feraw_dycc_clear_states, "cclear", BRUTER_TYPE_FUNCTION);
-    bruter_push_pointer(context, feraw_dycc_compile, "cc", BRUTER_TYPE_FUNCTION);
-
-    atexit(_terminate_tcc_at_exit_handler);
-}

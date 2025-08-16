@@ -1,6 +1,12 @@
+cc {
+include("../lib/std.c");
+include("../lib/os.c");
+include("../lib/condition.c");
+}
+
 start:
 
-    content = file.read("./example/os.feraw");
+    content = read_file("./example/os.feraw");
 
     if (not_equals(content, null))
     {

@@ -1528,3 +1528,184 @@ function feraw_compile(input)
     }
     return result_string;
 }
+
+// only if under node.js
+if (process)
+{
+    const fs = require('fs');
+    const path = require('path');
+
+    function expandIncludes(filePath, baseDir = null) {
+        if (!baseDir) baseDir = path.dirname(filePath);
+        
+        const content = [];
+        try {
+            const data = fs.readFileSync(filePath, 'utf8');
+            const lines = data.split(/\r?\n/);
+            
+            for (const line of lines) {
+                const match = line.match(/^\s*include\(\"([^\"]+)\"\);\s*$/);
+                if (match) {
+                    const incFile = match[1];
+                    const incPath = path.join(baseDir, incFile);
+                    const incDir = path.dirname(incPath);
+                    
+                    try {
+                        if (fs.existsSync(incPath) && fs.statSync(incPath).isFile()) {
+                            content.push(`/* start include: ${incFile} */`);
+                            content.push(...expandIncludes(incPath, incDir));
+                            content.push(`/* end include: ${incFile} */`);
+                            content.push('');
+                        } else {
+                            content.push(`/* missing include: ${incFile} */`);
+                        }
+                    } catch (err) {
+                        content.push(`/* error including ${incFile}: ${err.message} */`);
+                    }
+                } else {
+                    content.push(line);
+                }
+            }
+        } catch (err) {
+            content.push(`/* error processing ${filePath}: ${err.message} */`);
+        }
+        
+        return content;
+    }
+
+    function processContent(content) {
+        const ccBlocks = [];
+        const functions = [];
+        const otherLines = [];
+        let insideCC = false;
+        let depth = 0;
+        let ccBuffer = [];
+
+        for (const line of content) {
+            // Detect function declarations
+            const funcMatch = line.match(/function\s*\(\s*([a-zA-Z0-9_]+)\s*\)/);
+            if (funcMatch) {
+                const funcName = funcMatch[1];
+                const cleanName = funcName.startsWith('feraw_') 
+                    ? funcName.slice(6) 
+                    : funcName;
+                functions.push([funcName, cleanName]);
+            }
+
+            if (!insideCC) {
+                if (/^\s*cc\s*\{/.test(line)) {
+                    insideCC = true;
+                    depth = 1;
+                    const cleaned = line.replace(/^\s*cc\s*\{/, '');
+                    if (cleaned.trim()) ccBuffer.push(cleaned);
+                } else if (/^\s*cc\s*$/.test(line)) {
+                    insideCC = true;
+                    depth = 1;
+                } else {
+                    otherLines.push(line);
+                }
+            } else {
+                for (const char of line) {
+                    if (char === '{') depth++;
+                    if (char === '}') depth--;
+                    
+                    if (depth === 0) {
+                        insideCC = false;
+                        break;
+                    }
+                }
+                
+                if (!insideCC) {
+                    const endIndex = line.indexOf('}') + 1;
+                    if (endIndex > 0) {
+                        const before = line.substring(0, endIndex - 1);
+                        if (before.trim()) ccBuffer.push(before);
+                        
+                        const after = line.substring(endIndex);
+                        if (after.trim()) otherLines.push(after);
+                    } else if (line.trim()) {
+                        ccBuffer.push(line);
+                    }
+                    
+                    ccBlocks.push(...ccBuffer);
+                    ccBuffer = [];
+                } else if (line.trim()) {
+                    ccBuffer.push(line);
+                }
+            }
+        }
+        
+        return { ccBlocks, functions, otherLines };
+    }
+
+    function generateOutput(outputPath, { ccBlocks, functions, otherLines }) {
+        let output = `#include "bruter.h"\n`;
+        output += `#include <stdlib.h>\n\n`;
+        
+        if (ccBlocks.length > 0) {
+            output += `/* BEGIN cc blocks */\n`;
+            output += ccBlocks.join('\n') + '\n';
+            output += `/* END cc blocks */\n\n`;
+        }
+        
+        output += `int main(int argc, char *argv[])\n{\n`;
+        output += `    BruterList *context = bruter_new(8, true, true);\n\n`;
+        
+        if (functions.length > 0) {
+            output += `    /* BEGIN function registrations */\n`;
+            for (const [funcName, cleanName] of functions) {
+                output += `    bruter_push_pointer(context, ${funcName}, "${cleanName}", BRUTER_TYPE_FUNCTION);\n`;
+            }
+            output += `    /* END function registrations */\n\n`;
+        }
+        
+        // lets join the other lines into a single string
+        // apply feraw_compile() to it, then split it into lines again
+        // then prepare it for embedding
+        let joinedCode = otherLines.join('\n');
+        joinedCode = feraw_compile(joinedCode);
+        otherLines = joinedCode.split(/\r?\n/).filter(line => line.trim());
+
+        output += `    const char *embedded_code =\n`;
+        for (const line of otherLines) {
+            if (!line.trim()) continue;
+            const escaped = line
+                .replace(/\\/g, '\\\\')
+                .replace(/"/g, '\\"');
+            output += `    "${escaped}\\n"\n`;
+        }
+        output += `    ;\n\n`;
+        
+        output += `    BruterList *result = bruter_parse(context, embedded_code);\n`;
+        output += `    bruter_free(result);\n`;
+        output += `    bruter_free(context);\n`;
+        output += `    return EXIT_SUCCESS;\n}\n`;
+        
+        fs.writeFileSync(outputPath, output);
+    }
+
+    // Main execution
+    if (process.argv.length < 4) {
+        console.error(`Usage: ${path.basename(process.argv[1])} <input.feraw> <output.c>`);
+        process.exit(1);
+    }
+
+    const inputFile = path.resolve(process.argv[2]);
+    const outputFile = path.resolve(process.argv[3]);
+
+    try {
+        // Step 1: Expand includes
+        const expandedContent = expandIncludes(inputFile);
+        
+        // Step 2: Process content
+        const processed = processContent(expandedContent);
+        
+        // Step 3: Generate output
+        generateOutput(outputFile, processed);
+        
+        console.log(`Successfully generated: ${outputFile}`);
+    } catch (err) {
+        console.error(`Error: ${err.message}`);
+        process.exit(1);
+    }
+}
