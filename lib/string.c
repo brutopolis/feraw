@@ -120,7 +120,7 @@ function(feraw_strchr)
 function(feraw_strstr)
 {
     char* str1 = bruter_pop_pointer(stack);
-    char* str2 = (char)bruter_pop_int(stack);
+    char* str2 = (char*)bruter_pop_int(stack);
 
     char* result = strstr(str1, str2);
     bruter_push_pointer(stack, result, NULL, BRUTER_TYPE_BUFFER);
@@ -135,6 +135,6 @@ init(string)
     bruter_push_pointer(context, feraw_strcmp, "strcmp", BRUTER_TYPE_FUNCTION);
     bruter_push_pointer(context, feraw_strlen, "strlen", BRUTER_TYPE_FUNCTION);
     bruter_push_pointer(context, feraw_strchr, "strchr", BRUTER_TYPE_FUNCTION);
-    bruter_push_pointer(context, feraw_strlen, "strlen", BRUTER_TYPE_FUNCTION);
+    bruter_push_pointer(context, feraw_strstr, "strstr", BRUTER_TYPE_FUNCTION);
 
 }
