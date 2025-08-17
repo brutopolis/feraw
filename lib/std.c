@@ -403,3 +403,11 @@ function(feraw_ls)
         }
     }
 }
+
+function(feraw_eval)
+{
+    BruterList* code = bruter_pop_pointer(stack);
+    BruterList* new_stack = bruter_new(8, true, true);
+    bruter_interpret(code, new_stack);
+    bruter_push_pointer(stack, new_stack, NULL, BRUTER_TYPE_LIST);
+}
