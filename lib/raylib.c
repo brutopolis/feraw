@@ -1,14 +1,6 @@
 #include "bruter.h"
 #include "raylib.h"
 
-// constructors
-function(feraw_Vector2)
-{
-    BruterList* list = bruter_new(2, true, true);
-    
-}
-
-
 // raylib functions
 
 function(raylib_init_window)

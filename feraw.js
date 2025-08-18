@@ -1414,95 +1414,105 @@ function feraw_expand_inline_br(input)
     return out;
 }
 
-function feraw_assignment_reorder(code) {
-    let out = "";
+function feraw_expand_dots(str) {
+    let out = '';
     let i = 0;
 
-    function skipString(quote) {
-        out += code[i++];
-        while (i < code.length) {
-            out += code[i];
-            if (code[i] === "\\" && i + 1 < code.length) {
-                out += code[i + 1];
-                i += 2;
-                continue;
+    while (i < str.length) {
+        // captura identificador inicial
+        let nameMatch = /^([a-zA-Z_$][a-zA-Z0-9_$]*)/.exec(str.slice(i));
+        if (nameMatch) {
+            let base = nameMatch[1];
+            i += base.length;
+
+            let props = [];
+            while (i < str.length && str[i] === '.') {
+                i++; // pula o "."
+                let propMatch = /^([a-zA-Z_$][a-zA-Z0-9_$]*)/.exec(str.slice(i));
+                if (!propMatch) break;
+                props.push(propMatch[1]);
+                i += propMatch[1].length;
             }
-            if (code[i] === quote) {
-                i++;
-                break;
-            }
-            i++;
-        }
-    }
 
-    while (i < code.length) {
-        let c = code[i];
+            if (props.length > 0) {
+                // olhar adiante até o próximo ';'
+                let lookaheadEnd = str.indexOf(';', i);
+                if (lookaheadEnd === -1) lookaheadEnd = str.length;
+                let rightSide = str.slice(i, lookaheadEnd);
 
-        // strings
-        if (c === '"' || c === "'" || c === "`") {
-            skipString(c);
-            continue;
-        }
+                let trimmedRight = rightSide.trimStart();
+                if (trimmedRight.startsWith('=')) {
+                    // atribuição
+                    let valueExpr = trimmedRight.slice(1).trim(); // remove '='
+                    valueExpr = feraw_expand_dots(valueExpr); // processa recursivamente
 
-        // possível assignment
-        if (/[a-zA-Z_]/.test(c)) {
-            let start = i;
-            while (i < code.length && /[a-zA-Z0-9_.\[\]]/.test(code[i])) i++;
-            let lhs = code.slice(start, i).trim();
-
-            // skip espaços
-            while (/\s/.test(code[i])) i++;
-
-            if (code[i] === "=") {
-                i++;
-                while (/\s/.test(code[i])) i++;
-
-                // caso especial: macro{
-                if (code.startsWith("macro{", i)) {
-                    out += lhs + " = ";
-                    let depth = 0;
-                    while (i < code.length) {
-                        out += code[i];
-                        if (code[i] === "{") depth++;
-                        else if (code[i] === "}") depth--;
-                        i++;
-                        if (depth === 0 && code[i] === ";") {
-                            out += code[i];
-                            i++;
-                            break;
+                    if (props.length === 1) {
+                        // foo.bar = X
+                        out += `set(${base}, "${props[0]}", ${valueExpr})`;
+                    } else {
+                        // foo.bar.baz = X
+                        let objExpr = base;
+                        for (let j = 0; j < props.length - 1; j++) {
+                            objExpr = `get(${objExpr}, "${props[j]}")`;
                         }
+                        let lastKey = props[props.length - 1];
+                        out += `set(${objExpr}, "${lastKey}", ${valueExpr})`;
                     }
+                    i = lookaheadEnd; // pular até ;
+                    continue;
+                } else {
+                    // só acesso → get encadeado
+                    let expr = base;
+                    for (let p of props) {
+                        expr = `get(${expr}, "${p}")`;
+                    }
+                    out += expr;
                     continue;
                 }
-
-                // caso normal: LHS = RHS;
-                let rhsStart = i;
-                while (i < code.length && code[i] !== ";") i++;
-                let rhs = code.slice(rhsStart, i).trim();
-                if (code[i] === ";") i++;
-
-                out += rhs + "; " + lhs + " =;";
+            } else {
+                out += base;
                 continue;
             }
-
-            // não era assignment → só copia
-            out += code.slice(start, i);
-            continue;
         }
-
-        // default
-        out += c;
-        i++;
+        out += str[i++];
     }
 
     return out;
 }
 
+function feraw_expand_macro_calls(code) {
+    let macros = new Set();
+
+    // 1ª fase: coleta nomes de macros
+    const macroDecl = /\b([a-zA-Z_$][a-zA-Z0-9_$]*)\s*=\s*macro\s*{[\s\S]*?};/g;
+    let m;
+    while ((m = macroDecl.exec(code)) !== null) {
+        macros.add(m[1]);
+    }
+
+    if (macros.size === 0) return code; // nada a fazer
+
+    // 2ª fase: reescreve assignments com chamada de macro
+    // Captura lhs, macroName e todo conteúdo dos parênteses
+    const macroNames = [...macros].join("|");
+    const assignCall = new RegExp(
+        `\\b([a-zA-Z_$][a-zA-Z0-9_$]*)\\s*=\\s*(${macroNames})\\s*(\\([^;]*?\\));`,
+        "g"
+    );
+
+    code = code.replace(assignCall, (match, lhs, macroName, args) => {
+        return `${macroName}${args}; ${lhs} =;`;
+    });
+
+    return code;
+}
+
 function feraw_expand_all(input)
 {
-    input = feraw_assignment_reorder(input);
+    input = feraw_expand_macro_calls(input);
     input = feraw_isolate_labels(input);
     input = feraw_expand_brackets(input);
+    input = feraw_expand_dots(input);
     input = feraw_expand_macros(input);
     input = feraw_expand_ifs(input);
     input = feraw_expand_whiles(input);

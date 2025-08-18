@@ -1,5 +1,7 @@
 
 cc {
+    include("../lib/std.c");
+    include("../lib/mem.c");
     include("raylib.c");
 };
 
@@ -38,6 +40,68 @@ BLACK      = 0b00000000000000000000000011111111; // 0, 0, 0, 255
 BLANK      = 0b00000000000000000000000000000000; // 0, 0, 0, 0
 MAGENTA    = 0b11111111000000001111111111111111; // 255, 0, 255, 255
 RAYWHITE   = 0b11110101111101011111010111111111; // 245, 245, 245, 255
+
+Vector2 = macro{
+    list(0);
+    dup();
+    set(remove(stack, -3), "x", $0);
+    dup();
+    set(remove(stack, -3), "y", $1);
+};
+
+Vector3 = macro{
+    list(0);
+    dup();
+    set(remove(stack, -3), "x", $0);
+    dup();
+    set(remove(stack, -3), "y", $1);
+    dup();
+    set(remove(stack, -3), "z", $2);
+};
+
+Vector4 = macro{
+    temp_vector = new();
+    temp_vector.x = $0;
+    temp_vector.y = $1;
+    temp_vector.z = $2;
+    temp_vector.w = $3;
+};
+
+// same as Vector4 but we cannot create aliases for macros 
+Quaternion = macro{
+    
+};
+
+Matrix = macro{
+    temp_matrix = new();
+    temp_matrix.m0 = $0; // m0
+    temp_matrix.m4 = $1; // m4
+    temp_matrix.m8 = $2; // m8
+    temp_matrix.m12 = $3; // m12
+    temp_matrix.m1 = $4; // m1
+    temp_matrix.m5 = $5; // m5
+    temp_matrix.m9 = $6; // m9
+    temp_matrix.m13 = $7; // m13
+    temp_matrix.m2 = $8; // m2
+    temp_matrix.m6 = $9; // m6
+    temp_matrix.m10 = $10; // m10
+    temp_matrix.m14 = $11; // m14
+    temp_matrix.m3 = $12; // m3
+    temp_matrix.m7 = $13; // m7
+    temp_matrix.m11 = $14; // m11
+    temp_matrix.m15 = $15; // m15
+
+    // the remove will push the matrix to the stack
+    remove(context, "temp_matrix");
+};
+
+Color = macro{
+    temp_color = 0;
+    memset(temp_color, 0, $0); // r
+    memset(temp_color, 1, $1); // g
+    memset(temp_color, 2, $2); // b
+    memset(temp_color, 3, $3); // a
+}
 
 
 // System/Window config flags
@@ -408,17 +472,3 @@ CAMERA_ORTHOGRAPHIC     = 1;   // Orthographic projection
 NPATCH_NINE_PATCH             = 0;  // 3x3 tiles
 NPATCH_THREE_PATCH_VERTICAL   = 1;  // 1x3 tiles
 NPATCH_THREE_PATCH_HORIZONTAL = 2;  // 3x1 tiles
-
-
-// sadasda
-
-Vector2UnderTheHood = macro{
-    enable_table_stack();
-    rename($1, "x");
-    rename($2, "y");
-};
-
-Vector2 = macro{
-    eval("Vector2UnderTheHood($1, $2)");
-};
-

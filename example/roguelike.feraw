@@ -56,8 +56,7 @@ start:
     map["y"] = 64;
     creatures = new();
 
-    new_creature(creatures, 4, 4, 100, "player");
-    player =;
+    player = new_creature(creatures, 4, 4, 100, "player");
 
     println(player["name"]);
 
