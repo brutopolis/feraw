@@ -1,0 +1,14 @@
+cc {
+    include("bsr.c");
+}
+
+bsr_flag_resizable = 0b00000001;
+bsr_flag_fullscreen = 0b00000010;
+bsr_flag_fullscreen_desktop = 0b00000100;
+bsr_flag_borderless = 0b00001000;
+bsr_flag_always_on_top = 0b00010000;
+
+// not all the olivec implemented,
+// we still need to implement triangles and such
+
+init_bsr(@);

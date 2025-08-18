@@ -1,0 +1,42 @@
+cc{
+    include("../lib/std.c");
+    include("../lib/math.c");
+};
+
+include("../lib/bsr.feraw");
+
+ls(@);
+
+win = bsr_new_window("BSR Example", 320, 240, 0); 
+
+while (bsr_wait_sync(win))
+{
+    bsr_fill(win, 0xFF005555);
+    bsr_draw_circle(win, 160, 120, 50, 0x7700FF00);
+    bsr_draw_line(win, 0, 0, 320, 240, 0xFF0000FF);
+    bsr_draw_line(win, 320, 0, 0, 240, 0xFF0000FF);
+    bsr_draw_rect(win, 10, 10, 30, 22, 0x7700FFFF);
+    bsr_update_window(win);
+
+    if (bsr_is_key_pressed(win, 'W')) 
+    {
+        println("You pressed W!");
+        bsr_fill(win, 0xFF000055);
+    };
+
+    if (bsr_is_key_pressed(win, 'S')) 
+    {
+        println("You pressed S!");
+        bsr_fill(win, 0xFF000055);
+    };
+
+    if (bsr_is_key_pressed(win, 'Q')) 
+    {
+        println("You pressed Q!") @msg;
+        ?(1, end);
+    };
+}
+
+end:
+
+bsr_close_window(win);
