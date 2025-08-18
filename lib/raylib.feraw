@@ -42,13 +42,13 @@ MAGENTA    = 0b11111111000000001111111111111111; // 255, 0, 255, 255
 RAYWHITE   = 0b11110101111101011111010111111111; // 245, 245, 245, 255
 
 Vector2 = macro{
-    list(0);
-    dup();
-    set(remove(stack, -3), "x", $0);
-    dup();
-    set(remove(stack, -3), "y", $1);
+    tempvec2 = list(0);
+    tempvec2.x = $0;
+    tempvec2.y = $1;
+    remove(context, find(context, "tempvec2"));
 };
 
+// fast way of doing the same thing, but much more verbose and much less readable
 Vector3 = macro{
     list(0);
     dup();
@@ -60,20 +60,21 @@ Vector3 = macro{
 };
 
 Vector4 = macro{
-    temp_vector = new();
+    temp_vector = list(0);
     temp_vector.x = $0;
     temp_vector.y = $1;
     temp_vector.z = $2;
     temp_vector.w = $3;
+    remove(context, find(context, "temp_vector"));
 };
 
 // same as Vector4 but we cannot create aliases for macros 
 Quaternion = macro{
-    
+    Vector4($0, $1, $2, $3);
 };
 
 Matrix = macro{
-    temp_matrix = new();
+    temp_matrix = list(0);
     temp_matrix.m0 = $0; // m0
     temp_matrix.m4 = $1; // m4
     temp_matrix.m8 = $2; // m8
@@ -92,17 +93,19 @@ Matrix = macro{
     temp_matrix.m15 = $15; // m15
 
     // the remove will push the matrix to the stack
-    remove(context, "temp_matrix");
+    remove(context, find(context, "temp_matrix"));
 };
 
+// in feraw always prefer using color directly as hex
+// but here it is, its part of the API
 Color = macro{
     temp_color = 0;
     memset(temp_color, 0, $0); // r
     memset(temp_color, 1, $1); // g
     memset(temp_color, 2, $2); // b
     memset(temp_color, 3, $3); // a
+    remove(context, find(context, "temp_color"));
 }
-
 
 // System/Window config flags
 // NOTE: Every bit registers one state (use it with bit masks)
