@@ -1,0 +1,16 @@
+cc {
+include("../lib/std.c");
+};
+
+
+
+start:
+a = Vector2(1, 2);
+println("Vector2 Example");
+println(a["x"]);
+println(a["y"]);
+a["x"] = 3;
+println(a["x"]);
+a["y"] = 4;
+println(a["y"]);
+println(a);

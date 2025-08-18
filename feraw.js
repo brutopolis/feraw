@@ -982,19 +982,24 @@ function feraw_expand_macros(input)
                             }
                             const args = splitArgsRobust(argsStr);
 
-                            // --- Perform Substitution on the Macro Body ---
+                            
                             let expanded = macroBody;
-                            // 1. Replace $@ (all arguments joined as-is) - Use the version from Pasted_Text_1754372135154.txt
+                            // 1. Replace $@ (all arguments joined as-is)
                             expanded = expanded.replace(/\$all/g, args.join(', '));
-                            // replace all $count by the argument count - Use the version from Pasted_Text_1754372135154.txt
+                            
+                            // 2. replace all $count by the argument count
                             expanded = expanded.replace(/\$count/g, args.length.toString());
-                            // 2. Replace numbered arguments $N from back to front
+
+                            // 3. replace all $macro_name by the macro name
+                            //expanded = expanded.replace(/\$count/g, args.length.toString());
+                            
+                            // 4. Replace numbered arguments $N from back to front
                             for (let idx = args.length - 1; idx >= 0; idx--) 
                             {
                                 const regExp = new RegExp(`\\$${idx}\\b`, 'g');
                                 expanded = expanded.replace(regExp, args[idx]);
                             }
-                            // Use $@ replacement from Pasted_Text_1754204706745.txt
+                            
                             expanded = expanded.replace(/\$@/g, args.join(', '));
 
                             outputAfterExpansion += expanded;
@@ -1409,8 +1414,93 @@ function feraw_expand_inline_br(input)
     return out;
 }
 
+function feraw_assignment_reorder(code) {
+    let out = "";
+    let i = 0;
+
+    function skipString(quote) {
+        out += code[i++];
+        while (i < code.length) {
+            out += code[i];
+            if (code[i] === "\\" && i + 1 < code.length) {
+                out += code[i + 1];
+                i += 2;
+                continue;
+            }
+            if (code[i] === quote) {
+                i++;
+                break;
+            }
+            i++;
+        }
+    }
+
+    while (i < code.length) {
+        let c = code[i];
+
+        // strings
+        if (c === '"' || c === "'" || c === "`") {
+            skipString(c);
+            continue;
+        }
+
+        // possível assignment
+        if (/[a-zA-Z_]/.test(c)) {
+            let start = i;
+            while (i < code.length && /[a-zA-Z0-9_.\[\]]/.test(code[i])) i++;
+            let lhs = code.slice(start, i).trim();
+
+            // skip espaços
+            while (/\s/.test(code[i])) i++;
+
+            if (code[i] === "=") {
+                i++;
+                while (/\s/.test(code[i])) i++;
+
+                // caso especial: macro{
+                if (code.startsWith("macro{", i)) {
+                    out += lhs + " = ";
+                    let depth = 0;
+                    while (i < code.length) {
+                        out += code[i];
+                        if (code[i] === "{") depth++;
+                        else if (code[i] === "}") depth--;
+                        i++;
+                        if (depth === 0 && code[i] === ";") {
+                            out += code[i];
+                            i++;
+                            break;
+                        }
+                    }
+                    continue;
+                }
+
+                // caso normal: LHS = RHS;
+                let rhsStart = i;
+                while (i < code.length && code[i] !== ";") i++;
+                let rhs = code.slice(rhsStart, i).trim();
+                if (code[i] === ";") i++;
+
+                out += rhs + "; " + lhs + " =;";
+                continue;
+            }
+
+            // não era assignment → só copia
+            out += code.slice(start, i);
+            continue;
+        }
+
+        // default
+        out += c;
+        i++;
+    }
+
+    return out;
+}
+
 function feraw_expand_all(input)
 {
+    input = feraw_assignment_reorder(input);
     input = feraw_isolate_labels(input);
     input = feraw_expand_brackets(input);
     input = feraw_expand_macros(input);

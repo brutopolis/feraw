@@ -49,6 +49,18 @@ function(feraw_println)
     printf("\n");
 }
 
+function(feraw_type)
+{
+    BruterMeta value = bruter_pop_meta(stack);
+    bruter_push_int(stack, value.type, NULL, BRUTER_TYPE_ANY);
+}
+
+function(feraw_key)
+{
+    BruterMeta value = bruter_pop_meta(stack);
+    bruter_push_pointer(stack, value.key, NULL, BRUTER_TYPE_BUFFER);
+}
+
 function(feraw_retype)
 {
     BruterInt new_type = bruter_pop_int(stack);
@@ -105,10 +117,9 @@ function(feraw_insert)
     BruterInt index = bruter_pop_int(stack);
     BruterMeta value = bruter_pop_meta(stack);
 
-    if (index < 0 || index > list->size)
+    if (index < 0) // -1 = the last element and so on
     {
-        fprintf(stderr, "ERROR: cant insert index %" PRIdPTR " out of range in list of size %" PRIdPTR "\n", index, list->size);
-        exit(EXIT_FAILURE);
+        index += list->size; // Adjust negative index to positive
     }
 
     bruter_insert_meta(list, index, value);
@@ -119,10 +130,9 @@ function(feraw_remove)
     BruterList* list = bruter_pop_pointer(stack);
     BruterInt index = bruter_pop_int(stack);
 
-    if (index < 0 || index >= list->size)
+    if (index < 0) // -1 = the last element and so on
     {
-        fprintf(stderr, "ERROR: cant remove, index %" PRIdPTR " out of range in list of size %" PRIdPTR "\n", index, list->size);
-        exit(EXIT_FAILURE);
+        index += list->size; // Adjust negative index to positive
     }
 
     BruterMeta removed_value = bruter_remove_meta(list, index);
@@ -139,6 +149,16 @@ function(feraw_get)
     if (list_meta.type == BRUTER_TYPE_BUFFER)
     {
         char* buffer = (char*)list_meta.value.p;
+        if (index_meta.type == BRUTER_TYPE_FLOAT)
+        {
+            index = (BruterInt)index_meta.value.f; // Convert float to integer if necessary
+        }
+        
+        if (index < 0) // -1 = the last element and so on
+        {
+            index += strlen(buffer); // Adjust negative index to positive
+        }
+
         bruter_push_int(stack, buffer[index], NULL, BRUTER_TYPE_ANY);
         return;
     }
@@ -152,35 +172,16 @@ function(feraw_get)
         else if (index_meta.type == BRUTER_TYPE_BUFFER)
         {
             index = bruter_find_key(list_meta.value.p, (char*)index_meta.value.p);
+            if (index < 0)
+            {
+                fprintf(stderr, "ERROR: cant get, key '%s' not found in list\n", (char*)index_meta.value.p);
+                exit(EXIT_FAILURE);
+            }
         }
 
-        bruter_push_meta(stack, bruter_get_meta(list, index));
-    }
-}
-
-
-function(feraw_rget)
-{
-    BruterMeta index_meta = bruter_pop_meta(stack);
-    BruterMeta list_meta = bruter_pop_meta(stack);
-    BruterInt index = index_meta.value.i;
-    
-    if (list_meta.type == BRUTER_TYPE_BUFFER)
-    {
-        char* buffer = (char*)list_meta.value.p;
-        bruter_push_int(stack, buffer[index], NULL, BRUTER_TYPE_ANY);
-        return;
-    }
-    else
-    {
-        BruterList* list = (BruterList*)list_meta.value.p;
-        if (index_meta.type == BRUTER_TYPE_FLOAT)
+        if (index < 0) // -1 = the last element and so on
         {
-            index = (BruterInt)index_meta.value.f; // Convert float to integer if necessary
-        }
-        else if (index_meta.type == BRUTER_TYPE_BUFFER)
-        {
-            index = bruter_find_key(list_meta.value.p, (char*)index_meta.value.p);
+            index += list->size; // Adjust negative index to positive
         }
 
         bruter_push_meta(stack, bruter_get_meta(list, index));
@@ -199,9 +200,10 @@ function(feraw_set)
         {
             index.value.i = (BruterInt)index.value.f; // Convert float to integer if necessary
         }
-        else if (index.type == BRUTER_TYPE_BUFFER)
+        
+        if (index.value.i < 0) // -1 = the last element and so on
         {
-            index.value.i = bruter_find_key(list_meta.value.p, (char*)index.value.p);
+            index.value.i += strlen((char*)buffer); // Adjust negative index to positive
         }
 
         buffer[index.value.i] = value.value.i; // Directly set the value in the buffer
@@ -220,6 +222,10 @@ function(feraw_set)
                     {
                         bruter_push_meta(list, (BruterMeta){.value = {.i = 0}, .key = NULL, .type = BRUTER_TYPE_ANY});
                     }
+                }
+                else if (index.value.i < 0) // -1 = the last element and so on
+                {
+                    index.value.i += list->size; // Adjust negative index to positive
                 }
                 list->data[index.value.i] = value.value; // Directly set the value
                 break;
@@ -402,4 +408,12 @@ function(feraw_ls)
                 break;
         }
     }
+}
+
+function(feraw_eval)
+{
+    BruterList* context = bruter_pop_pointer(stack);
+    char* code = bruter_pop_pointer(stack);
+    BruterList* result = bruter_parse(context, code);
+    bruter_push_pointer(stack, result, NULL, BRUTER_TYPE_LIST);
 }
