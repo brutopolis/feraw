@@ -107,6 +107,315 @@ Color = macro{
     remove(context, find(context, "temp_color"));
 }
 
+Rectangle = macro{
+    temp_rectangle = list(0);
+    temp_rectangle.x = $0;
+    temp_rectangle.y = $1;
+    temp_rectangle.width = $2;
+    temp_rectangle.height = $3;
+    remove(context, find(context, "temp_rectangle"));
+};
+
+Image = macro{
+    temp_image = list(0);
+    temp_image.data = $0;
+    temp_image.width = $1;
+    temp_image.height = $2;
+    temp_image.mipmaps = $3;
+    temp_image.format = $4;
+    remove(context, find(context, "temp_image"));
+};
+
+Texture = macro{
+    temp_texture = list(0);
+    temp_texture.id = $0;
+    temp_texture.width = $1;
+    temp_texture.height = $2;
+    temp_texture.mipmaps = $3;
+    temp_texture.format = $4;
+    remove(context, find(context, "temp_texture"));
+};
+
+Texture2D = macro{
+    Texture($0, $1, $2, $3, $4);
+};
+
+TextureCubeMap = macro{
+    Texture($0, $1, $2, $3, $4);
+};
+
+RenderTexture = macro{
+    temp_render_texture = list(0);
+    temp_render_texture.id = $0;
+    temp_render_texture.texture = $1;
+    temp_render_texture.depth = $2;
+    remove(context, find(context, "temp_render_texture"));
+};
+
+RenderTexture2D = macro{
+    RenderTexture($0, $1, $2);
+};
+
+NPatchInfo = macro{
+    temp_npatch_info = list(0);
+    temp_npatch_info.source = $0;
+    temp_npatch_info.left = $1;
+    temp_npatch_info.top = $2;
+    temp_npatch_info.right = $3;
+    temp_npatch_info.bottom = $4;
+    temp_npatch_info.layout = $5; // NPatchLayout
+    remove(context, find(context, "temp_npatch_info"));
+};
+
+GlyphInfo = macro{
+    temp_glyph_info = list(0);
+    temp_glyph_info.value = $0; // codepoint
+    temp_glyph_info.offsetX = $1;
+    temp_glyph_info.offsetY = $2;
+    temp_glyph_info.advanceX = $3;
+    temp_glyph_info.image = $4; // Image
+    remove(context, find(context, "temp_glyph_info"));
+};
+
+Font = macro{
+    temp_font = list(0);
+    temp_font.baseSize = $0;
+    temp_font.glyphCount = $1;
+    temp_font.glyphPadding = $2;
+    temp_font.texture = $3;
+    temp_font.recs = $4;
+    temp_font.glyphs = $5;
+    remove(context, find(context, "temp_font"));
+};
+
+Camera3D = macro{
+    temp_camera3d = list(0);
+    temp_camera3d.position = $0;
+    temp_camera3d.target = $1;
+    temp_camera3d.up = $2;
+    temp_camera3d.fovy = $3;
+    temp_camera3d.projection = $4;
+    remove(context, find(context, "temp_camera3d"));
+};
+
+Camera = macro{
+    Camera3D($0, $1, $2, $3, $4);
+};
+
+Camera2D = macro{
+    temp_camera2d = list(0);
+    temp_camera2d.offset = $0;
+    temp_camera2d.target = $1;
+    temp_camera2d.rotation = $2;
+    temp_camera2d.zoom = $3;
+    remove(context, find(context, "temp_camera2d"));
+};
+
+Mesh = macro{
+    temp_mesh = list(0);
+    temp_mesh.vertexCount = $0; // Number of vertices stored in arrays
+    temp_mesh.triangleCount = $1; // Number of triangles stored (indexed or not)
+    temp_mesh.vertices = $2; // Vertex position (XYZ - 3 components per vertex) (shader-location = 0)
+    temp_mesh.texcoords = $3; // Vertex texture coordinates (UV - 2 components per vertex) (shader-location = 1)
+    temp_mesh.texcoords2 = $4; // Vertex texture second coordinates (UV - 2 components per vertex) (shader-location = 5)
+    temp_mesh.normals = $5; // Vertex normals (XYZ - 3 components per vertex) (shader-location = 2)
+    temp_mesh.tangents = $6; // Vertex tangents (XYZW - 4 components per vertex) (shader-location = 4)
+    temp_mesh.colors = $7; // Vertex colors (RGBA - 4 components per vertex) (shader-location = 3)
+    temp_mesh.indices = $8; // Vertex indices (in case vertex data comes indexed)
+    temp_mesh.animVertices = $9; // Animated vertex positions (after bones transformations)
+    temp_mesh.animNormals = $10; // Animated normals (after bones transformations)
+    temp_mesh.boneIds = $11; // Vertex bone ids, max 255 bone ids, up to 4 bones influence by vertex (skinning) (shader-location = 6)
+    temp_mesh.boneWeights = $12; // Vertex bone weight, up to 4 bones influence by vertex (skinning) (shader-location = 7)
+    temp_mesh.boneMatrices = $13; // Bones animated transformation matrices
+    temp_mesh.boneCount = $14; // Number of bones
+    temp_mesh.vaoId = $15; // OpenGL Vertex Array Object id
+    temp_mesh.vboId = $16; // OpenGL Vertex Buffer Objects id (default vertex data)
+    remove(context, find(context, "temp_mesh"));
+};
+
+Shader = macro{
+    temp_shader = list(0);
+    temp_shader.id = $0; // Shader program id
+    temp_shader.locs = $1; // Shader locations array (max 32 locations)
+    remove(context, find(context, "temp_shader"));
+};
+
+MaterialMap = macro{
+    temp_material_map = list(0);
+    temp_material_map.texture = $0; // Material map texture
+    temp_material_map.color = $1; // Material map color
+    temp_material_map.value = $2; // Material map value (depends on map type)
+    remove(context, find(context, "temp_material_map"));
+};
+
+Material = macro{
+    temp_material = list(0);
+    temp_material.shader = $0; // Material shader
+    temp_material.maps = $1; // Material maps array (max 8 maps)
+    temp_material.params = $2; // Material generic parameters (if required)
+    remove(context, find(context, "temp_material"));
+};
+
+Transform = macro{
+    temp_transform = list(0);
+    temp_transform.translation = $0; // Translation vector
+    temp_transform.rotation = $1; // Quaternion rotation
+    temp_transform.scale = $2; // Scale vector
+    remove(context, find(context, "temp_transform"));
+};
+
+BoneInfo = macro{
+    temp_bone_info = list(0);
+    temp_bone_info.name = $0; // Bone name
+    temp_bone_info.parent = $1; // Parent bone index
+    temp_bone_info.transform = $2; // Local transform matrix
+    remove(context, find(context, "temp_bone_info"));
+};
+
+Model = macro{
+    temp_model = list(0);
+    temp_model.transform = $0; // Local transform matrix
+    temp_model.meshCount = $1; // Number of meshes
+    temp_model.materialCount = $2; // Number of materials
+    temp_model.meshes = $3; // Meshes array
+    temp_model.materials = $4; // Materials array
+    temp_model.meshMaterial = $5; // Mesh material number
+    temp_model.boneCount = $6; // Number of bones
+    temp_model.bones = $7; // Bones information (skeleton)
+    temp_model.bindPose = $8; // Bones base transformation (pose)
+    remove(context, find(context, "temp_model"));
+};
+
+ModelAnimation = macro{
+    temp_model_animation = list(0);
+    temp_model_animation.boneCount = $0; // Number of bones
+    temp_model_animation.frameCount = $1; // Number of animation frames
+    temp_model_animation.bones = $2; // Bones information (skeleton)
+    temp_model_animation.framePoses = $3; // Poses array by frame
+    temp_model_animation.name = $4; // Animation name
+    remove(context, find(context, "temp_model_animation"));
+};
+
+Ray = macro{
+    temp_ray = list(0);
+    temp_ray.position = $0; // Ray position (origin)
+    temp_ray.direction = $1; // Ray direction
+    remove(context, find(context, "temp_ray"));
+};
+
+RayCollision = macro{
+    temp_ray_collision = list(0);
+    temp_ray_collision.hit = $0; // Did the ray hit something?
+    temp_ray_collision.distance = $1; // Distance to the hit point
+    temp_ray_collision.point = $2; // Point of the hit
+    temp_ray_collision.normal = $3; // Normal of the hit
+    temp_ray_collision.object = $4; // Object hit (mesh, model, etc.)
+    remove(context, find(context, "temp_ray_collision"));
+};
+
+BoundingBox = macro{
+    temp_bounding_box = list(0);
+    temp_bounding_box.min = $0; // Minimum vertex of the box
+    temp_bounding_box.max = $1; // Maximum vertex of the box
+    remove(context, find(context, "temp_bounding_box"));
+};
+
+Wave = macro{
+    temp_wave = list(0);
+    temp_wave.frameCount = $0; // Number of audio frames (samples)
+    temp_wave.sampleRate = $1; // Frequency (samples per second)
+    temp_wave.sampleSize = $2; // Number of channels (1-mono, 2-stereo)
+    temp_wave.channels = $3; // Number of channels (1-mono, 2-stereo)
+    temp_wave.data = $4; // Buffer data pointer
+    remove(context, find(context, "temp_wave"));
+};
+
+/* opaque structs that are part of raudio module
+    rAudioBuffer = ?
+    rAudioStream = ? 
+*/
+
+// i honestly dont know if this works without the above declarations
+// might be tested later
+AudioStream = macro{
+    temp_audio_stream = list(0);
+    temp_audio_stream.buffer = $0; // Audio buffer pointer
+    temp_audio_stream.processor = $1; // Audio processor pointer
+    temp_audio_stream.sampleRate = $2; // Sample rate (frequency)
+    temp_audio_stream.sampleSize = $3; // Sample size (in bytes)
+    temp_audio_stream.channels = $4; // Number of channels (1-mono, 2-stereo)
+    remove(context, find(context, "temp_audio_stream"));
+};
+
+Sound = macro{
+    temp_sound = list(0);
+    temp_sound.stream = $0; // Audio stream
+    temp_sound.frameCount = $1; // Number of audio frames (samples)
+    remove(context, find(context, "temp_sound"));
+};
+
+Music = macro{
+    temp_music = list(0);
+    temp_music.stream = $0; // Audio stream
+    temp_music.frameCount = $1; // Number of audio frames (samples)
+    temp_music.looping = $2; // Music looping enabled
+    temp_music.ctxType = $3; // Music context type (depends on backend)
+    temp_music.ctxData = $4; // Music context data (depends on backend)
+    remove(context, find(context, "temp_music"));
+};
+
+VrDeviceInfo = macro{
+    temp_vr_device_info = list(0);
+    temp_vr_device_info.hResolution = $0; // Horizontal resolution in pixels
+    temp_vr_device_info.vResolution = $1; // Vertical resolution in pixels
+    temp_vr_device_info.hScreenSize = $2; // Horizontal size in meters
+    temp_vr_device_info.vScreenSize = $3; // Vertical size in meters
+    temp_vr_device_info.vScreenCenter = $4; // Screen center in meters
+    temp_vr_device_info.eyeToScreenDistance = $5; // Distance between eye and display in meters
+    temp_vr_device_info.lensSeparationDistance = $6; // Lens separation distance in meters
+    temp_vr_device_info.interpupillaryDistance = $7; // IPD (distance between pupils) in meters
+    temp_vr_device_info.lensesDistortionValues = $8; // Lenses distortion values (k1, k2, k3, k4)
+    temp_vr_device_info.chromaticAberrationValues = $9; // Chromatic aberration values (chromaShiftX, chromaShiftY)
+    remove(context, find(context, "temp_vr_device_info"));
+};
+
+VrStereoConfig = macro {
+    temp_vr_stereo_config = list(0);
+    temp_vr_stereo_config.projection = $0; // Projection matrix for stereo rendering
+    temp_vr_stereo_config.viewOffset = $1; // View offset for stereo rendering
+    temp_vr_stereo_config.leftLensCenter = $2; // Left lens center in pixels
+    temp_vr_stereo_config.rightLensCenter = $3; // Right lens center in pixels
+    temp_vr_stereo_config.leftScreenCenter = $4; // Left screen center in pixels
+    temp_vr_stereo_config.rightScreenCenter = $5; // Right screen center in pixels
+    temp_vr_stereo_config.scale = $6; // Scale factor for stereo rendering
+    temp_vr_stereo_config.scaleIn = $7; // Scale factor for stereo rendering (inner)
+    remove(context, find(context, "temp_vr_stereo_config"));
+};
+
+FilePathList = macro{
+    temp_file_path_list = list(0);
+    temp_file_path_list.capacity = $0; // Maximum number of file paths
+    temp_file_path_list.count = $1; // Current number of file paths
+    temp_file_path_list.paths = $2; // Array of file paths
+    remove(context, find(context, "temp_file_path_list"));
+};
+
+AutomationEvent = macro{
+    temp_automation_event = list(0);
+    temp_automation_event.type = $0; // Event type (e.g., note on, note off, control change)
+    temp_automation_event.channel = $1; // MIDI channel (0-15)
+    temp_automation_event.params = $2; // list of parameters(although it is a list, it will only consider the first 4 elements)
+    remove(context, find(context, "temp_automation_event"));
+};
+
+AutomationEventList = macro{
+    temp_automation_event_list = list(0);
+    temp_automation_event_list.capacity = $0; // Maximum number of events
+    temp_automation_event_list.count = $1; // Current number of events
+    temp_automation_event_list.events = $2; // Array of events
+    remove(context, find(context, "temp_automation_event_list"));
+};
+
 // System/Window config flags
 // NOTE: Every bit registers one state (use it with bit masks)
 // By default all flags are set to 0
@@ -122,8 +431,8 @@ FLAG_WINDOW_TOPMOST           = 0x00001000;   // Set to window always on top
 FLAG_WINDOW_ALWAYS_RUN        = 0x00000100;   // Set to allow windows running while minimized
 FLAG_WINDOW_TRANSPARENT       = 0x00000010;   // Set to allow transparent framebuffer
 FLAG_WINDOW_HIGHDPI           = 0x00002000;   // Set to support HighDPI
-FLAG_WINDOW_MOUSE_PASSTHROUGH = 0x00004000; // Set to support mouse passthrough, only supported when FLAG_WINDOW_UNDECORATED
-FLAG_BORDERLESS_WINDOWED_MODE = 0x00008000; // Set to run program in borderless windowed mode
+FLAG_WINDOW_MOUSE_PASSTHROUGH = 0x00004000;   // Set to support mouse passthrough, only supported when FLAG_WINDOW_UNDECORATED
+FLAG_BORDERLESS_WINDOWED_MODE = 0x00008000;   // Set to run program in borderless windowed mode
 FLAG_MSAA_4X_HINT             = 0x00000020;   // Set to try enabling MSAA 4X
 FLAG_INTERLACED_HINT          = 0x00010000;   // Set to try enabling interlaced video format (for V3D)
 
