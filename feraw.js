@@ -1029,80 +1029,98 @@ function feraw_expand_macros(input)
 function feraw_expand_ifs(input) {
     let i = 0;
     let out = '';
+    let inDoubleQuotes = false;
+    let inBackticks = false;
+    let escape = false;
 
     while (i < input.length) {
+        let c = input[i];
+
+        // Handle string literals
+        if (escape) {
+            out += c;
+            escape = false;
+            i++;
+            continue;
+        }
+        if (c === '\\') {
+            out += c;
+            escape = true;
+            i++;
+            continue;
+        }
+        if (!inDoubleQuotes && !inBackticks && (c === '"' || c === '`')) {
+            if (c === '"') inDoubleQuotes = true;
+            else inBackticks = true;
+            out += c;
+            i++;
+            continue;
+        }
+        if (inDoubleQuotes && c === '"') {
+            inDoubleQuotes = false;
+            out += c;
+            i++;
+            continue;
+        }
+        if (inBackticks && c === '`') {
+            inBackticks = false;
+            out += c;
+            i++;
+            continue;
+        }
+        if (inDoubleQuotes || inBackticks) {
+            out += c;
+            i++;
+            continue;
+        }
+
+        // Not inside a string, process if
         if (/^if\s*\(/.test(input.slice(i))) {
             let id = feraw_if_counter++;
 
-            // Avançar além do "if"
             i += 2;
-
-            // Pular espaços
             while (/\s/.test(input[i])) i++;
-
             if (input[i] !== '(') {
                 out += 'if';
                 continue;
             }
 
-            // Capturar condição
             let condStart = i;
             let condEnd = findMatching(input, i, '(', ')');
             let cond = input.slice(condStart + 1, condEnd);
             i = condEnd + 1;
-
-            // Pular espaços
             while (/\s/.test(input[i])) i++;
-
             if (input[i] !== '{') {
                 out += `if(${cond})`;
                 continue;
             }
 
-            // Capturar bloco do if
             let ifBlockEnd = findMatching(input, i, '{', '}');
             let ifBlock = input.slice(i + 1, ifBlockEnd);
             i = ifBlockEnd + 1;
-
-            // Pular espaços
             while (/\s/.test(input[i])) i++;
 
-            // Inicializar lista de condições e blocos
             let chain = [{ cond, block: ifBlock }];
             let elseBlock = '';
 
-            // Verificar se há else/if
             while (/^else\b/.test(input.slice(i))) {
-                i += 4; // pula "else"
-
-                // Pular espaços
+                i += 4;
                 while (/\s/.test(input[i])) i++;
-
                 if (/^if\s*\(/.test(input.slice(i))) {
-                    // É um else if
-                    i += 2; // pula "if"
-
-                    // Pular espaços
+                    i += 2;
                     while (/\s/.test(input[i])) i++;
-
                     if (input[i] !== '(') break;
-
                     let condStart = i;
                     let condEnd = findMatching(input, i, '(', ')');
                     let cond = input.slice(condStart + 1, condEnd);
                     i = condEnd + 1;
-
                     while (/\s/.test(input[i])) i++;
-
                     if (input[i] !== '{') break;
-
                     let blockEnd = findMatching(input, i, '{', '}');
                     let block = input.slice(i + 1, blockEnd);
                     i = blockEnd + 1;
-
                     chain.push({ cond, block });
                 } else if (input[i] === '{') {
-                    // É um else final
                     let elseEnd = findMatching(input, i, '{', '}');
                     elseBlock = input.slice(i + 1, elseEnd);
                     i = elseEnd + 1;
@@ -1110,12 +1128,9 @@ function feraw_expand_ifs(input) {
                 } else {
                     break;
                 }
-
-                // Pular espaços
                 while (/\s/.test(input[i])) i++;
             }
 
-            // Expandir blocos
             for (let j = 0; j < chain.length; j++) {
                 chain[j].block = feraw_expand_all(chain[j].block);
             }
@@ -1123,176 +1138,204 @@ function feraw_expand_ifs(input) {
                 elseBlock = feraw_expand_all(elseBlock);
             }
 
-            // Gerar labels
             let trueLabels = chain.map((_, idx) => `if${id}_true_${idx}`);
             let afterLabel = `if${id}_after`;
 
-            // Primeira condição
             out += `?(${chain[0].cond}, ${trueLabels[0]});\n`;
-
-            // Se houver else, vai para ele
             if (elseBlock) {
                 out += elseBlock + '\n';
                 out += `?(1, ${afterLabel});\n`;
             } else {
-                // Se não houver else, vai direto para o final
                 out += `?(1, ${afterLabel});\n`;
             }
-
-            // Processar else if
             for (let j = 0; j < chain.length; j++) {
                 out += `${trueLabels[j]}:\n`;
                 out += chain[j].block + '\n';
-
                 if (j + 1 < chain.length) {
-                    // Próximo else if
                     out += `?(${chain[j + 1].cond}, ${trueLabels[j + 1]});\n`;
-                    out += `?(1, ${afterLabel});\n`; // fallback
+                    out += `?(1, ${afterLabel});\n`;
                 }
             }
-
             out += `${afterLabel}:\n`;
-
             continue;
         }
 
-        // Copia caractere normal
         out += input[i++];
     }
 
     return out;
 }
 
-function feraw_expand_whiles(input) 
-{
+function feraw_expand_whiles(input) {
     let i = 0;
     let out = '';
+    let inDoubleQuotes = false;
+    let inBackticks = false;
+    let escape = false;
 
-    while (i < input.length) 
-    {
-        if (/^while\s*\(/.test(input.slice(i))) 
-        {
+    while (i < input.length) {
+        let c = input[i];
+
+        // Handle string literals
+        if (escape) {
+            out += c;
+            escape = false;
+            i++;
+            continue;
+        }
+        if (c === '\\') {
+            out += c;
+            escape = true;
+            i++;
+            continue;
+        }
+        if (!inDoubleQuotes && !inBackticks && (c === '"' || c === '`')) {
+            if (c === '"') inDoubleQuotes = true;
+            else inBackticks = true;
+            out += c;
+            i++;
+            continue;
+        }
+        if (inDoubleQuotes && c === '"') {
+            inDoubleQuotes = false;
+            out += c;
+            i++;
+            continue;
+        }
+        if (inBackticks && c === '`') {
+            inBackticks = false;
+            out += c;
+            i++;
+            continue;
+        }
+        if (inDoubleQuotes || inBackticks) {
+            out += c;
+            i++;
+            continue;
+        }
+
+        // Not inside a string, process while
+        if (/^while\s*\(/.test(input.slice(i))) {
             let id = feraw_while_counter++;
-            
             i += 5;
-
-            while (/\s/.test(input[i])) 
-            {
-                i++;
-            }
-
-            if (input[i] !== '(') 
-            {
+            while (/\s/.test(input[i])) i++;
+            if (input[i] !== '(') {
                 out += 'while';
                 continue;
             }
-
             let condStart = i;
             let condEnd = findMatching(input, i, '(', ')');
             let cond = input.slice(condStart + 1, condEnd);
             i = condEnd + 1;
-
-            while (/\s/.test(input[i])) 
-            {
-                i++;
-            }
-
-            if (input[i] !== '{') 
-            {
+            while (/\s/.test(input[i])) i++;
+            if (input[i] !== '{') {
                 out += `while(${cond})`;
                 continue;
             }
-
             let whileBlockEnd = findMatching(input, i, '{', '}');
             let whileBlock = input.slice(i + 1, whileBlockEnd);
             i = whileBlockEnd + 1;
-
-            while (/\s/.test(input[i])) 
-            {
-                i++;
-            }
-
+            while (/\s/.test(input[i])) i++;
             whileBlock = feraw_expand_all(whileBlock);
 
-            let whileTrueLabel  = `while${id}_true`;
+            let whileTrueLabel = `while${id}_true`;
             let whileAfterLabel = `while${id}_after`;
             let whileStartLabel = `while${id}_start`;
 
             out += `${whileStartLabel}:\n`;
-
             out += `?(${cond}, ${whileTrueLabel});\n`;
             out += `?(1, ${whileAfterLabel});\n`;
-
             out += `${whileTrueLabel}:\n`;
             out += whileBlock + '\n';
-            out += `?(1, ${whileStartLabel});\n`; // Loop back to start
+            out += `?(1, ${whileStartLabel});\n`;
             out += `${whileAfterLabel}:\n`;
-
             continue;
         }
 
-        // Copia caractere normal
         out += input[i++];
     }
 
     return out;
 }
 
-function feraw_expand_fors(input) 
-{
+function feraw_expand_fors(input) {
     let i = 0;
     let out = '';
-    while (i < input.length) 
-    {
-        if (/^for\s*\(/.test(input.slice(i))) 
-        {
+    let inDoubleQuotes = false;
+    let inBackticks = false;
+    let escape = false;
+
+    while (i < input.length) {
+        let c = input[i];
+
+        // Handle string literals
+        if (escape) {
+            out += c;
+            escape = false;
+            i++;
+            continue;
+        }
+        if (c === '\\') {
+            out += c;
+            escape = true;
+            i++;
+            continue;
+        }
+        if (!inDoubleQuotes && !inBackticks && (c === '"' || c === '`')) {
+            if (c === '"') inDoubleQuotes = true;
+            else inBackticks = true;
+            out += c;
+            i++;
+            continue;
+        }
+        if (inDoubleQuotes && c === '"') {
+            inDoubleQuotes = false;
+            out += c;
+            i++;
+            continue;
+        }
+        if (inBackticks && c === '`') {
+            inBackticks = false;
+            out += c;
+            i++;
+            continue;
+        }
+        if (inDoubleQuotes || inBackticks) {
+            out += c;
+            i++;
+            continue;
+        }
+
+        // Not inside a string, process for
+        if (/^for\s*\(/.test(input.slice(i))) {
             let id = feraw_for_counter++;
-            
             i += 3;
-
-            while (/\s/.test(input[i])) 
-            {
-                i++;
-            }
-
-            if (input[i] !== '(') 
-            {
+            while (/\s/.test(input[i])) i++;
+            if (input[i] !== '(') {
                 out += 'for';
                 continue;
             }
-
             let headerStart = i;
             let headerEnd = findMatching(input, i, '(', ')');
             let header = input.slice(headerStart + 1, headerEnd);
             i = headerEnd + 1;
-
-            while (/\s/.test(input[i])) 
-            {
-                i++;
-            }
-
-            if (input[i] !== '{') 
-            {
+            while (/\s/.test(input[i])) i++;
+            if (input[i] !== '{') {
                 out += `for(${header})`;
                 continue;
             }
-
             let forBlockEnd = findMatching(input, i, '{', '}');
             let forBlock = input.slice(i + 1, forBlockEnd);
             i = forBlockEnd + 1;
-
-            while (/\s/.test(input[i])) 
-            {
-                i++;
-            }
+            while (/\s/.test(input[i])) i++;
 
             let [init, cond, iter] = header.split(';').map(s => s.trim());
-            if (!cond) cond = '1'; // Default to infinite loop if no condition
+            if (!cond) cond = '1';
 
             forBlock = feraw_expand_all(forBlock);
 
             let forStartLabel = `for${id}_start`;
-            let forTrueLabel  = `for${id}_true`;
+            let forTrueLabel = `for${id}_true`;
             let forAfterLabel = `for${id}_after`;
 
             out += init ? `${init};\n` : '';
@@ -1302,23 +1345,77 @@ function feraw_expand_fors(input)
             out += `${forTrueLabel}:\n`;
             out += forBlock + '\n';
             out += iter ? `${iter};\n` : '';
-            out += `?(1, ${forStartLabel});\n`; // Loop back to start
+            out += `?(1, ${forStartLabel});\n`;
             out += `${forAfterLabel}:\n`;
-
             continue;
         }
 
-        // Copia caractere normal
         out += input[i++];
     }
     return out;
 }
 
-function feraw_expand_brackets(str) {
+function feraw_expand_brackets(str) 
+{
     let out = '';
     let i = 0;
+    let inDoubleQuotes = false;
+    let inBackticks = false;
+    let escape = false;
 
-    while (i < str.length) {
+    while (i < str.length) 
+    {
+        let c = str[i];
+
+        // Handle string literals
+        if (escape) 
+        {
+            out += c;
+            escape = false;
+            i++;
+            continue;
+        }
+
+        if (c === '\\') 
+        {
+            out += c;
+            escape = true;
+            i++;
+            continue;
+        }
+
+        if (!inDoubleQuotes && !inBackticks && (c === '"' || c === '`')) {
+            if (c === '"') inDoubleQuotes = true;
+            else inBackticks = true;
+            out += c;
+            i++;
+            continue;
+        }
+
+        if (inDoubleQuotes && c === '"') 
+        {
+            inDoubleQuotes = false;
+            out += c;
+            i++;
+            continue;
+        }
+
+        if (inBackticks && c === '`') 
+        {
+            inBackticks = false;
+            out += c;
+            i++;
+            continue;
+        }
+
+        if (inDoubleQuotes || inBackticks) 
+        {
+            out += c;
+            i++;
+            continue;
+        }
+
+        // Not inside a string, process brackets
         let nameMatch = /^([a-zA-Z_$][a-zA-Z0-9_$]*)/.exec(str.slice(i));
         if (nameMatch) {
             let base = nameMatch[1];
@@ -1414,11 +1511,55 @@ function feraw_expand_inline_br(input)
     return out;
 }
 
-function feraw_expand_dots(str) {
+function feraw_expand_dots(str) 
+{
     let out = '';
     let i = 0;
+    let inDoubleQuotes = false;
+    let inBackticks = false;
+    let escape = false;
 
     while (i < str.length) {
+        let c = str[i];
+
+        // Handle string literals
+        if (escape) {
+            out += c;
+            escape = false;
+            i++;
+            continue;
+        }
+        if (c === '\\') {
+            out += c;
+            escape = true;
+            i++;
+            continue;
+        }
+        if (!inDoubleQuotes && !inBackticks && (c === '"' || c === '`')) {
+            if (c === '"') inDoubleQuotes = true;
+            else inBackticks = true;
+            out += c;
+            i++;
+            continue;
+        }
+        if (inDoubleQuotes && c === '"') {
+            inDoubleQuotes = false;
+            out += c;
+            i++;
+            continue;
+        }
+        if (inBackticks && c === '`') {
+            inBackticks = false;
+            out += c;
+            i++;
+            continue;
+        }
+        if (inDoubleQuotes || inBackticks) {
+            out += c;
+            i++;
+            continue;
+        }
+
         // captura identificador inicial
         let nameMatch = /^([a-zA-Z_$][a-zA-Z0-9_$]*)/.exec(str.slice(i));
         if (nameMatch) {
@@ -1481,30 +1622,176 @@ function feraw_expand_dots(str) {
 }
 
 function feraw_expand_macro_calls(code) {
-    let macros = new Set();
+    // Helper: find matching close char ignoring "strings", `backticks`, and 'single quotes'
+    function findMatchingWithBT(s, start, openChar, closeChar) {
+        let depth = 1;
+        let inDouble = false;
+        let inBacktick = false;
+        let inSingle = false;
+        let escape = false;
+        for (let i = start + 1; i < s.length; i++) {
+            const ch = s[i];
+            if (escape) {
+                escape = false;
+                continue;
+            }
+            if (inDouble) {
+                if (ch === '\\') { escape = true; continue; }
+                if (ch === '"') { inDouble = false; continue; }
+                continue;
+            }
+            if (inBacktick) {
+                if (ch === '\\') { escape = true; continue; }
+                if (ch === '`') { inBacktick = false; continue; }
+                continue;
+            }
+            if (inSingle) {
+                if (ch === '\\') { escape = true; continue; }
+                if (ch === "'") { inSingle = false; continue; }
+                continue;
+            }
 
-    // 1ª fase: coleta nomes de macros
-    const macroDecl = /\b([a-zA-Z_$][a-zA-Z0-9_$]*)\s*=\s*macro\s*{[\s\S]*?};/g;
-    let m;
-    while ((m = macroDecl.exec(code)) !== null) {
-        macros.add(m[1]);
+            if (ch === '"') { inDouble = true; continue; }
+            if (ch === '`') { inBacktick = true; continue; }
+            if (ch === "'") { inSingle = true; continue; }
+
+            if (ch === openChar) depth++;
+            else if (ch === closeChar) {
+                depth--;
+                if (depth === 0) return i;
+            }
+        }
+        return -1;
     }
 
-    if (macros.size === 0) return code; // nada a fazer
+    // Pass 1: collect macro names, but never touch content inside "..." or `...`
+    const macros = new Set();
+    (function collectMacros() {
+        let i = 0;
+        let inDouble = false, inBacktick = false, inSingle = false, escape = false;
+        while (i < code.length) {
+            const ch = code[i];
+            if (escape) { escape = false; i++; continue; }
+            if (inDouble) {
+                if (ch === '\\') { escape = true; i++; continue; }
+                if (ch === '"') { inDouble = false; i++; continue; }
+                i++; continue;
+            }
+            if (inBacktick) {
+                if (ch === '\\') { escape = true; i++; continue; }
+                if (ch === '`') { inBacktick = false; i++; continue; }
+                i++; continue;
+            }
+            if (inSingle) {
+                if (ch === '\\') { escape = true; i++; continue; }
+                if (ch === "'") { inSingle = false; i++; continue; }
+                i++; continue;
+            }
 
-    // 2ª fase: reescreve assignments com chamada de macro
-    // Captura lhs, macroName e todo conteúdo dos parênteses
-    const macroNames = [...macros].join("|");
-    const assignCall = new RegExp(
-        `\\b([a-zA-Z_$][a-zA-Z0-9_$]*)\\s*=\\s*(${macroNames})\\s*(\\([^;]*?\\));`,
-        "g"
-    );
+            if (ch === '"') { inDouble = true; i++; continue; }
+            if (ch === '`') { inBacktick = true; i++; continue; }
+            if (ch === "'") { inSingle = true; i++; continue; }
 
-    code = code.replace(assignCall, (match, lhs, macroName, args) => {
-        return `${macroName}${args}; ${lhs} =;`;
-    });
+            // Try to match: <name> = macro { ... };
+            const nameMatch = /^([a-zA-Z_$][a-zA-Z0-9_$]*)/.exec(code.slice(i));
+            if (!nameMatch) { i++; continue; }
+            const name = nameMatch[1];
+            let p = i + name.length;
 
-    return code;
+            // skip whitespace
+            while (p < code.length && /\s/.test(code[p])) p++;
+            if (code[p] !== '=') { i++; continue; }
+            p++;
+            while (p < code.length && /\s/.test(code[p])) p++;
+            if (code.slice(p, p + 5) !== 'macro') { i++; continue; }
+            p += 5;
+            while (p < code.length && /\s/.test(code[p])) p++;
+            if (code[p] !== '{') { i++; continue; }
+
+            const bodyEnd = findMatchingWithBT(code, p, '{', '}');
+            if (bodyEnd === -1) { i++; continue; }
+
+            macros.add(name);
+
+            // jump over definition; consume optional spaces and semicolon
+            i = bodyEnd + 1;
+            while (i < code.length && /\s/.test(code[i])) i++;
+            if (code[i] === ';') i++;
+        }
+    })();
+
+    if (macros.size === 0) return code;
+
+    // Pass 2: rewrite "lhs = MacroName(...);" into "MacroName(...); lhs =;"
+    let out = '';
+    let i = 0;
+    let inDouble = false, inBacktick = false, inSingle = false, escape = false;
+
+    while (i < code.length) {
+        const ch = code[i];
+
+        // Handle string contexts to avoid touching their content
+        if (escape) { out += ch; escape = false; i++; continue; }
+        if (inDouble) {
+            out += ch;
+            if (ch === '\\') escape = true;
+            else if (ch === '"') inDouble = false;
+            i++; continue;
+        }
+        if (inBacktick) {
+            out += ch;
+            if (ch === '\\') escape = true;
+            else if (ch === '`') inBacktick = false;
+            i++; continue;
+        }
+        if (inSingle) {
+            out += ch;
+            if (ch === '\\') escape = true;
+            else if (ch === "'") inSingle = false;
+            i++; continue;
+        }
+
+        if (ch === '"') { out += ch; inDouble = true; i++; continue; }
+        if (ch === '`') { out += ch; inBacktick = true; i++; continue; }
+        if (ch === "'") { out += ch; inSingle = true; i++; continue; }
+
+        // Try to detect: lhs = MacroName(args);
+        const lhsMatch = /^([a-zA-Z_$][a-zA-Z0-9_$]*)/.exec(code.slice(i));
+        if (!lhsMatch) { out += ch; i++; continue; }
+
+        const lhs = lhsMatch[1];
+        let p = i + lhs.length;
+
+        // save fallback output if pattern fails
+        const fallback = () => { out += code[i]; i++; };
+
+        // skip whitespace
+        while (p < code.length && /\s/.test(code[p])) p++;
+        if (p >= code.length || code[p] !== '=') { fallback(); continue; }
+        p++;
+        while (p < code.length && /\s/.test(code[p])) p++;
+        const macroNameMatch = /^([a-zA-Z_$][a-zA-Z0-9_$]*)/.exec(code.slice(p));
+        if (!macroNameMatch) { fallback(); continue; }
+        const macroName = macroNameMatch[1];
+        if (!macros.has(macroName)) { fallback(); continue; }
+        p += macroName.length;
+        while (p < code.length && /\s/.test(code[p])) p++;
+        if (p >= code.length || code[p] !== '(') { fallback(); continue; }
+
+        const close = findMatchingWithBT(code, p, '(', ')');
+        if (close === -1) { fallback(); continue; }
+
+        let k = close + 1;
+        while (k < code.length && /\s/.test(code[k])) k++;
+        if (k >= code.length || code[k] !== ';') { fallback(); continue; }
+
+        // Success: perform rewrite
+        const args = code.slice(p, close + 1); // includes parentheses
+        out += `${macroName}${args}; ${lhs} =;`;
+        i = k + 1; // move past semicolon
+    }
+
+    return out;
 }
 
 function feraw_expand_all(input)

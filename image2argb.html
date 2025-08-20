@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Image ↔ ARGB (.h / .argb)</title>
+<style>
+  body { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; margin: 16px; }
+  .row { margin: 8px 0; }
+  #canvas { border: 1px solid #888; image-rendering: pixelated; }
+  button { margin-right: 8px; }
+  pre { max-height: 280px; overflow: auto; background:#111; color:#ddd; padding:8px; }
+</style>
+</head>
+<body>
+  <div class="row">
+    <label>Imagem → (.h / .argb): </label>
+    <input type="file" id="fileInputImg" accept="image/*">
+    <button id="downloadH" disabled>Download .h</button>
+    <button id="downloadARGB" disabled>Download .argb</button>
+  </div>
+
+  <div class="row">
+    <label>Carregar .argb → canvas: </label>
+    <input type="file" id="fileInputArgb" accept=".argb,application/octet-stream">
+  </div>
+
+  <div class="row">
+    <canvas id="canvas" width="0" height="0"></canvas>
+  </div>
+
+  <pre id="output"></pre>
+
+<script>
+const fileInputImg = document.getElementById("fileInputImg");
+const fileInputArgb = document.getElementById("fileInputArgb");
+const btnH = document.getElementById("downloadH");
+const btnARGB = document.getElementById("downloadARGB");
+const output = document.getElementById("output");
+const canvas = document.getElementById("canvas");
+const ctx = canvas.getContext("2d", { willReadFrequently: true });
+
+let headerText = "";
+let rawBuffer = null;
+let baseName = "output";
+
+// Util: print curto
+function log(msg) { output.textContent = String(msg); }
+function hexBytes(u8, max=64) {
+  const n = Math.min(max, u8.length);
+  let out = [];
+  for (let i=0;i<n;i++) out.push(u8[i].toString(16).padStart(2,"0"));
+  return out.join(" ");
+}
+
+// ===== Imagem → .h / .argb =====
+fileInputImg.addEventListener("change", (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+
+  baseName = file.name.replace(/\.[^.]+$/, "") || "image";
+
+  const img = new Image();
+  img.onload = () => {
+    canvas.width = img.width;
+    canvas.height = img.height;
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    ctx.drawImage(img, 0, 0);
+
+    const { width:w, height:h } = canvas;
+    const imageData = ctx.getImageData(0, 0, w, h);
+    const data = imageData.data; // RGBA
+
+    // ---- Gera HEADER C (.h) ----
+    let lines = [];
+    const GUARD = `${baseName.toUpperCase()}_ARGB_H`.replace(/[^A-Z0-9_]/g, "_");
+    lines.push(`#ifndef ${GUARD}`);
+    lines.push(`#define ${GUARD}`);
+    lines.push("");
+    lines.push(`#define ${baseName.toUpperCase()}_WIDTH ${w}`);
+    lines.push(`#define ${baseName.toUpperCase()}_HEIGHT ${h}`);
+    lines.push("");
+    lines.push(`static const unsigned int ${baseName}_pixels[] = {`);
+
+    let row = "    ";
+    for (let i = 0, px = 0; i < data.length; i += 4, px++) {
+      const r = data[i];
+      const g = data[i + 1];
+      const b = data[i + 2];
+      const a = data[i + 3];
+      const argb = ((a << 24) | (r << 16) | (g << 8) | b) >>> 0;
+      row += "0x" + argb.toString(16).padStart(8, "0") + ",";
+      if ((px + 1) % 8 === 0) {
+        lines.push(row);
+        row = "    ";
+      }
+    }
+    if (row.trim() !== "") lines.push(row);
+    lines.push("};");
+    lines.push("");
+    lines.push("#endif");
+    headerText = lines.join("\n");
+
+    // ---- Gera RAW ARGB (.argb) ----
+    const buf = new Uint8Array(8 + w * h * 4);
+    const dv = new DataView(buf.buffer);
+    // header little-endian: width, height
+    dv.setUint32(0, w, true);
+    dv.setUint32(4, h, true);
+    let off = 8;
+    for (let i = 0; i < data.length; i += 4) {
+      const r = data[i], g = data[i+1], b = data[i+2], a = data[i+3];
+      // write ARGB bytes: A,R,G,B
+      buf[off++] = a;
+      buf[off++] = r;
+      buf[off++] = g;
+      buf[off++] = b;
+    }
+    rawBuffer = buf;
+
+    btnH.disabled = false;
+    btnARGB.disabled = false;
+
+    log(
+`[Imagem → ARGB]
+Nome base: ${baseName}
+W: ${w}  H: ${h}
+Header .h (preview):
+${headerText.split("\n").slice(0,12).join("\n")}
+...
+.argb primeiros bytes:
+${hexBytes(buf, 64)}`
+    );
+  };
+  img.src = URL.createObjectURL(file);
+});
+
+// Download .h
+btnH.addEventListener("click", () => {
+  if (!headerText) return;
+  const blob = new Blob([headerText], { type: "text/plain" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = baseName + ".h";
+  a.click();
+  URL.revokeObjectURL(url);
+});
+
+// Download .argb
+btnARGB.addEventListener("click", () => {
+  if (!rawBuffer) return;
+  const blob = new Blob([rawBuffer], { type: "application/octet-stream" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = baseName + ".argb";
+  a.click();
+  URL.revokeObjectURL(url);
+});
+
+// ===== .argb → canvas =====
+fileInputArgb.addEventListener("change", async (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+  try {
+    const ab = await file.arrayBuffer();
+    if (ab.byteLength < 8) throw new Error("Arquivo menor que 8 bytes.");
+    const dv = new DataView(ab);
+    const w = dv.getUint32(0, true);
+    const h = dv.getUint32(4, true);
+    const expected = 8 + w * h * 4;
+    if (w === 0 || h === 0) throw new Error(`Dimensões inválidas: ${w}x${h}.`);
+    if (ab.byteLength !== expected) {
+      throw new Error(`Tamanho inválido: ${ab.byteLength} bytes, esperado ${expected} para ${w}x${h}.`);
+    }
+
+    const argb = new Uint8Array(ab, 8); // A,R,G,B...
+    const rgba = new Uint8ClampedArray(w * h * 4);
+    // Convert ARGB → RGBA para o canvas
+    for (let i = 0, j = 0; i < argb.length; i += 4, j += 4) {
+      const A = argb[i];
+      const R = argb[i+1];
+      const G = argb[i+2];
+      const B = argb[i+3];
+      rgba[j]   = R;
+      rgba[j+1] = G;
+      rgba[j+2] = B;
+      rgba[j+3] = A;
+    }
+
+    const imageData = new ImageData(rgba, w, h);
+    canvas.width = w;
+    canvas.height = h;
+    ctx.putImageData(imageData, 0, 0);
+
+    log(
+`[ARGB → Canvas]
+Arquivo: ${file.name}
+W: ${w}  H: ${h}
+Primeiros bytes do payload ARGB:
+${hexBytes(new Uint8Array(ab), 64)}`
+    );
+  } catch (err) {
+    log("Erro ao ler .argb: " + err.message);
+  }
+});
+</script>
+</body>
+</html>

@@ -9,10 +9,6 @@ cc{
     include("../lib/mem.c");
 };
 
-new = macro{
-    list(0)
-};
-
 fill_buffer = macro{
     for (i = 0; less(i, mul(get($0, "x"), get($0, "y"))); i = add(i, 1)) 
     {
@@ -32,7 +28,7 @@ print_map = macro{
 };
 
 new_creature = macro{
-    c = new();
+    c = list(0);
     c["x"] = $1;
     c["y"] = $2;
     c["hp"] = $3;
@@ -51,10 +47,10 @@ new_creature = macro{
 
 
 start:
-    map = new();
-    map["x"] = 64;
-    map["y"] = 64;
-    creatures = new();
+    map = list(0);
+    map.x = 64;
+    map.y = 64;
+    creatures = list(0);
 
     player = new_creature(creatures, 4, 4, 100, "player");
 

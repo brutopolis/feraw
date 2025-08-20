@@ -39,16 +39,23 @@ debug()
     --verbose ./$FILENAME.exe
 }
 
+run-bsr()
+{
+    node feraw.js "example/$FILENAME.feraw" "example/$FILENAME.debug.c"
+    gcc -o $FILENAME.exe "example/$FILENAME.debug.c" -O3 -g -lm -lminifb -lX11 -lGL
+    ./$FILENAME.exe
+}
+
 debug-bsr()
 {
     node feraw.js "example/$FILENAME.feraw" "example/$FILENAME.debug.c"
     gcc -o $FILENAME.exe "example/$FILENAME.debug.c" -O3 -g -lm -lminifb -lX11 -lGL
-    # valgrind \
-    # --leak-check=full \
-    # --show-leak-kinds=all \
-    # --track-origins=yes \
-    # --log-file=./valgrind-out.txt \
-    # --verbose \
+    valgrind \
+    --leak-check=full \
+    --show-leak-kinds=definite \
+    --track-origins=yes \
+    --log-file=./valgrind-out.txt \
+    --verbose \
     ./$FILENAME.exe
 }
 

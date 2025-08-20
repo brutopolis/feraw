@@ -49,18 +49,6 @@ function(feraw_println)
     printf("\n");
 }
 
-function(feraw_type)
-{
-    BruterMeta value = bruter_pop_meta(stack);
-    bruter_push_int(stack, value.type, NULL, BRUTER_TYPE_ANY);
-}
-
-function(feraw_key)
-{
-    BruterMeta value = bruter_pop_meta(stack);
-    bruter_push_pointer(stack, value.key, NULL, BRUTER_TYPE_BUFFER);
-}
-
 function(feraw_retype)
 {
     BruterInt new_type = bruter_pop_int(stack);
@@ -337,6 +325,35 @@ function(feraw_reverse)
 {
     BruterList* list = bruter_pop_pointer(stack);
     bruter_reverse(list);
+}
+
+function(feraw_pointer_to)
+{
+    BruterList* list = bruter_pop_pointer(stack);
+    BruterMeta value = bruter_pop_meta(stack);
+    if (value.type == BRUTER_TYPE_BUFFER) // we assume its the key of the element we wanto to point to
+    {
+        BruterInt index = bruter_find_key(list, (char*)value.value.p);
+        if (index < 0)
+        {
+            fprintf(stderr, "ERROR: cannot point to, key '%s' not found in list\n", (char*)value.value.p);
+            exit(EXIT_FAILURE);
+        }
+        bruter_push_pointer(stack, &list->data[index], NULL, BRUTER_TYPE_BUFFER);
+    }
+    else // we assume its the index of the element we want to point to
+    {
+        if (value.value.i < 0) // -1 = the last element and so on
+        {
+            value.value.i += list->size; // Adjust negative index to positive
+        }
+        if (value.value.i < 0 || value.value.i >= list->size)
+        {
+            fprintf(stderr, "ERROR: cannot point to, index %" PRIdPTR " out of range in list of size %" PRIdPTR "\n", value.value.i, list->size);
+            exit(EXIT_FAILURE);
+        }
+        bruter_push_pointer(stack, &list->data[value.value.i], NULL, BRUTER_TYPE_BUFFER);
+    }
 }
 
 function(feraw_alloc)

@@ -1,33 +1,80 @@
 cc{
     include("../lib/std.c");
     include("../lib/math.c");
+    include("../lib/os.c");
+    include("./periclaoimg.h");
+
+    function(periclaoimg_get)
+    {
+        void *new_buffer = malloc(PERICLAOIMG_WIDTH * PERICLAOIMG_HEIGHT * 4);
+        memcpy(new_buffer, periclaoimg_pixels, PERICLAOIMG_WIDTH * PERICLAOIMG_HEIGHT * 4);
+        bruter_push_pointer(stack, new_buffer, "periclaoimg", BRUTER_TYPE_BUFFER);
+    }
 };
 
 include("../lib/bsr.feraw");
 
 ls(@);
 
-win = bsr_new_window("BSR Example", 320, 240, 0); 
+win = bsr_new_window("BSR Example", 640, 480, 0); 
+canvas = bsr_get_window_canvas(win);
+
+periclaoimg = argb_to_canvas(periclaoimg_get());
+
+img = list(0);
+img.x = 0;
+img.y = 0;
+img.w = 64;
+img.h = 64;
 
 while (bsr_wait_sync(win))
 {
-    bsr_fill(win, 0xFF005555);
-    bsr_draw_circle(win, 160, 120, 50, 0x7700FF00);
-    bsr_draw_line(win, 0, 0, 320, 240, 0xFF0000FF);
-    bsr_draw_line(win, 320, 0, 0, 240, 0xFF0000FF);
-    bsr_draw_rect(win, 10, 10, 30, 22, 0x7700FFFF);
+    bsr_fill(canvas, 0xFF005555);
+    // bsr_draw_circle(canvas, 160, 120, 50, 0x7700FF00);
+    // bsr_draw_line(canvas, 0, 0, 320, 240, 0xFF0000FF);
+    // bsr_draw_line(canvas, 320, 0, 0, 240, 0xFF0000FF);
+    // bsr_draw_rect(canvas, 10, 10, 30, 22, 0x7700FFFF);
+    bsr_draw_sprite_copy(canvas, img.x, img.y, img.w, img.h, periclaoimg);
     bsr_update_window(win);
 
-    if (bsr_is_key_pressed(win, 'W')) 
+    if (bsr_is_key_pressed(win, 265)) 
     {
-        println("You pressed W!");
-        bsr_fill(win, 0xFF000055);
+        img.y = sub(img.y, 7);
+    };
+
+    if (bsr_is_key_pressed(win, 263)) 
+    {
+        img.x = sub(img.x, 7);
+    };
+
+    if (bsr_is_key_pressed(win, 262)) 
+    {
+        img.x = add(img.x, 7);
+    };
+
+    if (bsr_is_key_pressed(win, 264)) 
+    {
+        img.y = add(img.y, 7);
     };
 
     if (bsr_is_key_pressed(win, 'S')) 
     {
-        println("You pressed S!");
-        bsr_fill(win, 0xFF000055);
+        img.h = add(img.h, 7);
+    };
+
+    if (bsr_is_key_pressed(win, 'W')) 
+    {
+        img.h = sub(img.h, 7);
+    };
+
+    if (bsr_is_key_pressed(win, 'D')) 
+    {
+        img.w = add(img.w, 7);
+    };
+
+    if (bsr_is_key_pressed(win, 'A')) 
+    {
+        img.w = sub(img.w, 7);
     };
 
     if (bsr_is_key_pressed(win, 'Q')) 

@@ -30,14 +30,12 @@ typedef struct
 {
     struct mfb_window *window; // window pointer
     char *title; // window title
-    char* buffer;
+    Olivec_Canvas canvas; // canvas for drawing
     uint8_t keys[350]; // key states
     uint8_t key_mods[6]; // shift, ctrl, alt, super, caps lock, num lock
     float mouse_scroll_delta_x; // mouse scroll x
     float mouse_scroll_delta_y; // mouse scroll y
     char character; // last character input
-    int width; // window width
-    int height; // window height
     uint8_t flags;
 
 } BSRWindow;
@@ -53,23 +51,23 @@ static void resize(struct mfb_window *window, int width, int height)
     BSRWindow *current_window = (BSRWindow *)mfb_get_user_data(window);
 
 
-    if(width > current_window->width)
+    if(width > current_window->canvas.width)
     {
-        x = (width - current_window->width) >> 1;
-        width = current_window->width;
+        x = (width - current_window->canvas.width) >> 1;
+        width = current_window->canvas.width;
     }
-    if(height > current_window->height)
+    if(height > current_window->canvas.height)
     {
-        y = (height - current_window->height) >> 1;
-        height = current_window->height;
+        y = (height - current_window->canvas.height) >> 1;
+        height = current_window->canvas.height;
     }
-    current_window->buffer = realloc(current_window->buffer, width * height * 4); // reallocate buffer for the new window size
-    if (current_window->buffer == NULL) {
+    current_window->canvas.pixels = realloc(current_window->canvas.pixels, width * height * 4); // reallocate buffer for the new window size
+    if (current_window->canvas.pixels == NULL) {
         printf("Failed to reallocate buffer for window\n");
         return;
     }
-    current_window->width = width;
-    current_window->height = height;
+    current_window->canvas.width = width;
+    current_window->canvas.height = height;
     mfb_set_viewport(window, x, y, width, height);
 }
 
@@ -132,7 +130,6 @@ static void mouse_scroll(struct mfb_window *window, mfb_key_mod mod, float delta
     current_window->key_mods[4] = (mod & KB_MOD_CAPS_LOCK) ? 1 : 0;
     current_window->key_mods[5] = (mod & KB_MOD_NUM_LOCK) ? 1 : 0;
 }
-
 // functions
 
 function(bsr_new_window) 
@@ -157,16 +154,10 @@ function(bsr_new_window)
     }
     bsr_window->window = window;
     bsr_window->title = title;
-    bsr_window->buffer = (char*)malloc(width * height * 4); // allocate buffer for the window
-    if (bsr_window->buffer == NULL) 
-    {
-        printf("Failed to allocate buffer for window\n");
-        free(bsr_window);
-        mfb_close(window);
-        return;
-    }
-    bsr_window->width = width;
-    bsr_window->height = height;
+    bsr_window->canvas = olivec_canvas(
+        (uint32_t*)malloc(width * height * sizeof(uint32_t)), // allocate memory for pixels
+        width, height, width // stride is the same as width in pixels
+    );
     bsr_window->flags = flags;
     memset(bsr_window->keys, 0, sizeof(bsr_window->keys));
     memset(bsr_window->key_mods, 0, sizeof(bsr_window->key_mods));
@@ -203,7 +194,7 @@ function(bsr_close_window)
         BSRWindow *bsr_window = (BSRWindow*)bsr_windows->data[i].p;
         if (bsr_window && bsr_window->window == window)
         {
-            free(bsr_window->buffer);
+            free(bsr_window->canvas.pixels);
             free(bsr_window);
             bsr_windows->data[i].p = NULL; // mark as removed
             bruter_remove(bsr_windows, i);
@@ -218,9 +209,9 @@ function(bsr_update_window)
 {
     BSRWindow *current_window = (BSRWindow*)(bruter_pop_pointer(stack));
     struct mfb_window *window = (struct mfb_window*)(current_window)->window;
-    uint8_t *buffer = (uint8_t*)(current_window)->buffer;
-    int width = current_window->width;
-    int height = current_window->height;
+    uint8_t *buffer = (uint8_t*)(current_window)->canvas.pixels;
+    int width = current_window->canvas.width;
+    int height = current_window->canvas.height;
     if (window == NULL || buffer == NULL)
     {
         printf("Window or buffer is NULL\n");
@@ -363,7 +354,7 @@ function(bsr_get_framebuffer)
         printf("Window is NULL\n");
         return;
     }
-    uint8_t *buffer = (uint8_t*)(current_window)->buffer;
+    uint8_t *buffer = (uint8_t*)(current_window)->canvas.pixels;
     if (buffer == NULL)
     {
         printf("Buffer is NULL\n");
@@ -377,37 +368,16 @@ function(bsr_get_framebuffer)
 // drawing functions
 function(bsr_fill)
 {
-    BSRWindow *current_window = (BSRWindow*)(bruter_pop_pointer(stack));
-    struct mfb_window *window = (struct mfb_window*)(current_window)->window;
-    if (window == NULL)
-    {
-        printf("Window is NULL\n");
-        return;
-    }
+    Olivec_Canvas* canvas = (Olivec_Canvas*)bruter_pop_pointer(stack);
     
     uint32_t color = bruter_pop_int(stack);
 
-    Olivec_Canvas canvas = (Olivec_Canvas){
-        .pixels = (uint32_t*)(current_window)->buffer,
-        .width = current_window->width,
-        .height = current_window->height,
-        .stride = current_window->width
-    };
-
-    olivec_fill(canvas, color);
-
-    
+    olivec_fill(*canvas, color);    
 }
 
 function(bsr_draw_rect)
 {
-    BSRWindow *current_window = (BSRWindow*)(bruter_pop_pointer(stack));
-    struct mfb_window *window = (struct mfb_window*)(current_window)->window;
-    if (window == NULL)
-    {
-        printf("Window is NULL\n");
-        return;
-    }
+    Olivec_Canvas* canvas = (Olivec_Canvas*)bruter_pop_pointer(stack);
     
     int x = bruter_pop_int(stack);
     int y = bruter_pop_int(stack);
@@ -415,25 +385,12 @@ function(bsr_draw_rect)
     int height = bruter_pop_int(stack);
     uint32_t color = bruter_pop_int(stack);
 
-    Olivec_Canvas canvas = (Olivec_Canvas){
-        .pixels = (uint32_t*)(current_window)->buffer,
-        .width = current_window->width,
-        .height = current_window->height,
-        .stride = current_window->width
-    };
-
-    olivec_rect(canvas, x, y, width, height, color);
+    olivec_rect(*canvas, x, y, width, height, color);
 }
 
 function(bsr_draw_frame)
 {
-    BSRWindow *current_window = (BSRWindow*)(bruter_pop_pointer(stack));
-    struct mfb_window *window = (struct mfb_window*)(current_window)->window;
-    if (window == NULL)
-    {
-        printf("Window is NULL\n");
-        return;
-    }
+    Olivec_Canvas* canvas = (Olivec_Canvas*)bruter_pop_pointer(stack);
     
     int x = bruter_pop_int(stack);
     int y = bruter_pop_int(stack);
@@ -442,50 +399,24 @@ function(bsr_draw_frame)
     int thickness = bruter_pop_int(stack);
     uint32_t color = bruter_pop_int(stack);
 
-    Olivec_Canvas canvas = (Olivec_Canvas){
-        .pixels = (uint32_t*)(current_window)->buffer,
-        .width = current_window->width,
-        .height = current_window->height,
-        .stride = current_window->width
-    };
-
-    olivec_frame(canvas, x, y, width, height, thickness, color);
+    olivec_frame(*canvas, x, y, width, height, thickness, color);
 }
 
 function(bsr_draw_circle)
 {
-    BSRWindow *current_window = (BSRWindow*)(bruter_pop_pointer(stack));
-    struct mfb_window *window = (struct mfb_window*)(current_window)->window;
-    if (window == NULL)
-    {
-        printf("Window is NULL\n");
-        return;
-    }
+    Olivec_Canvas* canvas = (Olivec_Canvas*)bruter_pop_pointer(stack);
     
     int x = bruter_pop_int(stack);
     int y = bruter_pop_int(stack);
     int radius = bruter_pop_int(stack);
     uint32_t color = bruter_pop_int(stack);
 
-    Olivec_Canvas canvas = (Olivec_Canvas){
-        .pixels = (uint32_t*)(current_window)->buffer,
-        .width = current_window->width,
-        .height = current_window->height,
-        .stride = current_window->width
-    };
-
-    olivec_circle(canvas, x, y, radius, color);
+    olivec_circle(*canvas, x, y, radius, color);
 }
 
 function(bsr_draw_ellipse)
 {
-    BSRWindow *current_window = (BSRWindow*)(bruter_pop_pointer(stack));
-    struct mfb_window *window = (struct mfb_window*)(current_window)->window;
-    if (window == NULL)
-    {
-        printf("Window is NULL\n");
-        return;
-    }
+    Olivec_Canvas* canvas = (Olivec_Canvas*)bruter_pop_pointer(stack);
     
     int x = bruter_pop_int(stack);
     int y = bruter_pop_int(stack);
@@ -493,17 +424,216 @@ function(bsr_draw_ellipse)
     int radius_y = bruter_pop_int(stack);
     uint32_t color = bruter_pop_int(stack);
 
-    Olivec_Canvas canvas = (Olivec_Canvas){
-        .pixels = (uint32_t*)(current_window)->buffer,
-        .width = current_window->width,
-        .height = current_window->height,
-        .stride = current_window->width
-    };
-
-    olivec_ellipse(canvas, x, y, radius_x, radius_y, color);
+    olivec_ellipse(*canvas, x, y, radius_x, radius_y, color);
 }
 
 function(bsr_draw_line)
+{
+    Olivec_Canvas* canvas = (Olivec_Canvas*)bruter_pop_pointer(stack);
+    
+    int x1 = bruter_pop_int(stack);
+    int y1 = bruter_pop_int(stack);
+    int x2 = bruter_pop_int(stack);
+    int y2 = bruter_pop_int(stack);
+    uint32_t color = bruter_pop_int(stack);
+
+    olivec_line(*canvas, x1, y1, x2, y2, color);
+}
+
+
+function(bsr_draw_triangle)
+{
+    Olivec_Canvas* canvas = (Olivec_Canvas*)bruter_pop_pointer(stack);
+    
+    int x1 = bruter_pop_int(stack);
+    int y1 = bruter_pop_int(stack);
+    int x2 = bruter_pop_int(stack);
+    int y2 = bruter_pop_int(stack);
+    int x3 = bruter_pop_int(stack);
+    int y3 = bruter_pop_int(stack);
+    uint32_t color = bruter_pop_int(stack);
+
+    olivec_triangle(*canvas, x1, y1, x2, y2, x3, y3, color);
+}
+
+function(bsr_draw_triangle3c)
+{
+    Olivec_Canvas* canvas = (Olivec_Canvas*)bruter_pop_pointer(stack);
+    
+    int x1 = bruter_pop_int(stack);
+    int y1 = bruter_pop_int(stack);
+    int x2 = bruter_pop_int(stack);
+    int y2 = bruter_pop_int(stack);
+    int x3 = bruter_pop_int(stack);
+    int y3 = bruter_pop_int(stack);
+    uint32_t c1 = bruter_pop_int(stack);
+    uint32_t c2 = bruter_pop_int(stack);
+    uint32_t c3 = bruter_pop_int(stack);
+
+    olivec_triangle3c(*canvas, x1, y1, x2, y2, x3, y3, c1, c2, c3);
+}
+
+function(bsr_draw_triangle3z)
+{
+    Olivec_Canvas* canvas = (Olivec_Canvas*)bruter_pop_pointer(stack);
+    
+    int x1 = bruter_pop_int(stack);
+    int y1 = bruter_pop_int(stack);
+    int x2 = bruter_pop_int(stack);
+    int y2 = bruter_pop_int(stack);
+    int x3 = bruter_pop_int(stack);
+    int y3 = bruter_pop_int(stack);
+    float z1 = bruter_pop_float(stack);
+    float z2 = bruter_pop_float(stack);
+    float z3 = bruter_pop_float(stack);
+
+    olivec_triangle3z(*canvas, x1, y1, x2, y2, x3, y3, z1, z2, z3);
+}
+
+function(bsr_draw_triangle3uv)
+{
+    Olivec_Canvas* canvas = (Olivec_Canvas*)bruter_pop_pointer(stack);
+    int x1 = bruter_pop_int(stack);
+    int y1 = bruter_pop_int(stack);
+    int x2 = bruter_pop_int(stack);
+    int y2 = bruter_pop_int(stack);
+    int x3 = bruter_pop_int(stack);
+    int y3 = bruter_pop_int(stack);
+    float tx1 = bruter_pop_float(stack);
+    float ty1 = bruter_pop_float(stack);
+    float tx2 = bruter_pop_float(stack);
+    float ty2 = bruter_pop_float(stack);
+    float tx3 = bruter_pop_float(stack);
+    float ty3 = bruter_pop_float(stack);
+    float z1 = bruter_pop_float(stack);
+    float z2 = bruter_pop_float(stack);
+    float z3 = bruter_pop_float(stack);
+    Olivec_Canvas* texture = (Olivec_Canvas*)bruter_pop_pointer(stack);
+    if (texture == NULL) {
+        printf("Texture is NULL\n");
+        return;
+    }
+    
+    olivec_triangle3uv(*canvas, x1, y1, x2, y2, x3, y3, tx1, ty1, tx2, ty2, tx3, ty3, z1, z2, z3, *texture);
+}
+
+function(bsr_draw_triangle3uv_bilinear)
+{
+    Olivec_Canvas* canvas = (Olivec_Canvas*)bruter_pop_pointer(stack);
+    int x1 = bruter_pop_int(stack);
+    int y1 = bruter_pop_int(stack);
+    int x2 = bruter_pop_int(stack);
+    int y2 = bruter_pop_int(stack);
+    int x3 = bruter_pop_int(stack);
+    int y3 = bruter_pop_int(stack);
+    float tx1 = bruter_pop_float(stack);
+    float ty1 = bruter_pop_float(stack);
+    float tx2 = bruter_pop_float(stack);
+    float ty2 = bruter_pop_float(stack);
+    float tx3 = bruter_pop_float(stack);
+    float ty3 = bruter_pop_float(stack);
+    float z1 = bruter_pop_float(stack);
+    float z2 = bruter_pop_float(stack);
+    float z3 = bruter_pop_float(stack);
+    Olivec_Canvas* texture = (Olivec_Canvas*)bruter_pop_pointer(stack);
+    if (texture == NULL) {
+        printf("Texture is NULL\n");
+        return;
+    }
+    
+    olivec_triangle3uv_bilinear(*canvas, x1, y1, x2, y2, x3, y3, tx1, ty1, tx2, ty2, tx3, ty3, z1, z2, z3, *texture);
+}
+
+/*
+OLIVECDEF void olivec_sprite_blend(Olivec_Canvas oc, int x, int y, int w, int h, Olivec_Canvas sprite);
+OLIVECDEF void olivec_sprite_copy(Olivec_Canvas oc, int x, int y, int w, int h, Olivec_Canvas sprite);
+OLIVECDEF void olivec_sprite_copy_bilinear(Olivec_Canvas oc, int x, int y, int w, int h, Olivec_Canvas sprite);
+
+*/
+
+function(bsr_draw_sprite_blend)
+{
+    Olivec_Canvas* canvas = (Olivec_Canvas*)bruter_pop_pointer(stack);
+    
+    int x = bruter_pop_int(stack);
+    int y = bruter_pop_int(stack);
+    int w = bruter_pop_int(stack);
+    int h = bruter_pop_int(stack);
+    Olivec_Canvas* sprite = (Olivec_Canvas*)bruter_pop_pointer(stack);
+    
+    olivec_sprite_blend(*canvas, x, y, w, h, *sprite);
+}
+
+function(bsr_draw_sprite_copy)
+{
+    Olivec_Canvas* canvas = (Olivec_Canvas*)bruter_pop_pointer(stack);
+    
+    int x = bruter_pop_int(stack);
+    int y = bruter_pop_int(stack);
+    int w = bruter_pop_int(stack);
+    int h = bruter_pop_int(stack);
+    Olivec_Canvas* sprite = (Olivec_Canvas*)bruter_pop_pointer(stack);
+    
+    olivec_sprite_copy(*canvas, x, y, w, h, *sprite);
+}
+
+function(bsr_draw_sprite_copy_bilinear)
+{
+    Olivec_Canvas* canvas = (Olivec_Canvas*)bruter_pop_pointer(stack);
+    
+    int x = bruter_pop_int(stack);
+    int y = bruter_pop_int(stack);
+    int w = bruter_pop_int(stack);
+    int h = bruter_pop_int(stack);
+    Olivec_Canvas* sprite = (Olivec_Canvas*)bruter_pop_pointer(stack);
+    
+    olivec_sprite_copy_bilinear(*canvas, x, y, w, h, *sprite);
+}
+
+function(argb_to_canvas)
+{
+    uint8_t *data = (unsigned char*)bruter_pop_pointer(stack);
+    uint8_t *ptr = data;
+    uint32_t width = ((uint32_t*)data)[0];
+    uint32_t height = ((uint32_t*)data)[1];
+    
+    Olivec_Canvas* canvas = (Olivec_Canvas*)malloc(sizeof(Olivec_Canvas));
+    if (canvas == NULL) {
+        printf("Failed to allocate memory for Olivec_Canvas\n");
+        return;
+    }
+    canvas->pixels = (uint32_t*)(ptr + 8);
+    canvas->width = width;
+    canvas->height = height;
+    canvas->stride = width;
+
+    bruter_push_pointer(stack, canvas, NULL, BRUTER_TYPE_BUFFER);
+}
+
+function(new_canvas)
+{
+    uint32_t width = bruter_pop_int(stack);
+    uint32_t height = bruter_pop_int(stack);
+    
+    Olivec_Canvas* canvas = (Olivec_Canvas*)malloc(sizeof(Olivec_Canvas));
+    if (canvas == NULL) {
+        printf("Failed to allocate memory for Olivec_Canvas\n");
+        return;
+    }
+    canvas->pixels = (uint32_t*)malloc(width * height * sizeof(uint32_t));
+    if (canvas->pixels == NULL) {
+        printf("Failed to allocate memory for canvas pixels\n");
+        free(canvas);
+        return;
+    }
+    canvas->width = width;
+    canvas->height = height;
+    canvas->stride = width;
+
+    bruter_push_pointer(stack, canvas, NULL, BRUTER_TYPE_BUFFER);
+}
+
+function(bsr_get_window_canvas)
 {
     BSRWindow *current_window = (BSRWindow*)(bruter_pop_pointer(stack));
     struct mfb_window *window = (struct mfb_window*)(current_window)->window;
@@ -512,22 +642,33 @@ function(bsr_draw_line)
         printf("Window is NULL\n");
         return;
     }
+
+    Olivec_Canvas* canvas = &current_window->canvas;
+    bruter_push_pointer(stack, canvas, NULL, BRUTER_TYPE_BUFFER);
+}
+
+function(canvas_get_width)
+{
+    Olivec_Canvas* canvas = (Olivec_Canvas*)bruter_pop_pointer(stack);
+    if (canvas == NULL)
+    {
+        printf("Canvas is NULL\n");
+        return;
+    }
     
-    int x1 = bruter_pop_int(stack);
-    int y1 = bruter_pop_int(stack);
-    int x2 = bruter_pop_int(stack);
-    int y2 = bruter_pop_int(stack);
-    uint32_t color = bruter_pop_int(stack);
+    bruter_push_int(stack, canvas->width, NULL, BRUTER_TYPE_ANY);
+}
 
-    Olivec_Canvas canvas = (Olivec_Canvas){
-        .pixels = (uint32_t*)(current_window)->buffer,
-        .width = current_window->width,
-        .height = current_window->height,
-        .stride = current_window->width
-    };
-
-    olivec_line(canvas, x1, y1, x2, y2, color);
-
+function(canvas_get_height)
+{
+    Olivec_Canvas* canvas = (Olivec_Canvas*)bruter_pop_pointer(stack);
+    if (canvas == NULL)
+    {
+        printf("Canvas is NULL\n");
+        return;
+    }
+    
+    bruter_push_int(stack, canvas->height, NULL, BRUTER_TYPE_ANY);
 }
 
 void __bsr_at_exit(void)
