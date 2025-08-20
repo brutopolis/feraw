@@ -410,6 +410,26 @@ function(feraw_ls)
     }
 }
 
+function(feraw_rename)
+{
+    BruterList* list = bruter_pop_pointer(stack);
+    char* old_name = bruter_pop_pointer(stack);
+    char* new_name = bruter_pop_pointer(stack);
+
+    for (BruterInt i = 0; i < list->size; i++)
+    {
+        if (list->keys != NULL && list->keys[i] != NULL && strcmp(list->keys[i], old_name) == 0)
+        {
+            free(list->keys[i]); // Free the old key
+            list->keys[i] = strdup(new_name); // Set the new key
+            return;
+        }
+    }
+
+    fprintf(stderr, "ERROR: cannot rename, key '%s' not found in list\n", old_name);
+    exit(EXIT_FAILURE);
+}
+
 function(feraw_eval)
 {
     BruterList* context = bruter_pop_pointer(stack);

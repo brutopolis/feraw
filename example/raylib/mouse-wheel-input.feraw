@@ -1,0 +1,46 @@
+cc {
+include("../../lib/string.c");
+include("../../lib/condition.c");
+include("../../lib/math.c");
+};
+
+include("../../lib/types.feraw");
+include("../../lib/raylib.feraw");
+
+ // Initialization
+//--------------------------------------------------------------------------------------
+screenWidth = 800;
+screenHeight = 450;
+
+InitWindow(screenWidth, screenHeight, "raylib core example - input mouse wheel");
+
+boxPositionY = sub(div(screenHeight, 2), 40);
+scrollSpeed = 4;            // Scrolling speed in pixels
+
+SetTargetFPS(60);               // Set our game to run at 60 frames-per-second
+//--------------------------------------------------------------------------------------
+
+// Main game loop
+// Detect window close button or ESC key
+while (equals(WindowShouldClose(), 0))
+{
+    // Update
+    //----------------------------------------------------------------------------------
+    boxPositionY = round(sub(boxPositionY, mul(GetMouseWheelMove(), scrollSpeed)));
+
+    BeginDrawing();
+
+        ClearBackground(RAYWHITE);
+
+        DrawRectangle(sub(div(screenWidth, 2), 40), boxPositionY, 80, 80, MAROON);
+
+        DrawText("Use mouse wheel to move the cube up and down!", 10, 10, 20, GRAY);
+
+    EndDrawing();
+    //----------------------------------------------------------------------------------
+};
+
+// De-Initialization
+//--------------------------------------------------------------------------------------
+CloseWindow();        // Close window and OpenGL context
+//--------------------------------------------------------------------------------------

@@ -17,3 +17,4 @@ web/*.js
 example/*.js
 example/*.wasm
 *.debug.c
+.ccls-cache

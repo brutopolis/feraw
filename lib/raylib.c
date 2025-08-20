@@ -5,12 +5,13 @@
 notes:
 - everything vr-related is not tested and is not planned to be any soon
 - everything audio-related needs some testing
+- no *_v functions are implemented
 */
 
 Vector2 vector2_constructor(BruterList *vec2)
 {
-    float x = vec2->data[0].f;
-    float y = vec2->data[1].f;
+    BruterFloat x = vec2->data[0].f;
+    BruterFloat y = vec2->data[1].f;
     
     Vector2 vec;
     vec.x = x;
@@ -120,7 +121,7 @@ Color color_from_int(int color)
     return c;
 }
 
-BruterList *color_to_int(Color color)
+BruterInt color_to_int(Color color)
 {
     BruterInt result = 0;
     memcpy(&result, &color, sizeof(Color));
@@ -340,13 +341,13 @@ BruterList *font_to_list(Font font)
     return list;
 }
 
-Camera3D camera3d_constructor(BruterList *camera3d)
+Camera3D camera3d_constructor(BruterList *camera3D)
 {
-    Vector3 position = vector3_constructor(camera3d->data[0].p);
-    Vector3 target = vector3_constructor(camera3d->data[1].p);
-    Vector3 up = vector3_constructor(camera3d->data[2].p);
-    float fovy = camera3d->data[3].f;
-    int projection = camera3d->data[4].i;
+    Vector3 position = vector3_constructor(camera3D->data[0].p);
+    Vector3 target = vector3_constructor(camera3D->data[1].p);
+    Vector3 up = vector3_constructor(camera3D->data[2].p);
+    float fovy = camera3D->data[3].f;
+    int projection = camera3D->data[4].i;
     
     Camera3D cam;
     cam.position = position;
@@ -357,7 +358,7 @@ Camera3D camera3d_constructor(BruterList *camera3d)
     return cam;
 }
 
-BruterList *camera3d_to_list(Camera3D cam)
+BruterList *camera3D_to_list(Camera3D cam)
 {
     BruterList *list = bruter_new(5, true, true);
     bruter_push_pointer(list, vector3_to_list(cam.position), "position", BRUTER_TYPE_LIST);
@@ -368,12 +369,12 @@ BruterList *camera3d_to_list(Camera3D cam)
     return list;
 }
 
-Camera2D camera2d_constructor(BruterList *camera2d)
+Camera2D camera2d_constructor(BruterList *camera2D)
 {
-    Vector2 offset = vector2_constructor(camera2d->data[0].p);
-    Vector2 target = vector2_constructor(camera2d->data[1].p);
-    float rotation = camera2d->data[2].f;
-    float zoom = camera2d->data[3].f;
+    Vector2 offset = vector2_constructor(camera2D->data[0].p);
+    Vector2 target = vector2_constructor(camera2D->data[1].p);
+    float rotation = camera2D->data[2].f;
+    float zoom = camera2D->data[3].f;
     
     Camera2D cam;
     cam.offset = offset;
@@ -383,7 +384,7 @@ Camera2D camera2d_constructor(BruterList *camera2d)
     return cam;
 }
 
-BruterList *camera2d_to_list(Camera2D cam)
+BruterList *camera2D_to_list(Camera2D cam)
 {
     BruterList *list = bruter_new(4, true, true);
     bruter_push_pointer(list, vector2_to_list(cam.offset), "offset", BRUTER_TYPE_LIST);
@@ -1044,7 +1045,7 @@ BruterList *automation_event_list_to_list(AutomationEventList list)
 }
 
 // raylib functions
-function(raylib_init_window)
+function(feraw_InitWindow)
 {
     int width = bruter_pop_int(stack);
     int height = bruter_pop_int(stack);
@@ -1052,379 +1053,380 @@ function(raylib_init_window)
     InitWindow(width, height, title);
 }
 
-function(raylib_close_window)
+function(feraw_CloseWindow)
 {
     CloseWindow();
 }
 
-function(raylib_window_should_close)
+function(feraw_WindowShouldClose)
 {
     bool shouldClose = WindowShouldClose();
     bruter_push_int(stack, shouldClose, NULL, BRUTER_TYPE_ANY);
 }
 
-function(raylib_is_window_ready)
+function(feraw_IsWindowReady)
 {
     bool isReady = IsWindowReady();
     bruter_push_int(stack, isReady, NULL, BRUTER_TYPE_ANY);
 }
 
-function(raylib_is_window_fullscreen)
+function(feraw_IsWindowFullscreen)
 {
     bool isFullscreen = IsWindowFullscreen();
     bruter_push_int(stack, isFullscreen, NULL, BRUTER_TYPE_ANY);
 }
 
-function(raylib_is_window_hidden)
+function(feraw_IsWindowHidden)
 {
     bool isHidden = IsWindowHidden();
     bruter_push_int(stack, isHidden, NULL, BRUTER_TYPE_ANY);
 }
 
-function(raylib_is_window_minimized)
+function(feraw_IsWindowMinimized)
 {
     bool isMinimized = IsWindowMinimized();
     bruter_push_int(stack, isMinimized, NULL, BRUTER_TYPE_ANY);
 }
 
-function(raylib_is_window_maximized)
+function(feraw_IsWindowMaximized)
 {
     bool isMaximized = IsWindowMaximized();
     bruter_push_int(stack, isMaximized, NULL, BRUTER_TYPE_ANY);
 }
 
-function(raylib_is_window_focused)
+function(feraw_IsWindowFocused)
 {
     bool isFocused = IsWindowFocused();
     bruter_push_int(stack, isFocused, NULL, BRUTER_TYPE_ANY);
 }
 
-function(raylib_is_window_resized)
+function(feraw_IsWindowResized)
 {
     bool isResized = IsWindowResized();
     bruter_push_int(stack, isResized, NULL, BRUTER_TYPE_ANY);
 }
 
-function(raylib_is_window_state)
+function(feraw_IsWindowState)
 {
     int flags = bruter_pop_int(stack);
     bool isState = IsWindowState(flags);
     bruter_push_int(stack, isState, NULL, BRUTER_TYPE_ANY);
 }
 
-function(raylib_set_window_state)
+function(feraw_SetWindowState)
 {
     int flags = bruter_pop_int(stack);
     SetWindowState(flags);
 }
 
-function(raylib_clear_window_state)
+function(feraw_ClearWindowState)
 {
     int flags = bruter_pop_int(stack);
     ClearWindowState(flags);
 }
 
-function(raylib_toggle_fullscreen)
+function(feraw_ToggleFullscreen)
 {
     ToggleFullscreen();
 }
 
-function(raylib_toggle_borderless_windowed)
+function(feraw_ToggleBorderlessWindowed)
 {
     ToggleBorderlessWindowed();
 }
 
-function(raylib_maximize_window)
+function(feraw_MaximizeWindow)
 {
     MaximizeWindow();
 }
 
-function(raylib_minimize_window)
+function(feraw_MinimizeWindow)
 {
     MinimizeWindow();
 }
 
-function(raylib_restore_window)
+function(feraw_RestoreWindow)
 {
     RestoreWindow();
 }
 
-function(raylib_set_window_icon)
+function(feraw_SetWindowIcon)
 {
     Image icon = image_constructor(bruter_pop_pointer(stack));
     SetWindowIcon(icon);
 }
 
-function(raylib_set_window_icons)
+function(feraw_SetWindowIcons)
 {
-    BruterList *icons = (BruterList*)bruter_pop_pointer(stack);
-    SetWindowIcons(icons->data, icons->size);
+    Image *icons = (Image*)bruter_pop_pointer(stack);
+    int count = bruter_pop_int(stack);
+    SetWindowIcons(icons, count);
 }
 
-function(raylib_set_window_title)
+function(feraw_SetWindowTitle)
 {
     char *title = (char*)bruter_pop_pointer(stack);
     SetWindowTitle(title);
 }
 
-function(raylib_set_window_position)
+function(feraw_SetWindowPosition)
 {
     int x = bruter_pop_int(stack);
     int y = bruter_pop_int(stack);
     SetWindowPosition(x, y);
 }
 
-function(raylib_set_window_monitor)
+function(feraw_SetWindowMonitor)
 {
     int monitor = bruter_pop_int(stack);
     SetWindowMonitor(monitor);
 }
 
-function(raylib_set_window_min_size)
+function(feraw_SetWindowMinSize)
 {
     int width = bruter_pop_int(stack);
     int height = bruter_pop_int(stack);
     SetWindowMinSize(width, height);
 }
 
-function(raylib_set_window_max_size)
+function(feraw_SetWindowMaxSize)
 {
     int width = bruter_pop_int(stack);
     int height = bruter_pop_int(stack);
     SetWindowMaxSize(width, height);
 }
 
-function(raylib_set_window_size)
+function(feraw_SetWindowSize)
 {
     int width = bruter_pop_int(stack);
     int height = bruter_pop_int(stack);
     SetWindowSize(width, height);
 }
 
-function(raylib_set_window_opacity)
+function(feraw_SetWindowOpacity)
 {
     float opacity = bruter_pop_float(stack);
     SetWindowOpacity(opacity);
 }
 
-function(raylib_set_window_focused)
+function(feraw_SetWindowFocused)
 {
     SetWindowFocused();
 }
 
-function(raylib_get_window_handle)
+function(feraw_GetWindowHandle)
 {
     bruter_push_pointer(stack, GetWindowHandle(), NULL, BRUTER_TYPE_ANY);
 }
 
-function(raylib_get_screen_width)
+function(feraw_GetScreenWidth)
 {
     int width = GetScreenWidth();
     bruter_push_int(stack, width, NULL, BRUTER_TYPE_ANY);
 }
 
-function(raylib_get_screen_height)
+function(feraw_GetScreenHeight)
 {
     int height = GetScreenHeight();
     bruter_push_int(stack, height, NULL, BRUTER_TYPE_ANY);
 }
 
-function(raylib_get_monitor_count)
+function(feraw_GetMonitorCount)
 {
     int count = GetMonitorCount();
     bruter_push_int(stack, count, NULL, BRUTER_TYPE_ANY);
 }
 
-function(raylib_get_current_monitor)
+function(feraw_GetCurrentMonitor)
 {
     int monitor = GetCurrentMonitor();
     bruter_push_int(stack, monitor, NULL, BRUTER_TYPE_ANY);
 }
 
-function(raylib_get_monitor_position)
+function(feraw_GetMonitorPosition)
 {
     int monitor = bruter_pop_int(stack);
     Vector2 position = GetMonitorPosition(monitor);
     bruter_push_pointer(stack, vector2_to_list(position), NULL, BRUTER_TYPE_LIST);
 }
 
-function(raylib_get_monitor_width)
+function(feraw_GetMonitorWidth)
 {
     int monitor = bruter_pop_int(stack);
     int width = GetMonitorWidth(monitor);
     bruter_push_int(stack, width, NULL, BRUTER_TYPE_ANY);
 }
 
-function(raylib_get_monitor_height)
+function(feraw_GetMonitorHeight)
 {
     int monitor = bruter_pop_int(stack);
     int height = GetMonitorHeight(monitor);
     bruter_push_int(stack, height, NULL, BRUTER_TYPE_ANY);
 }
 
-function(raylib_get_monitor_physical_width)
+function(feraw_GetMonitorPhysicalWidth)
 {
     int monitor = bruter_pop_int(stack);
     int width = GetMonitorPhysicalWidth(monitor);
     bruter_push_int(stack, width, NULL, BRUTER_TYPE_ANY);
 }
 
-function(raylib_get_monitor_physical_height)
+function(feraw_GetMonitorPhysicalHeight)
 {
     int monitor = bruter_pop_int(stack);
     int height = GetMonitorPhysicalHeight(monitor);
     bruter_push_int(stack, height, NULL, BRUTER_TYPE_ANY);
 }
 
-function(raylib_get_monitor_refresh_rate)
+function(feraw_GetMonitorRefreshRate)
 {
     int monitor = bruter_pop_int(stack);
     int refreshRate = GetMonitorRefreshRate(monitor);
     bruter_push_int(stack, refreshRate, NULL, BRUTER_TYPE_ANY);
 }
 
-function(raylib_get_window_position)
+function(feraw_GetWindowPosition)
 {
     Vector2 position = GetWindowPosition();
     bruter_push_pointer(stack, vector2_to_list(position), NULL, BRUTER_TYPE_LIST);
 }
 
-function(raylib_get_window_scale_dpi)
+function(feraw_GetWindowScaleDpi)
 {
     Vector2 scale = GetWindowScaleDPI();
     bruter_push_pointer(stack, vector2_to_list(scale), NULL, BRUTER_TYPE_LIST);
 }
 
-function(raylib_get_monitor_name)
+function(feraw_GetMonitorName)
 {
     int monitor = bruter_pop_int(stack);
-    char *name = GetMonitorName(monitor);
-    bruter_push_pointer(stack, name, NULL, BRUTER_TYPE_BUFFER);
+    const char *name = GetMonitorName(monitor);
+    bruter_push_pointer(stack, strdup(name), NULL, BRUTER_TYPE_BUFFER);
 }
 
-function(raylib_set_clipboard_text)
+function(feraw_SetClipboardText)
 {
     char *text = (char*)bruter_pop_pointer(stack);
     SetClipboardText(text);
 }
 
-function(raylib_get_clipboard_text)
+function(feraw_GetClipboardText)
 {
-    char *text = GetClipboardText();
-    bruter_push_pointer(stack, text, NULL, BRUTER_TYPE_BUFFER);
+    const char *text = GetClipboardText();
+    bruter_push_pointer(stack, strdup(text), NULL, BRUTER_TYPE_BUFFER);
 }
 
-function(raylib_get_clipboard_image)
+function(feraw_GetClipboardImage)
 {
     Image image = GetClipboardImage();
     bruter_push_pointer(stack, image_to_list(image), NULL, BRUTER_TYPE_LIST);
 }
 
-function(raylib_enable_event_waiting)
+function(feraw_EnableEventWaiting)
 {
     EnableEventWaiting();
 }
 
-function(raylib_disable_event_waiting)
+function(feraw_DisableEventWaiting)
 {
     DisableEventWaiting();
 }
 
 // Cursor-related functions
-function(raylib_show_cursor)
+function(feraw_ShowCursor)
 {
     ShowCursor();
 }
 
-function(raylib_hide_cursor)
+function(feraw_HideCursor)
 {
     HideCursor();
 }
 
-function(raylib_is_cursor_hidden)
+function(feraw_IsCursorHidden)
 {
     bool isHidden = IsCursorHidden();
     bruter_push_int(stack, isHidden, NULL, BRUTER_TYPE_ANY);
 }
 
-function(raylib_enable_cursor)
+function(feraw_EnableCursor)
 {
     EnableCursor();
 }
 
-function(raylib_disable_cursor)
+function(feraw_DisableCursor)
 {
     DisableCursor();
 }
 
-function(raylib_is_cursor_on_screen)
+function(feraw_IsCursorOnScreen)
 {
     bool isOnScreen = IsCursorOnScreen();
     bruter_push_int(stack, isOnScreen, NULL, BRUTER_TYPE_ANY);
 }
 
 // Drawing-related functions
-function(raylib_clear_background)
+function(feraw_ClearBackground)
 {
     Color color = color_from_int(bruter_pop_int(stack));
     ClearBackground(color);
 }
 
-function(raylib_begin_drawing)
+function(feraw_BeginDrawing)
 {
     BeginDrawing();
 }
 
-function(raylib_end_drawing)
+function(feraw_EndDrawing)
 {
     EndDrawing();
 }
 
-function(raylib_begin_mode_2d)
+function(feraw_BeginMode2D)
 {
     Camera2D camera = camera2d_constructor(bruter_pop_pointer(stack));
     BeginMode2D(camera);
 }
 
-function(raylib_end_mode_2d)
+function(feraw_EndMode2D)
 {
     EndMode2D();
 }
 
-function(raylib_begin_mode_3d)
+function(feraw_BeginMode3D)
 {
     Camera3D camera = camera3d_constructor(bruter_pop_pointer(stack));
     BeginMode3D(camera);
 }
 
-function(raylib_end_mode_3d)
+function(feraw_EndMode3D)
 {
     EndMode3D();
 }
 
-function(raylib_begin_shader_mode)
+function(feraw_BeginShaderMode)
 {
     Shader shader = shader_constructor(bruter_pop_pointer(stack));
     BeginShaderMode(shader);
 }
 
-function(raylib_end_shader_mode)
+function(feraw_EndShaderMode)
 {
     EndShaderMode();
 }
 
-function(raylib_begin_blend_mode)
+function(feraw_BeginBlendMode)
 {
     int mode = bruter_pop_int(stack);
     BeginBlendMode(mode);
 }
 
-function(raylib_end_blend_mode)
+function(feraw_EndBlendMode)
 {
     EndBlendMode();
 }
 
-function(raylib_begin_scissor_mode)
+function(feraw_BeginScissorMode)
 {
     int x = bruter_pop_int(stack);
     int y = bruter_pop_int(stack);
@@ -1433,36 +1435,36 @@ function(raylib_begin_scissor_mode)
     BeginScissorMode(x, y, width, height);
 }
 
-function(raylib_end_scissor_mode)
+function(feraw_EndScissorMode)
 {
     EndScissorMode();
 }
 
-function(raylib_begin_vr_stereo_mode)
+function(feraw_BeginVrStereoMode)
 {
     VrStereoConfig config = vr_stereo_config_constructor(bruter_pop_pointer(stack));
     BeginVrStereoMode(config);
 }
 
-function(raylib_end_vr_stereo_mode)
+function(feraw_EndVrStereoMode)
 {
     EndVrStereoMode();
 }
 
-function(raylib_load_vr_stereo_config)
+function(feraw_LoadVrStereoConfig)
 {
     VrDeviceInfo info = vr_device_info_constructor(bruter_pop_pointer(stack));
     VrStereoConfig config = LoadVrStereoConfig(info);
     bruter_push_pointer(stack, vr_stereo_config_to_list(config), NULL, BRUTER_TYPE_LIST);
 }
 
-function(raylib_unload_vr_stereo_config)
+function(feraw_UnloadVrStereoConfig)
 {
     VrStereoConfig config = vr_stereo_config_constructor(bruter_pop_pointer(stack));
     UnloadVrStereoConfig(config);
 }
 
-function(raylib_load_shader)
+function(feraw_LoadShader)
 {
     char *vsFileName = (char*)bruter_pop_pointer(stack);
     char *fsFileName = (char*)bruter_pop_pointer(stack);
@@ -1470,7 +1472,7 @@ function(raylib_load_shader)
     bruter_push_pointer(stack, shader_to_list(shader), NULL, BRUTER_TYPE_LIST);
 }
 
-function(raylib_load_shader_from_memory)
+function(feraw_LoadShaderFromMemory)
 {
     char *vsCode = (char*)bruter_pop_pointer(stack);
     char *fsCode = (char*)bruter_pop_pointer(stack);
@@ -1478,14 +1480,14 @@ function(raylib_load_shader_from_memory)
     bruter_push_pointer(stack, shader_to_list(shader), NULL, BRUTER_TYPE_LIST);
 }
 
-function(raylib_is_shader_valid)
+function(feraw_IsShaderValid)
 {
     Shader shader = shader_constructor(bruter_pop_pointer(stack));
     bool isValid = IsShaderValid(shader);
     bruter_push_int(stack, isValid, NULL, BRUTER_TYPE_ANY);
 }
 
-function(raylib_get_shader_location)
+function(feraw_GetShaderLocation)
 {
     Shader shader = shader_constructor(bruter_pop_pointer(stack));
     char *uniformName = (char*)bruter_pop_pointer(stack);
@@ -1493,7 +1495,7 @@ function(raylib_get_shader_location)
     bruter_push_int(stack, location, NULL, BRUTER_TYPE_ANY);
 }
 
-function(raylib_get_shader_location_attrib)
+function(feraw_GetShaderLocationAttrib)
 {
     Shader shader = shader_constructor(bruter_pop_pointer(stack));
     char *attribName = (char*)bruter_pop_pointer(stack);
@@ -1501,7 +1503,7 @@ function(raylib_get_shader_location_attrib)
     bruter_push_int(stack, location, NULL, BRUTER_TYPE_ANY);
 }
 
-function(raylib_set_shader_value)
+function(feraw_SetShaderValue)
 {
     Shader shader = shader_constructor(bruter_pop_pointer(stack));
     int locIndex = bruter_pop_int(stack);
@@ -1511,18 +1513,7 @@ function(raylib_set_shader_value)
     SetShaderValue(shader, locIndex, value, uniformType);
 }
 
-function(raylib_set_shader_value_v)
-{
-    Shader shader = shader_constructor(bruter_pop_pointer(stack));
-    int locIndex = bruter_pop_int(stack);
-    const void *value = bruter_pop_pointer(stack);
-    int uniformType = bruter_pop_int(stack);
-    int count = bruter_pop_int(stack);
-
-    SetShaderValueV(shader, locIndex, value, uniformType, count);
-}
-
-function(raylib_set_shader_value_matrix)
+function(feraw_SetShaderValueMatrix)
 {
     Shader shader = shader_constructor(bruter_pop_pointer(stack));
     int locIndex = bruter_pop_int(stack);
@@ -1531,7 +1522,7 @@ function(raylib_set_shader_value_matrix)
     SetShaderValueMatrix(shader, locIndex, mat);
 }
 
-function(raylib_set_shader_value_texture)
+function(feraw_SetShaderValueTexture)
 {
     Shader shader = shader_constructor(bruter_pop_pointer(stack));
     int locIndex = bruter_pop_int(stack);
@@ -1540,13 +1531,13 @@ function(raylib_set_shader_value_texture)
     SetShaderValueTexture(shader, locIndex, texture);
 }
 
-function(raylib_unload_shader)
+function(feraw_UnloadShader)
 {
     Shader shader = shader_constructor(bruter_pop_pointer(stack));
     UnloadShader(shader);
 }
 
-function(raylib_get_screen_to_world_ray)
+function(feraw_GetScreenToWorldRay)
 {
     Vector2 position = vector2_constructor(bruter_pop_pointer(stack));
     Camera3D camera = camera3d_constructor(bruter_pop_pointer(stack));
@@ -1554,7 +1545,7 @@ function(raylib_get_screen_to_world_ray)
     bruter_push_pointer(stack, ray_to_list(ray), NULL, BRUTER_TYPE_LIST);
 }
 
-function(raylib_get_screen_to_world_ray_ex)
+function(feraw_GetScreenToWorldRayEx)
 {
     Vector2 position = vector2_constructor(bruter_pop_pointer(stack));
     Camera3D camera = camera3d_constructor(bruter_pop_pointer(stack));
@@ -1564,7 +1555,7 @@ function(raylib_get_screen_to_world_ray_ex)
     bruter_push_pointer(stack, ray_to_list(ray), NULL, BRUTER_TYPE_LIST);
 }
 
-function(raylib_get_world_to_screen)
+function(feraw_GetWorldToScreen)
 {
     Vector3 position = vector3_constructor(bruter_pop_pointer(stack));
     Camera3D camera = camera3d_constructor(bruter_pop_pointer(stack));
@@ -1572,7 +1563,7 @@ function(raylib_get_world_to_screen)
     bruter_push_pointer(stack, vector2_to_list(screenPos), NULL, BRUTER_TYPE_LIST);
 }
 
-function(raylib_get_world_to_screen_ex)
+function(feraw_GetWorldToScreenEx)
 {
     Vector3 position = vector3_constructor(bruter_pop_pointer(stack));
     Camera3D camera = camera3d_constructor(bruter_pop_pointer(stack));
@@ -1582,7 +1573,7 @@ function(raylib_get_world_to_screen_ex)
     bruter_push_pointer(stack, vector2_to_list(screenPos), NULL, BRUTER_TYPE_LIST);
 }
 
-function(raylib_get_world_to_screen_2d)
+function(feraw_GetWorldToScreen2D)
 {
     Vector2 position = vector2_constructor(bruter_pop_pointer(stack));
     Camera2D camera = camera2d_constructor(bruter_pop_pointer(stack));
@@ -1590,7 +1581,7 @@ function(raylib_get_world_to_screen_2d)
     bruter_push_pointer(stack, vector2_to_list(screenPos), NULL, BRUTER_TYPE_LIST);
 }
 
-function(raylib_get_screen_to_world_2d)
+function(feraw_GetScreenToWorld2D)
 {
     Vector2 position = vector2_constructor(bruter_pop_pointer(stack));
     Camera2D camera = camera2d_constructor(bruter_pop_pointer(stack));
@@ -1598,14 +1589,14 @@ function(raylib_get_screen_to_world_2d)
     bruter_push_pointer(stack, vector2_to_list(worldPos), NULL, BRUTER_TYPE_LIST);
 }
 
-function(raylib_get_camera_matrix)
+function(feraw_GetCameraMatrix)
 {
     Camera3D camera = camera3d_constructor(bruter_pop_pointer(stack));
     Matrix matrix = GetCameraMatrix(camera);
     bruter_push_pointer(stack, matrix_to_list(matrix), NULL, BRUTER_TYPE_LIST);
 }
 
-function(raylib_get_camera_matrix_2d)
+function(feraw_GetCameraMatrix2D)
 {
     Camera2D camera = camera2d_constructor(bruter_pop_pointer(stack));
     Matrix matrix = GetCameraMatrix2D(camera);
@@ -1613,55 +1604,55 @@ function(raylib_get_camera_matrix_2d)
 }
 
 // Timing-related functions
-function(raylib_set_target_fps)
+function(feraw_SetTargetFPS)
 {
     int fps = bruter_pop_int(stack);
     SetTargetFPS(fps);
 }
 
-function(raylib_get_frame_time)
+function(feraw_GetFrameTime)
 {
     float frameTime = GetFrameTime();
     bruter_push_float(stack, frameTime, NULL, BRUTER_TYPE_FLOAT);
 }
 
-function(raylib_get_time)
+function(feraw_GetTime)
 {
     double time = GetTime();
     bruter_push_float(stack, (float)time, NULL, BRUTER_TYPE_FLOAT);
 }
 
-function(raylib_get_fps)
+function(feraw_GetFPS)
 {
     int fps = GetFPS();
     bruter_push_int(stack, fps, NULL, BRUTER_TYPE_ANY);
 }
 
 // Custom frame control functions
-function(raylib_swap_screen_buffer)
+function(feraw_SwapScreenBuffer)
 {
     SwapScreenBuffer();
 }
 
-function(raylib_poll_input_events)
+function(feraw_PollInputEvents)
 {
     PollInputEvents();
 }
 
-function(raylib_wait_time)
+function(feraw_WaitTime)
 {
     float seconds = bruter_pop_float(stack);
     WaitTime(seconds);
 }
 
 // Random values generation functions
-function(raylib_set_random_seed)
+function(feraw_SetRandomSeed)
 {
     unsigned int seed = bruter_pop_int(stack);
     SetRandomSeed(seed);
 }
 
-function(raylib_get_random_value)
+function(feraw_GetRandomValue)
 {
     int min = bruter_pop_int(stack);
     int max = bruter_pop_int(stack);
@@ -1669,7 +1660,7 @@ function(raylib_get_random_value)
     bruter_push_int(stack, value, NULL, BRUTER_TYPE_ANY);
 }
 
-function(raylib_load_random_sequence)
+function(feraw_LoadRandomSequence)
 {
     unsigned int count = bruter_pop_int(stack);
     int min = bruter_pop_int(stack);
@@ -1678,51 +1669,51 @@ function(raylib_load_random_sequence)
     bruter_push_pointer(stack, sequence, NULL, BRUTER_TYPE_BUFFER);
 }
 
-function(raylib_unload_random_sequence)
+function(feraw_UnloadRandomSequence)
 {
     int *sequence = (int*)bruter_pop_pointer(stack);
     UnloadRandomSequence(sequence);
 }
 
 // Misc. functions
-function(raylib_take_screenshot)
+function(feraw_TakeScreenshot)
 {
     char *fileName = (char*)bruter_pop_pointer(stack);
     TakeScreenshot(fileName);
 }
 
-function(raylib_set_config_flags)
+function(feraw_SetConfigFlags)
 {
     unsigned int flags = bruter_pop_int(stack);
     SetConfigFlags(flags);
 }
 
-function(raylib_open_url)
+function(feraw_OpenUrl)
 {
     char *url = (char*)bruter_pop_pointer(stack);
     OpenURL(url);
 }
 
 // utils functions
-function(raylib_trace_log)
+function(feraw_TraceLog)
 {
-    printf("raylib_trace_log is not implemented in bruter yet\n");
+    printf("feraw_TraceLog is not implemented in bruter yet\n");
 }
 
-function(raylib_set_trace_log_level)
+function(feraw_SetTraceLogLevel)
 {
     int logLevel = bruter_pop_int(stack);
     SetTraceLogLevel(logLevel);
 }
 
-function(raylib_mem_alloc)
+function(feraw_MemAlloc)
 {
     unsigned int size = bruter_pop_int(stack);
     void *ptr = MemAlloc(size);
     bruter_push_pointer(stack, ptr, NULL, BRUTER_TYPE_BUFFER);
 }
 
-function(raylib_mem_realloc)
+function(feraw_MemRealloc)
 {
     void *ptr = bruter_pop_pointer(stack);
     unsigned int size = bruter_pop_int(stack);
@@ -1730,48 +1721,48 @@ function(raylib_mem_realloc)
     bruter_push_pointer(stack, newPtr, NULL, BRUTER_TYPE_BUFFER);
 }
 
-function(raylib_mem_free)
+function(feraw_MemFree)
 {
     void *ptr = bruter_pop_pointer(stack);
     MemFree(ptr);
 }
 
 // custom callbacks, probably not working
-function(raylib_set_custom_tracelog_callback)
+function(feraw_SetTracelogCallback)
 {
     TraceLogCallback callback = (TraceLogCallback)bruter_pop_pointer(stack);
-    SetCustomTraceLogCallback(callback);
+    SetTraceLogCallback(callback);
 }
 
-function(raylib_set_load_file_data_callback)
+function(feraw_SetLoadFileDataCallback)
 {
     LoadFileDataCallback callback = (LoadFileDataCallback)bruter_pop_pointer(stack);
     SetLoadFileDataCallback(callback);
 }
 
-function(raylib_set_save_file_data_callback)
+function(feraw_SetSaveFileDataCallback)
 {
     SaveFileDataCallback callback = (SaveFileDataCallback)bruter_pop_pointer(stack);
     SetSaveFileDataCallback(callback);
 }
 
-function(raylib_set_load_file_text_callback)
+function(feraw_SetLoadFileTextCallback)
 {
     LoadFileTextCallback callback = (LoadFileTextCallback)bruter_pop_pointer(stack);
     SetLoadFileTextCallback(callback);
 }
 
-function(raylib_set_save_file_text_callback)
+function(feraw_SetSaveFileTextCallback)
 {
     SaveFileTextCallback callback = (SaveFileTextCallback)bruter_pop_pointer(stack);
     SetSaveFileTextCallback(callback);
 }
 
 // Files management functions
-function(raylib_load_file_data)
+function(feraw_LoadFileData)
 {
     char *fileName = (char*)bruter_pop_pointer(stack);
-    unsigned int bytesRead = 0;
+    int bytesRead = 0;
     void *data = LoadFileData(fileName, &bytesRead);
     BruterList *list = bruter_new(2, true, true);
     bruter_push_pointer(list, data, "data", BRUTER_TYPE_BUFFER);
@@ -1779,13 +1770,13 @@ function(raylib_load_file_data)
     bruter_push_pointer(stack, list, NULL, BRUTER_TYPE_LIST);
 }
 
-function(raylib_unload_file_data)
+function(feraw_UnloadFileData)
 {
     void *data = bruter_pop_pointer(stack);
     UnloadFileData(data);
 }
 
-function(raylib_save_file_data)
+function(feraw_SaveFileData)
 {
     char *fileName = (char*)bruter_pop_pointer(stack);
     void *data = bruter_pop_pointer(stack);
@@ -1794,29 +1785,29 @@ function(raylib_save_file_data)
     bruter_push_int(stack, success, NULL, BRUTER_TYPE_ANY);
 }
 
-function(raylib_export_data_as_code)
+function(feraw_ExportDataAsCode)
 {
-    char *data = (char*)bruter_pop_pointer(stack);
+    unsigned char *data = (unsigned char*)bruter_pop_pointer(stack);
     int dataSize = bruter_pop_int(stack);
     char *fileName = (char*)bruter_pop_pointer(stack);
     bool success = ExportDataAsCode(data, dataSize, fileName);
     bruter_push_int(stack, success, NULL, BRUTER_TYPE_ANY);
 }
 
-function(raylib_load_file_text)
+function(feraw_LoadFileText)
 {
     char *fileName = (char*)bruter_pop_pointer(stack);
     char *text = LoadFileText(fileName);
     bruter_push_pointer(stack, text, NULL, BRUTER_TYPE_BUFFER);
 }
 
-function(raylib_unload_file_text)
+function(feraw_UnloadFileText)
 {
     char *text = (char*)bruter_pop_pointer(stack);
     UnloadFileText(text);
 }
 
-function(raylib_save_file_text)
+function(feraw_SaveFileText)
 {
     char *fileName = (char*)bruter_pop_pointer(stack);
     char *text = (char*)bruter_pop_pointer(stack);
@@ -1825,21 +1816,21 @@ function(raylib_save_file_text)
 }
 
 // File system functions
-function(raylib_file_exists)
+function(feraw_FileExists)
 {
     char *fileName = (char*)bruter_pop_pointer(stack);
     bool exists = FileExists(fileName);
     bruter_push_int(stack, exists, NULL, BRUTER_TYPE_ANY);
 }
 
-function(raylib_directory_exists)
+function(feraw_DirectoryExists)
 {
     char *dirPath = (char*)bruter_pop_pointer(stack);
     bool exists = DirectoryExists(dirPath);
     bruter_push_int(stack, exists, NULL, BRUTER_TYPE_ANY);
 }
 
-function(raylib_is_file_extension)
+function(feraw_IsFileExtension)
 {
     char *fileName = (char*)bruter_pop_pointer(stack);
     char *ext = (char*)bruter_pop_pointer(stack);
@@ -1847,96 +1838,96 @@ function(raylib_is_file_extension)
     bruter_push_int(stack, isExt, NULL, BRUTER_TYPE_ANY);
 }
 
-function(raylib_get_file_length)
+function(feraw_GetFileLength)
 {
     char *fileName = (char*)bruter_pop_pointer(stack);
     unsigned int length = GetFileLength(fileName);
     bruter_push_int(stack, length, NULL, BRUTER_TYPE_ANY);
 }
 
-function(raylib_get_file_extension)
+function(feraw_GetFileExtension)
 {
     char *fileName = (char*)bruter_pop_pointer(stack);
-    char *ext = GetFileExtension(fileName);
-    bruter_push_pointer(stack, ext, NULL, BRUTER_TYPE_BUFFER);
+    const char *ext = GetFileExtension(fileName);
+    bruter_push_pointer(stack, strdup(ext), NULL, BRUTER_TYPE_BUFFER);
 }
 
-function(raylib_get_file_name)
+function(feraw_GetFileName)
 {
     char *filePath = (char*)bruter_pop_pointer(stack);
-    char *fileName = GetFileName(filePath);
-    bruter_push_pointer(stack, fileName, NULL, BRUTER_TYPE_BUFFER);
+    const char *fileName = GetFileName(filePath);
+    bruter_push_pointer(stack, strdup(fileName), NULL, BRUTER_TYPE_BUFFER);
 }
 
-function(raylib_get_file_name_without_ext)
+function(feraw_GetFileNameWithoutExt)
 {
     char *filePath = (char*)bruter_pop_pointer(stack);
-    char *fileNameWithoutExt = GetFileNameWithoutExt(filePath);
-    bruter_push_pointer(stack, fileNameWithoutExt, NULL, BRUTER_TYPE_BUFFER);
+    const char *fileNameWithoutExt = GetFileNameWithoutExt(filePath);
+    bruter_push_pointer(stack, strdup(fileNameWithoutExt), NULL, BRUTER_TYPE_BUFFER);
 }
 
-function(raylib_get_directory_path)
+function(feraw_GetDirectoryPath)
 {
     char *filePath = (char*)bruter_pop_pointer(stack);
-    char *dirPath = GetDirectoryPath(filePath);
-    bruter_push_pointer(stack, dirPath, NULL, BRUTER_TYPE_BUFFER);
+    const char *dirPath = GetDirectoryPath(filePath);
+    bruter_push_pointer(stack, strdup(dirPath), NULL, BRUTER_TYPE_BUFFER);
 }
 
-function(raylib_get_prev_directory_path)
+function(feraw_GetPrevDirectoryPath)
 {
     char *filePath = (char*)bruter_pop_pointer(stack);
-    char *prevDirPath = GetPreviousDirectoryPath(filePath);
-    bruter_push_pointer(stack, prevDirPath, NULL, BRUTER_TYPE_BUFFER);
+    const char *prevDirPath = GetPrevDirectoryPath(filePath);
+    bruter_push_pointer(stack, strdup(prevDirPath), NULL, BRUTER_TYPE_BUFFER);
 }
 
-function(raylib_get_working_directory)
+function(feraw_GetWorkingDirectory)
 {
-    char *workingDir = GetWorkingDirectory();
-    bruter_push_pointer(stack, workingDir, NULL, BRUTER_TYPE_BUFFER);
+    const char *workingDir = GetWorkingDirectory();
+    bruter_push_pointer(stack, strdup(workingDir), NULL, BRUTER_TYPE_BUFFER);
 }
 
-function(raylib_get_application_directory)
+function(feraw_GetApplicationDirectory)
 {
-    char *appDir = GetApplicationDirectory();
-    bruter_push_pointer(stack, appDir, NULL, BRUTER_TYPE_BUFFER);
+    const char *appDir = GetApplicationDirectory();
+    bruter_push_pointer(stack, strdup(appDir), NULL, BRUTER_TYPE_BUFFER);
 }
 
-function(raylib_make_directory)
+function(feraw_MakeDirectory)
 {
     char *dirPath = (char*)bruter_pop_pointer(stack);
     bool success = MakeDirectory(dirPath);
     bruter_push_int(stack, success, NULL, BRUTER_TYPE_ANY);
 }
 
-function(raylib_change_directory)
+function(feraw_ChangeDirectory)
 {
     char *dirPath = (char*)bruter_pop_pointer(stack);
     bool success = ChangeDirectory(dirPath);
     bruter_push_int(stack, success, NULL, BRUTER_TYPE_ANY);
 }
 
-function(raylib_is_path_file)
+function(feraw_IsPathFile)
 {
     char *path = (char*)bruter_pop_pointer(stack);
     bool isFile = IsPathFile(path);
     bruter_push_int(stack, isFile, NULL, BRUTER_TYPE_ANY);
 }
 
-function(raylib_is_filename_valid)
+function(feraw_IsFilenameValid)
 {
     char *fileName = (char*)bruter_pop_pointer(stack);
     bool isValid = IsFileNameValid(fileName);
     bruter_push_int(stack, isValid, NULL, BRUTER_TYPE_ANY);
 }
 
-function(raylib_load_directory_files)
+function(feraw_LoadDirectoryFiles)
 {
     char *dirPath = (char*)bruter_pop_pointer(stack);
     FilePathList filePathList = LoadDirectoryFiles(dirPath);
     bruter_push_pointer(stack, file_path_list_to_list(filePathList), NULL, BRUTER_TYPE_LIST);
 }
 
-function(raylib_load_directory_files_ex)
+function(feraw_LoadDirectoryFilesEx)
 {
     char *dirPath = (char*)bruter_pop_pointer(stack);
     const char* filter = (const char*)bruter_pop_pointer(stack);
@@ -1945,31 +1936,31 @@ function(raylib_load_directory_files_ex)
     bruter_push_pointer(stack, file_path_list_to_list(filePathList), NULL, BRUTER_TYPE_LIST);
 }
 
-function(raylib_unload_directory_files)
+function(feraw_UnloadDirectoryFiles)
 {
     FilePathList filePathList = file_path_list_constructor(bruter_pop_pointer(stack));
     UnloadDirectoryFiles(filePathList);
 }
 
-function(raylib_is_file_dropped)
+function(feraw_IsFileDropped)
 {
     bool isDropped = IsFileDropped();
     bruter_push_int(stack, isDropped, NULL, BRUTER_TYPE_ANY);
 }
 
-function(raylib_load_dropped_files)
+function(feraw_LoadDroppedFiles)
 {
     FilePathList filePathList = LoadDroppedFiles();
     bruter_push_pointer(stack, file_path_list_to_list(filePathList), NULL, BRUTER_TYPE_LIST);
 }
 
-function(raylib_unload_dropped_files)
+function(feraw_UnloadDroppedFiles)
 {
     FilePathList filePathList = file_path_list_constructor(bruter_pop_pointer(stack));
     UnloadDroppedFiles(filePathList);
 }
 
-function(raylib_get_file_mod_time)
+function(feraw_GetFileModTime)
 {
     char *fileName = (char*)bruter_pop_pointer(stack);
     long modTime = GetFileModTime(fileName);
@@ -1977,7 +1968,7 @@ function(raylib_get_file_mod_time)
 }
 
 // Compression/Encoding functionality
-function(raylib_compress_data)
+function(feraw_CompressData)
 {
     void *data = bruter_pop_pointer(stack);
     int dataSize = bruter_pop_int(stack);
@@ -1986,7 +1977,7 @@ function(raylib_compress_data)
     bruter_push_pointer(stack, compressedData, NULL, BRUTER_TYPE_BUFFER);
 }
 
-function(raylib_decompress_data)
+function(feraw_DecompressData)
 {
     void *data = bruter_pop_pointer(stack);
     int dataSize = bruter_pop_int(stack);
@@ -1995,7 +1986,7 @@ function(raylib_decompress_data)
     bruter_push_pointer(stack, decompressedData, NULL, BRUTER_TYPE_BUFFER);
 }
 
-function(raylib_encode_data_base64)
+function(feraw_EncodeDataBase64)
 {
     void *data = bruter_pop_pointer(stack);
     int dataSize = bruter_pop_int(stack);
@@ -2004,15 +1995,15 @@ function(raylib_encode_data_base64)
     bruter_push_pointer(stack, encodedData, NULL, BRUTER_TYPE_BUFFER);
 }
 
-function(raylib_decode_data_base64)
+function(feraw_DecodeDataBase64)
 {
-    char *encodedData = (char*)bruter_pop_pointer(stack);
+    const unsigned char *encodedData = (const unsigned char*)bruter_pop_pointer(stack);
     int *decodedDataSize = (int*)bruter_pop_pointer(stack);
     void *decodedData = DecodeDataBase64(encodedData, decodedDataSize);
     bruter_push_pointer(stack, decodedData, NULL, BRUTER_TYPE_BUFFER);
 }
 
-function(raylib_compute_crc32)
+function(feraw_ComputeCrc32)
 {
     void *data = bruter_pop_pointer(stack);
     int dataSize = bruter_pop_int(stack);
@@ -2020,7 +2011,7 @@ function(raylib_compute_crc32)
     bruter_push_int(stack, crc, NULL, BRUTER_TYPE_ANY);
 }
 
-function(raylib_compute_md5)
+function(feraw_ComputeMd5)
 {
     void *data = bruter_pop_pointer(stack);
     int dataSize = bruter_pop_int(stack);
@@ -2028,7 +2019,7 @@ function(raylib_compute_md5)
     bruter_push_pointer(stack, data, NULL, BRUTER_TYPE_BUFFER);
 }
 
-function(raylib_compute_sha1)
+function(feraw_ComputeSha1)
 {
     void *data = bruter_pop_pointer(stack);
     int dataSize = bruter_pop_int(stack);
@@ -2037,20 +2028,20 @@ function(raylib_compute_sha1)
 }
 
 // Automation events functionality
-function(raylib_load_automation_event_list)
+function(feraw_LoadAutomationEventList)
 {
-    char *fileName = (char*)bruter_pop_pointer(stack);
-    AutomationEventList eventList = automation_event_list_constructor(fileName);
+    BruterList *automation_event_list = bruter_pop_pointer(stack);
+    AutomationEventList eventList = automation_event_list_constructor(automation_event_list);
     bruter_push_pointer(stack, automation_event_list_to_list(eventList), NULL, BRUTER_TYPE_LIST);
 }
 
-function(raylib_unload_automation_event_list)
+function(feraw_UnloadAutomationEventList)
 {
     AutomationEventList eventList = automation_event_list_constructor(bruter_pop_pointer(stack));
     UnloadAutomationEventList(eventList);
 }
 
-function(raylib_export_automation_event_list)
+function(feraw_ExportAutomationEventList)
 {
     AutomationEventList eventList = automation_event_list_constructor(bruter_pop_pointer(stack));
     char *fileName = (char*)bruter_pop_pointer(stack);
@@ -2059,104 +2050,104 @@ function(raylib_export_automation_event_list)
 }
 
 // needs revision!!!!!
-function(raylib_set_automation_event_list)
+function(feraw_SetAutomationEventList)
 {
     AutomationEventList eventList = automation_event_list_constructor(bruter_pop_pointer(stack));
     SetAutomationEventList(&eventList);
 }
 
-function(raylib_set_automation_event_base_frame)
+function(feraw_SetAutomationEventBaseFrame)
 {
     int baseFrame = bruter_pop_int(stack);
     SetAutomationEventBaseFrame(baseFrame);
 }
 
-function(raylib_start_automation_event_recording)
+function(feraw_StartAutomationEventRecording)
 {
     StartAutomationEventRecording();
 }
 
-function(raylib_stop_automation_event_recording)
+function(feraw_StopAutomationEventRecording)
 {
     StopAutomationEventRecording();
 }
 
-function(raylib_play_automation_event)
+function(feraw_PlayAutomationEvent)
 {
-    AutomationEventList eventList = automation_event_list_constructor(bruter_pop_pointer(stack));
-    PlayAutomationEventList(eventList);
+    AutomationEvent eventList = automation_event_constructor(bruter_pop_pointer(stack));
+    PlayAutomationEvent(eventList);
 }
 
 // input-related functions: keyboard
-function(raylib_is_key_pressed)
+function(feraw_IsKeyPressed)
 {
     int key = bruter_pop_int(stack);
     bool isPressed = IsKeyPressed(key);
     bruter_push_int(stack, isPressed, NULL, BRUTER_TYPE_ANY);
 }
 
-function(raylib_is_key_pressed_repeat)
+function(feraw_IsKeyPressedRepeat)
 {
     int key = bruter_pop_int(stack);
     bool isPressedRepeat = IsKeyPressedRepeat(key);
     bruter_push_int(stack, isPressedRepeat, NULL, BRUTER_TYPE_ANY);
 }
 
-function(raylib_is_key_down)
+function(feraw_IsKeyDown)
 {
     int key = bruter_pop_int(stack);
     bool isDown = IsKeyDown(key);
     bruter_push_int(stack, isDown, NULL, BRUTER_TYPE_ANY);
 }
 
-function(raylib_is_key_released)
+function(feraw_IsKeyReleased)
 {
     int key = bruter_pop_int(stack);
     bool isReleased = IsKeyReleased(key);
     bruter_push_int(stack, isReleased, NULL, BRUTER_TYPE_ANY);
 }
 
-function(raylib_is_key_up)
+function(feraw_IsKeyUp)
 {
     int key = bruter_pop_int(stack);
     bool isUp = IsKeyUp(key);
     bruter_push_int(stack, isUp, NULL, BRUTER_TYPE_ANY);
 }
 
-function(raylib_get_key_pressed)
+function(feraw_GetKeyPressed)
 {
     int key = GetKeyPressed();
     bruter_push_int(stack, key, NULL, BRUTER_TYPE_ANY);
 }
 
-function(raylib_get_key_pressed_repeat)
+function(feraw_GetCharPressed)
 {
-    int key = GetKeyPressedRepeat();
-    bruter_push_int(stack, key, NULL, BRUTER_TYPE_ANY);
+    int charCode = GetCharPressed();
+    bruter_push_int(stack, charCode, NULL, BRUTER_TYPE_ANY);
 }
 
-function(raylin_set_exit_key)
+function(feraw_SetExitKey)
 {
     int key = bruter_pop_int(stack);
     SetExitKey(key);
 }
 
 // input-related functions: gamepads
-function(raylib_is_gamepad_available)
+function(feraw_IsGamepadAvailable)
 {
     int gamepad = bruter_pop_int(stack);
     bool isAvailable = IsGamepadAvailable(gamepad);
     bruter_push_int(stack, isAvailable, NULL, BRUTER_TYPE_ANY);
 }
 
-function(raylib_get_gamepad_name)
+function(feraw_GetGamepadName)
 {
     int gamepad = bruter_pop_int(stack);
-    char *name = GetGamepadName(gamepad);
-    bruter_push_pointer(stack, name, NULL, BRUTER_TYPE_BUFFER);
+    const char *name = GetGamepadName(gamepad);
+    bruter_push_pointer(stack, strdup(name), NULL, BRUTER_TYPE_BUFFER);
 }
 
-function(raylib_is_gamepad_button_pressed)
+function(feraw_IsGamepadButtonPressed)
 {
     int gamepad = bruter_pop_int(stack);
     int button = bruter_pop_int(stack);
@@ -2164,7 +2155,7 @@ function(raylib_is_gamepad_button_pressed)
     bruter_push_int(stack, isPressed, NULL, BRUTER_TYPE_ANY);
 }
 
-function(raylib_is_gamepad_button_down)
+function(feraw_IsGamepadButtonDown)
 {
     int gamepad = bruter_pop_int(stack);
     int button = bruter_pop_int(stack);
@@ -2172,7 +2163,7 @@ function(raylib_is_gamepad_button_down)
     bruter_push_int(stack, isDown, NULL, BRUTER_TYPE_ANY);
 }
 
-function(raylib_is_gamepad_button_released)
+function(feraw_IsGamepadButtonReleased)
 {
     int gamepad = bruter_pop_int(stack);
     int button = bruter_pop_int(stack);
@@ -2180,7 +2171,7 @@ function(raylib_is_gamepad_button_released)
     bruter_push_int(stack, isReleased, NULL, BRUTER_TYPE_ANY);
 }
 
-function(raylib_is_gamepad_button_up)
+function(feraw_IsGamepadButtonUp)
 {
     int gamepad = bruter_pop_int(stack);
     int button = bruter_pop_int(stack);
@@ -2188,21 +2179,21 @@ function(raylib_is_gamepad_button_up)
     bruter_push_int(stack, isUp, NULL, BRUTER_TYPE_ANY);
 }
 
-function(raylib_get_gamepad_button_pressed)
+function(feraw_GetGamepadButtonPressed)
 {
     int gamepad = bruter_pop_int(stack);
     int button = GetGamepadButtonPressed();
     bruter_push_int(stack, button, NULL, BRUTER_TYPE_ANY);
 }
 
-function(raylib_get_gamepad_axis_count)
+function(feraw_GetGamepadAxisCount)
 {
     int gamepad = bruter_pop_int(stack);
     int axisCount = GetGamepadAxisCount(gamepad);
     bruter_push_int(stack, axisCount, NULL, BRUTER_TYPE_ANY);
 }
 
-function(raylib_get_gamepad_axis_movement)
+function(feraw_GetGamepadAxisMovement)
 {
     int gamepad = bruter_pop_int(stack);
     int axis = bruter_pop_int(stack);
@@ -2210,14 +2201,14 @@ function(raylib_get_gamepad_axis_movement)
     bruter_push_float(stack, movement, NULL, BRUTER_TYPE_FLOAT);
 }
 
-function(raylib_set_gamepad_mappings)
+function(feraw_SetGamepadMappings)
 {
     char *mapping = (char*)bruter_pop_pointer(stack);
-    bool success = SetGamepadMapping(mapping);
+    bool success = SetGamepadMappings(mapping);
     bruter_push_int(stack, success, NULL, BRUTER_TYPE_ANY);
 }
 
-function(raylib_set_gamepad_vibration)
+function(feraw_SetGamepadVibration)
 {
     int gamepad = bruter_pop_int(stack);
     float leftVibration = bruter_pop_float(stack);
@@ -2227,92 +2218,86 @@ function(raylib_set_gamepad_vibration)
 }
 
 // input-related functions: mouse
-function(raylib_is_mouse_button_pressed)
+function(feraw_IsMouseButtonPressed)
 {
     int button = bruter_pop_int(stack);
     bool isPressed = IsMouseButtonPressed(button);
     bruter_push_int(stack, isPressed, NULL, BRUTER_TYPE_ANY);
 }
 
-function(raylib_is_mouse_button_down)
+function(feraw_IsMouseButtonDown)
 {
     int button = bruter_pop_int(stack);
     bool isDown = IsMouseButtonDown(button);
     bruter_push_int(stack, isDown, NULL, BRUTER_TYPE_ANY);
 }
 
-function(raylib_is_mouse_button_released)
+function(feraw_IsMouseButtonReleased)
 {
     int button = bruter_pop_int(stack);
     bool isReleased = IsMouseButtonReleased(button);
     bruter_push_int(stack, isReleased, NULL, BRUTER_TYPE_ANY);
 }
 
-function(raylib_is_mouse_button_up)
+function(feraw_IsMouseButtonUp)
 {
     int button = bruter_pop_int(stack);
     bool isUp = IsMouseButtonUp(button);
     bruter_push_int(stack, isUp, NULL, BRUTER_TYPE_ANY);
 }
 
-function(raylib_get_mouse_x)
+function(feraw_GetMouseX)
 {
     int x = GetMouseX();
     bruter_push_int(stack, x, NULL, BRUTER_TYPE_ANY);
 }
 
-function(raylib_get_mouse_y)
+function(feraw_GetMouseY)
 {
     int y = GetMouseY();
     bruter_push_int(stack, y, NULL, BRUTER_TYPE_ANY);
 }
 
-function(raylib_get_mouse_position)
+function(feraw_GetMousePosition)
 {
     Vector2 position = GetMousePosition();
     bruter_push_pointer(stack, vector2_to_list(position), NULL, BRUTER_TYPE_LIST);
 }
 
-function(raylib_get_mouse_delta)
+function(feraw_GetMouseDelta)
 {
     Vector2 delta = GetMouseDelta();
     bruter_push_pointer(stack, vector2_to_list(delta), NULL, BRUTER_TYPE_LIST);
 }
 
-function(raylib_set_mouse_position)
+function(feraw_SetMousePosition)
 {
     int x = bruter_pop_int(stack);
     int y = bruter_pop_int(stack);
     SetMousePosition(x, y);
 }
 
-function(raylib_set_mouse_offset)
+function(feraw_SetMouseOffset)
 {
     int offsetX = bruter_pop_int(stack);
     int offsetY = bruter_pop_int(stack);
     SetMouseOffset(offsetX, offsetY);
 }
 
-function(raylib_set_mouse_scale)
+function(feraw_SetMouseScale)
 {
     float scaleX = bruter_pop_float(stack);
     float scaleY = bruter_pop_float(stack);
     SetMouseScale(scaleX, scaleY);
 }
 
-function(raylib_get_mouse_wheel_move)
+function(feraw_GetMouseWheelMove)
 {
     float wheelMove = GetMouseWheelMove();
     bruter_push_float(stack, wheelMove, NULL, BRUTER_TYPE_FLOAT);
 }
 
-function(raylib_get_mouse_wheel_move_v)
-{
-    Vector2 wheelMove = GetMouseWheelMoveV();
-    bruter_push_pointer(stack, vector2_to_list(wheelMove), NULL, BRUTER_TYPE_LIST);
-}
-
-function(raylib_set_mouse_cursor)
+function(feraw_SetMouseCursor)
 {
     int cursor = bruter_pop_int(stack);
     SetMouseCursor(cursor);
@@ -2320,97 +2305,97 @@ function(raylib_set_mouse_cursor)
 
 // input-related functions: touch
 
-function(raylib_get_touch_x)
+function(feraw_GetTouchX)
 {
     int touchX = GetTouchX();
     bruter_push_int(stack, touchX, NULL, BRUTER_TYPE_ANY);
 }
 
-function(raylib_get_touch_y)
+function(feraw_GetTouchY)
 {
     int touchY = GetTouchY();
     bruter_push_int(stack, touchY, NULL, BRUTER_TYPE_ANY);
 }
 
-function(raylib_get_touch_position)
+function(feraw_GetTouchPosition)
 {
     int index = bruter_pop_int(stack);
     Vector2 position = GetTouchPosition(index);
     bruter_push_pointer(stack, vector2_to_list(position), NULL, BRUTER_TYPE_LIST);
 }
 
-function(raylib_get_touch_point_id)
+function(feraw_GetTouchPointId)
 {
     int index = bruter_pop_int(stack);
     int id = GetTouchPointId(index);
     bruter_push_int(stack, id, NULL, BRUTER_TYPE_ANY);
 }
 
-function(raylib_get_touch_point_count)
+function(feraw_GetTouchPointCount)
 {
     int count = GetTouchPointCount();
     bruter_push_int(stack, count, NULL, BRUTER_TYPE_ANY);
 }
 
 // Gestures and Touch Handling functions
-function(raylib_set_gestures_enabled)
+function(feraw_SetGesturesEnabled)
 {
     unsigned int gestureFlags = bruter_pop_int(stack);
     SetGesturesEnabled(gestureFlags);
 }
 
-function(raylib_is_gesture_detected)
+function(feraw_IsGestureDetected)
 {
     int gesture = bruter_pop_int(stack);
     bool detected = IsGestureDetected(gesture);
     bruter_push_int(stack, detected, NULL, BRUTER_TYPE_ANY);
 }
 
-function(raylib_get_gesture_detected)
+function(feraw_GetGestureDetected)
 {
     int gesture = GetGestureDetected();
     bruter_push_int(stack, gesture, NULL, BRUTER_TYPE_ANY);
 }
 
-function(raylib_get_gesture_hold_duration)
+function(feraw_GetGestureHoldDuration)
 {
     float duration = GetGestureHoldDuration();
     bruter_push_float(stack, duration, NULL, BRUTER_TYPE_FLOAT);
 }
 
-function(raylib_get_gesture_drag_vector)
+function(feraw_GetGestureDragVector)
 {
     Vector2 dragVector = GetGestureDragVector();
     bruter_push_pointer(stack, vector2_to_list(dragVector), NULL, BRUTER_TYPE_LIST);
 }
 
-function(raylib_get_gesture_drag_angle)
+function(feraw_GetGestureDragAngle)
 {
     float angle = GetGestureDragAngle();
     bruter_push_float(stack, angle, NULL, BRUTER_TYPE_FLOAT);
 }
 
-function(raylib_get_gesture_pinch_vector)
+function(feraw_GetGesturePinchVector)
 {
     Vector2 pinchVector = GetGesturePinchVector();
     bruter_push_pointer(stack, vector2_to_list(pinchVector), NULL, BRUTER_TYPE_LIST);
 }
 
-function(raylib_get_gesture_pinch_angle)
+function(feraw_GetGesturePinchAngle)
 {
     float angle = GetGesturePinchAngle();
     bruter_push_float(stack, angle, NULL, BRUTER_TYPE_FLOAT);
 }
 
 // Camera system functions
-function(raylib_update_camera)
+function(feraw_UpdateCamera)
 {
     Camera3D *camera = (Camera3D*)bruter_pop_pointer(stack);
     int mode = bruter_pop_int(stack);
     UpdateCamera(camera, mode);
 }
 
-function(raylib_update_camera_pro)
+function(feraw_UpdateCameraPro)
 {
     Camera3D *camera = (Camera3D*)bruter_pop_pointer(stack);
     Vector3 move = vector3_constructor(bruter_pop_pointer(stack));
@@ -2420,27 +2405,27 @@ function(raylib_update_camera_pro)
 }
 
 // basic shapes drawing functions
-function(raylib_set_shapes_texture)
+function(feraw_SetShapesTexture)
 {
     Texture2D texture = texture_constructor(bruter_pop_pointer(stack));
     Rectangle source = rectangle_constructor(bruter_pop_pointer(stack));
     SetShapesTexture(texture, source);
 }
 
-function(raylib_get_shapes_texture)
+function(feraw_GetShapesTexture)
 {
     Texture2D texture = GetShapesTexture();
     bruter_push_pointer(stack, texture_to_list(texture), NULL, BRUTER_TYPE_LIST);
 }
 
-function(raylib_get_shapes_texture_rectangle)
+function(feraw_GetShapesTextureRectangle)
 {
     Rectangle source = GetShapesTextureRectangle();
     bruter_push_pointer(stack, rectangle_to_list(source), NULL, BRUTER_TYPE_LIST);
 }
 
 // basic shapes drawing functions
-function(raylib_draw_pixel)
+function(feraw_DrawPixel)
 {
     int posX = bruter_pop_int(stack);
     int posY = bruter_pop_int(stack);
@@ -2448,14 +2433,7 @@ function(raylib_draw_pixel)
     DrawPixel(posX, posY, color);
 }
 
-function(raylib_draw_pixel_v)
-{
-    Vector2 position = vector2_constructor(bruter_pop_pointer(stack));
-    Color color = color_from_int(bruter_pop_int(stack));
-    DrawPixelV(position, color);
-}
-
-function(raylib_draw_line)
+function(feraw_DrawLine)
 {
     int startX = bruter_pop_int(stack);
     int startY = bruter_pop_int(stack);
@@ -2465,15 +2443,7 @@ function(raylib_draw_line)
     DrawLine(startX, startY, endX, endY, color);
 }
 
-function(raylib_draw_line_v)
-{
-    Vector2 start = vector2_constructor(bruter_pop_pointer(stack));
-    Vector2 end = vector2_constructor(bruter_pop_pointer(stack));
-    Color color = color_from_int(bruter_pop_int(stack));
-    DrawLineV(start, end, color);
-}
-
-function(raylib_draw_line_ex)
+function(feraw_DrawLineEx)
 {
     Vector2 start = vector2_constructor(bruter_pop_pointer(stack));
     Vector2 end = vector2_constructor(bruter_pop_pointer(stack));
@@ -2482,16 +2452,15 @@ function(raylib_draw_line_ex)
     DrawLineEx(start, end, thick, color);
 }
 
-function(raylib_draw_line_strip)
+function(feraw_DrawLineStrip)
 {
-    BruterList *pointsList = bruter_pop_list(stack);
-    Vector2 *points = (Vector2*)bruter_list_to_pointer(pointsList);
-    int pointCount = bruter_list_length(pointsList);
+    Vector2 *points = bruter_pop_pointer(stack);
+    int pointCount = bruter_pop_int(stack);
     Color color = color_from_int(bruter_pop_int(stack));
     DrawLineStrip(points, pointCount, color);
 }
 
-function(raylib_draw_line_bezier)
+function(feraw_DrawLineBezier)
 {
     Vector2 start = vector2_constructor(bruter_pop_pointer(stack));
     Vector2 end = vector2_constructor(bruter_pop_pointer(stack));
@@ -2500,7 +2469,7 @@ function(raylib_draw_line_bezier)
     DrawLineBezier(start, end, thick, color);
 }
 
-function(raylib_draw_circle)
+function(feraw_DrawCircle)
 {
     int centerX = bruter_pop_int(stack);
     int centerY = bruter_pop_int(stack);
@@ -2509,7 +2478,7 @@ function(raylib_draw_circle)
     DrawCircle(centerX, centerY, radius, color);
 }
 
-function(raylib_draw_circle_sector)
+function(feraw_DrawCircleSector)
 {
     Vector2 center = vector2_constructor(bruter_pop_pointer(stack));
     float radius = bruter_pop_float(stack);
@@ -2520,7 +2489,7 @@ function(raylib_draw_circle_sector)
     DrawCircleSector(center, radius, startAngle, endAngle, segments, color);
 }
 
-function(raylib_draw_circle_sector_lines)
+function(feraw_DrawCircleSectorLines)
 {
     Vector2 center = vector2_constructor(bruter_pop_pointer(stack));
     float radius = bruter_pop_float(stack);
@@ -2531,7 +2500,7 @@ function(raylib_draw_circle_sector_lines)
     DrawCircleSectorLines(center, radius, startAngle, endAngle, segments, color);
 }
 
-function(raylib_draw_circle_gradient)
+function(feraw_DrawCircleGradient)
 {
     int centerX = bruter_pop_int(stack);
     int centerY = bruter_pop_int(stack);
@@ -2541,15 +2510,7 @@ function(raylib_draw_circle_gradient)
     DrawCircleGradient(centerX, centerY, radius, innerColor, outerColor);
 }
 
-function(raylib_draw_circle_v)
-{
-    Vector2 center = vector2_constructor(bruter_pop_pointer(stack));
-    float radius = bruter_pop_float(stack);
-    Color color = color_from_int(bruter_pop_int(stack));
-    DrawCircleV(center, radius, color);
-}
-
-function(raylib_draw_circle_lines)
+function(feraw_DrawCircleLines)
 {
     int centerX = bruter_pop_int(stack);
     int centerY = bruter_pop_int(stack);
@@ -2558,15 +2519,7 @@ function(raylib_draw_circle_lines)
     DrawCircleLines(centerX, centerY, radius, color);
 }
 
-function(raylib_draw_circle_lines_v)
-{
-    Vector2 center = vector2_constructor(bruter_pop_pointer(stack));
-    float radius = bruter_pop_float(stack);
-    Color color = color_from_int(bruter_pop_int(stack));
-    DrawCircleLinesV(center, radius, color);
-}
-
-function(raylib_draw_rectangle)
+function(feraw_DrawRectangle)
 {
     int posX = bruter_pop_int(stack);
     int posY = bruter_pop_int(stack);
@@ -2575,23 +2528,14 @@ function(raylib_draw_rectangle)
     Color color = color_from_int(bruter_pop_int(stack));
     DrawRectangle(posX, posY, width, height, color);
 }
-
-function(raylib_draw_rectangle_v)
-{
-    Vector2 position = vector2_constructor(bruter_pop_pointer(stack));
-    Vector2 size = vector2_constructor(bruter_pop_pointer(stack));
-    Color color = color_from_int(bruter_pop_int(stack));
-    DrawRectangleV(position, size, color);
-}
-
-function(raylib_draw_rectangle_rec)
+function(feraw_DrawRectangleRec)
 {
     Rectangle rec = rectangle_constructor(bruter_pop_pointer(stack));
     Color color = color_from_int(bruter_pop_int(stack));
     DrawRectangleRec(rec, color);
 }
 
-function(raylib_draw_rectangle_pro)
+function(feraw_DrawRectanglePro)
 {
     Rectangle rec = rectangle_constructor(bruter_pop_pointer(stack));
     Vector2 origin = vector2_constructor(bruter_pop_pointer(stack));
@@ -2600,18 +2544,7 @@ function(raylib_draw_rectangle_pro)
     DrawRectanglePro(rec, origin, rotation, color);
 }
 
-function(raylib_draw_rectangle_gradient_v)
-{
-    int posx = bruter_pop_int(stack);
-    int posy = bruter_pop_int(stack);
-    int width = bruter_pop_int(stack);
-    int height = bruter_pop_int(stack);
-    Color top = color_from_int(bruter_pop_int(stack));
-    Color bottom = color_from_int(bruter_pop_int(stack));
-    DrawRectangleGradientV(posx, posy, width, height, top, bottom);
-}
-
-function(raylib_draw_rectangle_gradient_h)
+function(feraw_DrawRectangleGradientH)
 {
     int posx = bruter_pop_int(stack);
     int posy = bruter_pop_int(stack);
@@ -2622,7 +2555,7 @@ function(raylib_draw_rectangle_gradient_h)
     DrawRectangleGradientH(posx, posy, width, height, left, right);
 }
 
-function(raylib_draw_rectangle_gradient_ex)
+function(feraw_DrawRectangleGradientEx)
 {
     Rectangle rec = rectangle_constructor(bruter_pop_pointer(stack));
     Color color1 = color_from_int(bruter_pop_int(stack));
@@ -2632,7 +2565,7 @@ function(raylib_draw_rectangle_gradient_ex)
     DrawRectangleGradientEx(rec, color1, color2, color3, color4);
 }
 
-function(raylib_draw_rectangle_lines)
+function(feraw_DrawRectangleLines)
 {
     int posX = bruter_pop_int(stack);
     int posY = bruter_pop_int(stack);
@@ -2642,7 +2575,7 @@ function(raylib_draw_rectangle_lines)
     DrawRectangleLines(posX, posY, width, height, color);
 }
 
-function(raylib_draw_rectangle_lines_ex)
+function(feraw_DrawRectangleLinesEx)
 {
     Rectangle rec = rectangle_constructor(bruter_pop_pointer(stack));
     float thick = bruter_pop_float(stack);
@@ -2650,7 +2583,7 @@ function(raylib_draw_rectangle_lines_ex)
     DrawRectangleLinesEx(rec, thick, color);
 }
 
-function(raylib_draw_rectangle_rounded)
+function(feraw_DrawRectangleRounded)
 {
     Rectangle rec = rectangle_constructor(bruter_pop_pointer(stack));
     float roundness = bruter_pop_float(stack);
@@ -2659,7 +2592,7 @@ function(raylib_draw_rectangle_rounded)
     DrawRectangleRounded(rec, roundness, segments, color);
 }
 
-function(raylib_draw_rectangle_rounded_lines)
+function(feraw_DrawRectangleRoundedLines)
 {
     Rectangle rec = rectangle_constructor(bruter_pop_pointer(stack));
     float roundness = bruter_pop_float(stack);
@@ -2668,7 +2601,7 @@ function(raylib_draw_rectangle_rounded_lines)
     DrawRectangleRoundedLines(rec, roundness, segments, color);
 }
 
-function(raylib_draw_rectangle_rounded_lines_ex)
+function(feraw_DrawRectangleRoundedLinesEx)
 {
     Rectangle rec = rectangle_constructor(bruter_pop_pointer(stack));
     float roundness = bruter_pop_float(stack);
@@ -2678,7 +2611,7 @@ function(raylib_draw_rectangle_rounded_lines_ex)
     DrawRectangleRoundedLinesEx(rec, roundness, segments, thick, color);
 }
 
-function(raylib_draw_triangle)
+function(feraw_DrawTriangle)
 {
     Vector2 v1 = vector2_constructor(bruter_pop_pointer(stack));
     Vector2 v2 = vector2_constructor(bruter_pop_pointer(stack));
@@ -2687,7 +2620,7 @@ function(raylib_draw_triangle)
     DrawTriangle(v1, v2, v3, color);
 }
 
-function(raylib_draw_triangle_lines)
+function(feraw_DrawTriangleLines)
 {
     Vector2 v1 = vector2_constructor(bruter_pop_pointer(stack));
     Vector2 v2 = vector2_constructor(bruter_pop_pointer(stack));
@@ -2696,25 +2629,23 @@ function(raylib_draw_triangle_lines)
     DrawTriangleLines(v1, v2, v3, color);
 }
 
-function(raylib_draw_triangle_fan)
+function(feraw_DrawTriangleFan)
 {
-    BruterList *pointsList = bruter_pop_list(stack);
-    Vector2 *points = (Vector2*)bruter_list_to_pointer(pointsList);
-    int pointCount = bruter_list_length(pointsList);
+    Vector2 *points = bruter_pop_pointer(stack);
+    int pointCount = bruter_pop_int(stack);
     Color color = color_from_int(bruter_pop_int(stack));
     DrawTriangleFan(points, pointCount, color);
 }
 
-function(raylib_draw_triangle_strip)
+function(feraw_DrawTriangleStrip)
 {
-    BruterList *pointsList = bruter_pop_list(stack);
-    Vector2 *points = (Vector2*)bruter_list_to_pointer(pointsList);
-    int pointCount = bruter_list_length(pointsList);
+    Vector2 *points = bruter_pop_pointer(stack);
+    int pointCount = bruter_pop_int(stack);
     Color color = color_from_int(bruter_pop_int(stack));
     DrawTriangleStrip(points, pointCount, color);
 }
 
-function(raylib_draw_poly)
+function(feraw_DrawPoly)
 {
     Vector2 center = vector2_constructor(bruter_pop_pointer(stack));
     int sides = bruter_pop_int(stack);
@@ -2724,7 +2655,7 @@ function(raylib_draw_poly)
     DrawPoly(center, sides, radius, rotation, color);
 }
 
-function(raylib_draw_poly_lines)
+function(feraw_DrawPolyLines)
 {
     Vector2 center = vector2_constructor(bruter_pop_pointer(stack));
     int sides = bruter_pop_int(stack);
@@ -2734,7 +2665,7 @@ function(raylib_draw_poly_lines)
     DrawPolyLines(center, sides, radius, rotation, color);
 }
 
-function(raylib_draw_poly_lines_ex)
+function(feraw_DrawPolyLinesEx)
 {
     Vector2 center = vector2_constructor(bruter_pop_pointer(stack));
     int sides = bruter_pop_int(stack);
@@ -2746,7 +2677,7 @@ function(raylib_draw_poly_lines_ex)
 }
 
 // splines drawing functions
-function(raylib_draw_spline_linear)
+function(feraw_DrawSplineLinear)
 {
     Vector2 *points = (Vector2*)bruter_pop_pointer(stack);
     int pointCount = bruter_pop_int(stack);
@@ -2755,7 +2686,7 @@ function(raylib_draw_spline_linear)
     DrawSplineLinear(points, pointCount, thick, color);
 }
 
-function(raylib_draw_spline_basis)
+function(feraw_DrawSplineBasis)
 {
     Vector2 *points = (Vector2*)bruter_pop_pointer(stack);
     int pointCount = bruter_pop_int(stack);
@@ -2764,7 +2695,7 @@ function(raylib_draw_spline_basis)
     DrawSplineBasis(points, pointCount, thick, color);
 }
 
-function(raylib_draw_spline_catmull_rom)
+function(feraw_DrawSplineCatmullRom)
 {
     Vector2 *points = (Vector2*)bruter_pop_pointer(stack);
     int pointCount = bruter_pop_int(stack);
@@ -2773,7 +2704,7 @@ function(raylib_draw_spline_catmull_rom)
     DrawSplineCatmullRom(points, pointCount, thick, color);
 }
 
-function(raylib_draw_spline_bezierQuadratic)
+function(feraw_DrawSplineBezierQuadratic)
 {
     Vector2 *points = (Vector2*)bruter_pop_pointer(stack);
     int pointCount = bruter_pop_int(stack);
@@ -2782,7 +2713,7 @@ function(raylib_draw_spline_bezierQuadratic)
     DrawSplineBezierQuadratic(points, pointCount, thick, color);
 }
 
-function(raylib_draw_spline_bezierCubic)
+function(feraw_DrawSplineBezierCubic)
 {
     Vector2 *points = (Vector2*)bruter_pop_pointer(stack);
     int pointCount = bruter_pop_int(stack);
@@ -2791,7 +2722,7 @@ function(raylib_draw_spline_bezierCubic)
     DrawSplineBezierCubic(points, pointCount, thick, color);
 }
 
-function(raylib_draw_spline_segment_linear)
+function(feraw_DrawSplineSegmentLinear)
 {
     Vector2 p1 = vector2_constructor(bruter_pop_pointer(stack));
     Vector2 p2 = vector2_constructor(bruter_pop_pointer(stack));
@@ -2800,7 +2731,7 @@ function(raylib_draw_spline_segment_linear)
     DrawSplineSegmentLinear(p1, p2, thick, color);
 }
 
-function(raylib_draw_spline_segment_basis)
+function(feraw_DrawSplineSegmentBasis)
 {
     Vector2 p1 = vector2_constructor(bruter_pop_pointer(stack));
     Vector2 p2 = vector2_constructor(bruter_pop_pointer(stack));
@@ -2811,7 +2742,7 @@ function(raylib_draw_spline_segment_basis)
     DrawSplineSegmentBasis(p1, p2, p3, p4, thick, color);
 }
 
-function(raylib_draw_spline_segment_catmull_rom)
+function(feraw_DrawSplineSegmentCatmullRom)
 {
     Vector2 p1 = vector2_constructor(bruter_pop_pointer(stack));
     Vector2 p2 = vector2_constructor(bruter_pop_pointer(stack));
@@ -2822,7 +2753,7 @@ function(raylib_draw_spline_segment_catmull_rom)
     DrawSplineSegmentCatmullRom(p1, p2, p3, p4, thick, color);
 }
 
-function(raylib_draw_spline_segment_bezierQuadratic)
+function(feraw_DrawSplineSegmentBezierQuadratic)
 {
     Vector2 p1 = vector2_constructor(bruter_pop_pointer(stack));
     Vector2 p2 = vector2_constructor(bruter_pop_pointer(stack));
@@ -2832,7 +2763,7 @@ function(raylib_draw_spline_segment_bezierQuadratic)
     DrawSplineSegmentBezierQuadratic(p1, p2, p3, thick, color);
 }
 
-function(raylib_draw_spline_segment_bezierCubic)
+function(feraw_DrawSplineSegmentBezierCubic)
 {
     Vector2 p1 = vector2_constructor(bruter_pop_pointer(stack));
     Vector2 p2 = vector2_constructor(bruter_pop_pointer(stack));
@@ -2844,7 +2775,7 @@ function(raylib_draw_spline_segment_bezierCubic)
 }
 
 // spline segment point evaluation functions
-function(raylib_get_spline_point_linear)
+function(feraw_GetSplinePointLinear)
 {
     Vector2 startPos = vector2_constructor(bruter_pop_pointer(stack));
     Vector2 endPos = vector2_constructor(bruter_pop_pointer(stack));
@@ -2853,7 +2784,7 @@ function(raylib_get_spline_point_linear)
     bruter_push_pointer(stack, vector2_to_list(point), NULL, BRUTER_TYPE_LIST);
 }
 
-function(raylib_get_spline_point_basis)
+function(feraw_GetSplinePointBasis)
 {
     Vector2 p1 = vector2_constructor(bruter_pop_pointer(stack));
     Vector2 p2 = vector2_constructor(bruter_pop_pointer(stack));
@@ -2864,7 +2795,7 @@ function(raylib_get_spline_point_basis)
     bruter_push_pointer(stack, vector2_to_list(point), NULL, BRUTER_TYPE_LIST);
 }
 
-function(raylib_get_spline_point_catmull_rom)
+function(feraw_GetSplinePointCatmullRom)
 {
     Vector2 p1 = vector2_constructor(bruter_pop_pointer(stack));
     Vector2 p2 = vector2_constructor(bruter_pop_pointer(stack));
@@ -2875,7 +2806,7 @@ function(raylib_get_spline_point_catmull_rom)
     bruter_push_pointer(stack, vector2_to_list(point), NULL, BRUTER_TYPE_LIST);
 }
 
-function(raylib_get_spline_point_bezierQuad)
+function(feraw_GetSplinePointBezierQuad)
 {
     Vector2 p1 = vector2_constructor(bruter_pop_pointer(stack));
     Vector2 p2 = vector2_constructor(bruter_pop_pointer(stack));
@@ -2885,7 +2816,7 @@ function(raylib_get_spline_point_bezierQuad)
     bruter_push_pointer(stack, vector2_to_list(point), NULL, BRUTER_TYPE_LIST);
 }
 
-function(raylib_get_spline_point_bezierCubic)
+function(feraw_GetSplinePointBezierCubic)
 {
     Vector2 p1 = vector2_constructor(bruter_pop_pointer(stack));
     Vector2 p2 = vector2_constructor(bruter_pop_pointer(stack));
@@ -2897,7 +2828,7 @@ function(raylib_get_spline_point_bezierCubic)
 }
 
 // basic shapes collision detection functions
-function(raylib_check_collision_recs)
+function(feraw_CheckCollisionRecs)
 {
     Rectangle rec1 = rectangle_constructor(bruter_pop_pointer(stack));
     Rectangle rec2 = rectangle_constructor(bruter_pop_pointer(stack));
@@ -2905,7 +2836,7 @@ function(raylib_check_collision_recs)
     bruter_push_int(stack, collision, NULL, BRUTER_TYPE_ANY);
 }
 
-function(raylib_check_collision_circles)
+function(feraw_CheckCollisionCircles)
 {
     Vector2 center1 = vector2_constructor(bruter_pop_pointer(stack));
     float radius1 = bruter_pop_float(stack);
@@ -2915,7 +2846,7 @@ function(raylib_check_collision_circles)
     bruter_push_int(stack, collision, NULL, BRUTER_TYPE_ANY);
 }
 
-function(raylib_check_collision_circle_rec)
+function(feraw_CheckCollisionCircleRec)
 {
     Vector2 center = vector2_constructor(bruter_pop_pointer(stack));
     float radius = bruter_pop_float(stack);
@@ -2924,7 +2855,7 @@ function(raylib_check_collision_circle_rec)
     bruter_push_int(stack, collision, NULL, BRUTER_TYPE_ANY);
 }
 
-function(raylib_check_collision_circle_line)
+function(feraw_CheckCollisionCircleLine)
 {
     Vector2 center = vector2_constructor(bruter_pop_pointer(stack));
     float radius = bruter_pop_float(stack);
@@ -2934,7 +2865,7 @@ function(raylib_check_collision_circle_line)
     bruter_push_int(stack, collision, NULL, BRUTER_TYPE_ANY);
 }
 
-function(raylib_check_collision_point_rec)
+function(feraw_CheckCollisionPointRec)
 {
     Vector2 point = vector2_constructor(bruter_pop_pointer(stack));
     Rectangle rec = rectangle_constructor(bruter_pop_pointer(stack));
@@ -2942,7 +2873,7 @@ function(raylib_check_collision_point_rec)
     bruter_push_int(stack, collision, NULL, BRUTER_TYPE_ANY);
 }
 
-function(raylib_check_collision_point_circle)
+function(feraw_CheckCollisionPointCircle)
 {
     Vector2 point = vector2_constructor(bruter_pop_pointer(stack));
     Vector2 center = vector2_constructor(bruter_pop_pointer(stack));
@@ -2951,7 +2882,7 @@ function(raylib_check_collision_point_circle)
     bruter_push_int(stack, collision, NULL, BRUTER_TYPE_ANY);
 }
 
-function(raylib_check_collision_point_triangle)
+function(feraw_CheckCollisionPointTriangle)
 {
     Vector2 point = vector2_constructor(bruter_pop_pointer(stack));
     Vector2 p1 = vector2_constructor(bruter_pop_pointer(stack));
@@ -2961,7 +2892,7 @@ function(raylib_check_collision_point_triangle)
     bruter_push_int(stack, collision, NULL, BRUTER_TYPE_ANY);
 }
 
-function(raylib_check_collision_point_line)
+function(feraw_CheckCollisionPointLine)
 {
     Vector2 point = vector2_constructor(bruter_pop_pointer(stack));
     Vector2 start = vector2_constructor(bruter_pop_pointer(stack));
@@ -2971,17 +2902,16 @@ function(raylib_check_collision_point_line)
     bruter_push_int(stack, collision, NULL, BRUTER_TYPE_ANY);
 }
 
-function(raylib_check_collision_point_poly)
+function(feraw_CheckCollisionPointPoly)
 {
     Vector2 point = vector2_constructor(bruter_pop_pointer(stack));
-    BruterList *pointsList = bruter_pop_list(stack);
-    Vector2 *points = (Vector2*)bruter_list_to_pointer(pointsList);
-    int pointCount = bruter_list_length(pointsList);
+    Vector2 *points = (Vector2*)bruter_pop_pointer(stack);
+    int pointCount = bruter_pop_int(stack);
     bool collision = CheckCollisionPointPoly(point, points, pointCount);
     bruter_push_int(stack, collision, NULL, BRUTER_TYPE_ANY);
 }
 
-function(raylib_check_collision_lines)
+function(feraw_CheckCollisionLines)
 {
     Vector2 start1 = vector2_constructor(bruter_pop_pointer(stack));
     Vector2 end1 = vector2_constructor(bruter_pop_pointer(stack));
@@ -2993,7 +2923,7 @@ function(raylib_check_collision_lines)
     bruter_push_pointer(stack, vector2_to_list(collisionPoint), NULL, BRUTER_TYPE_LIST);
 }
 
-function(raylib_get_collision_rec)
+function(feraw_GetCollisionRec)
 {
     Rectangle rec1 = rectangle_constructor(bruter_pop_pointer(stack));
     Rectangle rec2 = rectangle_constructor(bruter_pop_pointer(stack));
@@ -3002,14 +2932,14 @@ function(raylib_get_collision_rec)
 }
 
 // image loading functions
-function(raylib_load_image)
+function(feraw_LoadImage)
 {
     char *fileName = (char*)bruter_pop_pointer(stack);
     Image image = LoadImage(fileName);
     bruter_push_pointer(stack, image_to_list(image), NULL, BRUTER_TYPE_LIST);
 }
 
-function(raylib_load_image_raw)
+function(feraw_LoadImageRaw)
 {
     char *fileName = (char*)bruter_pop_pointer(stack);
     int width = bruter_pop_int(stack);
@@ -3020,60 +2950,60 @@ function(raylib_load_image_raw)
     bruter_push_pointer(stack, image_to_list(image), NULL, BRUTER_TYPE_LIST);
 }
 
-function(raylib_load_image_anim)
+function(feraw_LoadImageAnim)
 {
     char *fileName = (char*)bruter_pop_pointer(stack);
     int *framesCount = (int*)bruter_pop_pointer(stack);
-    Image *images = LoadImageAnimation(fileName, framesCount);
-    bruter_push_pointer(stack, images, NULL, BRUTER_TYPE_BUFFER);
+    Image images = LoadImageAnim(fileName, framesCount);
+    bruter_push_pointer(stack, &images, NULL, BRUTER_TYPE_BUFFER);
 }
 
-function(raylib_load_image_anim_from_memory)
+function(feraw_LoadImageAnimFromMemory)
 {
     char *fileType = (char*)bruter_pop_pointer(stack);
-    char *fileData = (char*)bruter_pop_pointer(stack);
+    const unsigned char *fileData = (const unsigned char*)bruter_pop_pointer(stack);
     int dataSize = bruter_pop_int(stack);
     int *framesCount = (int*)bruter_pop_pointer(stack);
-    Image *images = LoadImageAnimationFromMemory(fileType, fileData, dataSize, framesCount);
-    bruter_push_pointer(stack, images, NULL, BRUTER_TYPE_BUFFER);
+    Image images = LoadImageAnimFromMemory(fileType, fileData, dataSize, framesCount);
+    bruter_push_pointer(stack, &images, NULL, BRUTER_TYPE_BUFFER);
 }
 
-function(raylib_load_image_from_memory)
+function(feraw_LoadImageFromMemory)
 {
     char *fileType = (char*)bruter_pop_pointer(stack);
-    char *fileData = (char*)bruter_pop_pointer(stack);
+    const unsigned char *fileData = (const unsigned char*)bruter_pop_pointer(stack);
     int dataSize = bruter_pop_int(stack);
     Image image = LoadImageFromMemory(fileType, fileData, dataSize);
     bruter_push_pointer(stack, image_to_list(image), NULL, BRUTER_TYPE_LIST);
 }
 
-function(raylib_load_image_from_texture)
+function(feraw_LoadImageFromTexture)
 {
     Texture2D texture = texture_constructor(bruter_pop_pointer(stack));
     Image image = LoadImageFromTexture(texture);
     bruter_push_pointer(stack, image_to_list(image), NULL, BRUTER_TYPE_LIST);
 }
 
-function(raylib_load_image_from_screen)
+function(feraw_LoadImageFromScreen)
 {
     Image image = LoadImageFromScreen();
     bruter_push_pointer(stack, image_to_list(image), NULL, BRUTER_TYPE_LIST);
 }
 
-function(raylib_is_image_valid)
+function(feraw_IsImageValid)
 {
     Image image = image_constructor(bruter_pop_pointer(stack));
     bool isValid = IsImageValid(image);
     bruter_push_int(stack, isValid, NULL, BRUTER_TYPE_ANY);
 }
 
-function(raylib_unload_image)
+function(feraw_UnloadImage)
 {
     Image image = image_constructor(bruter_pop_pointer(stack));
     UnloadImage(image);
 }
 
-function(raylib_export_image)
+function(feraw_ExportImage)
 {
     Image image = image_constructor(bruter_pop_pointer(stack));
     char *fileName = (char*)bruter_pop_pointer(stack);
@@ -3081,7 +3011,7 @@ function(raylib_export_image)
     bruter_push_int(stack, success, NULL, BRUTER_TYPE_ANY);
 }
 
-function(raylib_export_image_to_memory)
+function(feraw_ExportImageToMemory)
 {
     Image image = image_constructor(bruter_pop_pointer(stack));
     char *fileType = (char*)bruter_pop_pointer(stack);
@@ -3090,7 +3020,7 @@ function(raylib_export_image_to_memory)
     bruter_push_pointer(stack, data, NULL, BRUTER_TYPE_BUFFER);
 }
 
-function(raylib_export_image_as_code)
+function(feraw_ExportImageAsCode)
 {
     Image image = image_constructor(bruter_pop_pointer(stack));
     char *fileName = (char*)bruter_pop_pointer(stack);
@@ -3099,7 +3029,7 @@ function(raylib_export_image_as_code)
 }
 
 // image generation functions
-function(raylib_gen_image_color)
+function(feraw_GenImageColor)
 {
     int width = bruter_pop_int(stack);
     int height = bruter_pop_int(stack);
@@ -3108,7 +3038,7 @@ function(raylib_gen_image_color)
     bruter_push_pointer(stack, image_to_list(image), NULL, BRUTER_TYPE_LIST);
 }
 
-function(raylib_gen_image_gradient_linear)
+function(feraw_GenImageGradientLinear)
 {
     int width = bruter_pop_int(stack);
     int height = bruter_pop_int(stack);
@@ -3119,7 +3049,7 @@ function(raylib_gen_image_gradient_linear)
     bruter_push_pointer(stack, image_to_list(image), NULL, BRUTER_TYPE_LIST);
 }
 
-function(raylib_gen_image_gradient_radial)
+function(feraw_GenImageGradientRadial)
 {
     int width = bruter_pop_int(stack);
     int height = bruter_pop_int(stack);
@@ -3130,7 +3060,7 @@ function(raylib_gen_image_gradient_radial)
     bruter_push_pointer(stack, image_to_list(image), NULL, BRUTER_TYPE_LIST);
 }
 
-function(raylib_gen_image_gradient_square)
+function(feraw_GenImageGradientSquare)
 {
     int width = bruter_pop_int(stack);
     int height = bruter_pop_int(stack);
@@ -3141,7 +3071,7 @@ function(raylib_gen_image_gradient_square)
     bruter_push_pointer(stack, image_to_list(image), NULL, BRUTER_TYPE_LIST);
 }
 
-function(raylib_gen_image_checked)
+function(feraw_GenImageChecked)
 {
     int width = bruter_pop_int(stack);
     int height = bruter_pop_int(stack);
@@ -3153,7 +3083,7 @@ function(raylib_gen_image_checked)
     bruter_push_pointer(stack, image_to_list(image), NULL, BRUTER_TYPE_LIST);
 }
 
-function(raylib_gen_image_white_noise)
+function(feraw_GenImageWhiteNoise)
 {
     int width = bruter_pop_int(stack);
     int height = bruter_pop_int(stack);
@@ -3162,7 +3092,7 @@ function(raylib_gen_image_white_noise)
     bruter_push_pointer(stack, image_to_list(image), NULL, BRUTER_TYPE_LIST);
 }
 
-function(raylib_gen_image_perlin_noise)
+function(feraw_GenImagePerlinNoise)
 {
     int width = bruter_pop_int(stack);
     int height = bruter_pop_int(stack);
@@ -3173,7 +3103,7 @@ function(raylib_gen_image_perlin_noise)
     bruter_push_pointer(stack, image_to_list(image), NULL, BRUTER_TYPE_LIST);
 }
 
-function(raylib_gen_image_cellular)
+function(feraw_GenImageCellular)
 {
     int width = bruter_pop_int(stack);
     int height = bruter_pop_int(stack);
@@ -3182,7 +3112,7 @@ function(raylib_gen_image_cellular)
     bruter_push_pointer(stack, image_to_list(image), NULL, BRUTER_TYPE_LIST);
 }
 
-function(raylib_gen_image_text)
+function(feraw_GenImageText)
 {
     int width = bruter_pop_int(stack);
     int height = bruter_pop_int(stack);
@@ -3193,14 +3123,14 @@ function(raylib_gen_image_text)
 
 // image manipulation functions
 
-function(raylib_image_copy)
+function(feraw_ImageCopy)
 {
     Image image = image_constructor(bruter_pop_pointer(stack));
     Image copiedImage = ImageCopy(image);
     bruter_push_pointer(stack, image_to_list(copiedImage), NULL, BRUTER_TYPE_LIST);
 }
 
-function(raylib_image_from_image)
+function(feraw_ImageFromImage)
 {
     Image image = image_constructor(bruter_pop_pointer(stack));
     Rectangle rec = rectangle_constructor(bruter_pop_pointer(stack));
@@ -3208,7 +3138,7 @@ function(raylib_image_from_image)
     bruter_push_pointer(stack, image_to_list(subImage), NULL, BRUTER_TYPE_LIST);
 }
 
-function(raylib_image_from_channel)
+function(feraw_ImageFromChannel)
 {
     Image image = image_constructor(bruter_pop_pointer(stack));
     int channel = bruter_pop_int(stack);
@@ -3216,7 +3146,7 @@ function(raylib_image_from_channel)
     bruter_push_pointer(stack, image_to_list(channelImage), NULL, BRUTER_TYPE_LIST);
 }
 
-function(raylib_image_text)
+function(feraw_ImageText)
 {
     char *text = (char*)bruter_pop_pointer(stack);
     int fontSize = bruter_pop_int(stack);
@@ -3225,7 +3155,7 @@ function(raylib_image_text)
     bruter_push_pointer(stack, image_to_list(image), NULL, BRUTER_TYPE_LIST);
 }
 
-function(raylib_image_text_ex)
+function(feraw_ImageTextEx)
 {
     Font font = font_constructor(bruter_pop_pointer(stack));
     char *text = (char*)bruter_pop_pointer(stack);
@@ -3236,14 +3166,14 @@ function(raylib_image_text_ex)
     bruter_push_pointer(stack, image_to_list(image), NULL, BRUTER_TYPE_LIST);
 }
 
-function(raylib_image_format)
+function(feraw_ImageFormat)
 {
     Image image = image_constructor(bruter_pop_pointer(stack));
     int newFormat = bruter_pop_int(stack);
     ImageFormat(&image, newFormat);
 }
 
-function(raylib_image_to_pot)
+function(feraw_ImageToPot)
 {
     Image image = image_constructor(bruter_pop_pointer(stack));
     Color fill = color_from_int(bruter_pop_int(stack));
@@ -3251,7 +3181,7 @@ function(raylib_image_to_pot)
     bruter_push_pointer(stack, image_to_list(image), NULL, BRUTER_TYPE_LIST);
 }
 
-function(raylib_image_crop)
+function(feraw_ImageCrop)
 {
     Image image = image_constructor(bruter_pop_pointer(stack));
     Rectangle crop = rectangle_constructor(bruter_pop_pointer(stack));
@@ -3259,7 +3189,7 @@ function(raylib_image_crop)
     bruter_push_pointer(stack, image_to_list(image), NULL, BRUTER_TYPE_LIST);
 }
 
-function(raylib_image_alpha_crop)
+function(feraw_ImageAlphaCrop)
 {
     Image image = image_constructor(bruter_pop_pointer(stack));
     float threshold = bruter_pop_float(stack);
@@ -3267,7 +3197,7 @@ function(raylib_image_alpha_crop)
     bruter_push_pointer(stack, image_to_list(image), NULL, BRUTER_TYPE_LIST);
 }
 
-function(raylib_image_alpha_clear)
+function(feraw_ImageAlphaClear)
 {
     Image image = image_constructor(bruter_pop_pointer(stack));
     Color color = color_from_int(bruter_pop_int(stack));
@@ -3276,7 +3206,7 @@ function(raylib_image_alpha_clear)
     bruter_push_pointer(stack, image_to_list(image), NULL, BRUTER_TYPE_LIST);
 }
 
-function(raylib_image_alpha_mask)
+function(feraw_ImageAlphaMask)
 {
     Image image = image_constructor(bruter_pop_pointer(stack));
     Image mask = image_constructor(bruter_pop_pointer(stack));
@@ -3284,14 +3214,14 @@ function(raylib_image_alpha_mask)
     bruter_push_pointer(stack, image_to_list(image), NULL, BRUTER_TYPE_LIST);
 }
 
-function(raylib_image_alpha_premultiply)
+function(feraw_ImageAlphaPremultiply)
 {
     Image image = image_constructor(bruter_pop_pointer(stack));
     ImageAlphaPremultiply(&image);
     bruter_push_pointer(stack, image_to_list(image), NULL, BRUTER_TYPE_LIST);
 }
 
-function(raylib_image_blur_glaussian)
+function(feraw_ImageBlurGlaussian)
 {
     Image image = image_constructor(bruter_pop_pointer(stack));
     int blurSize = bruter_pop_int(stack);
@@ -3299,7 +3229,7 @@ function(raylib_image_blur_glaussian)
     bruter_push_pointer(stack, image_to_list(image), NULL, BRUTER_TYPE_LIST);
 }
 
-function(raylib_image_kernel_convolution)
+function(feraw_ImageKernelConvolution)
 {
     Image image = image_constructor(bruter_pop_pointer(stack));
     float *kernel = (float*)bruter_pop_pointer(stack);
@@ -3308,7 +3238,7 @@ function(raylib_image_kernel_convolution)
     bruter_push_pointer(stack, image_to_list(image), NULL, BRUTER_TYPE_LIST);
 }
 
-function(raylib_image_resize)
+function(feraw_ImageResize)
 {
     Image image = image_constructor(bruter_pop_pointer(stack));
     int newWidth = bruter_pop_int(stack);
@@ -3317,7 +3247,7 @@ function(raylib_image_resize)
     bruter_push_pointer(stack, image_to_list(image), NULL, BRUTER_TYPE_LIST);
 }
 
-function(raylib_image_resize_nn)
+function(feraw_ImageResizeNn)
 {
     Image image = image_constructor(bruter_pop_pointer(stack));
     int newWidth = bruter_pop_int(stack);
@@ -3326,7 +3256,7 @@ function(raylib_image_resize_nn)
     bruter_push_pointer(stack, image_to_list(image), NULL, BRUTER_TYPE_LIST);
 }
 
-function(raylib_image_resize_canvas)
+function(feraw_ImageResizeCanvas)
 {
     Image image = image_constructor(bruter_pop_pointer(stack));
     int newWidth = bruter_pop_int(stack);
@@ -3338,14 +3268,14 @@ function(raylib_image_resize_canvas)
     bruter_push_pointer(stack, image_to_list(image), NULL, BRUTER_TYPE_LIST);
 }
 
-function(raylib_image_mipmaps)
+function(feraw_ImageMipmaps)
 {
     Image image = image_constructor(bruter_pop_pointer(stack));
     ImageMipmaps(&image);
     bruter_push_pointer(stack, image_to_list(image), NULL, BRUTER_TYPE_LIST);
 }
 
-function(raylib_image_dither)
+function(feraw_ImageDither)
 {
     Image image = image_constructor(bruter_pop_pointer(stack));
     int rBpp = bruter_pop_int(stack);
@@ -3356,21 +3286,21 @@ function(raylib_image_dither)
     bruter_push_pointer(stack, image_to_list(image), NULL, BRUTER_TYPE_LIST);
 }
 
-function(raylib_image_flip_vertical)
+function(feraw_ImageFlipVertical)
 {
     Image image = image_constructor(bruter_pop_pointer(stack));
     ImageFlipVertical(&image);
     bruter_push_pointer(stack, image_to_list(image), NULL, BRUTER_TYPE_LIST);
 }
 
-function(raylib_image_flip_horizontal)
+function(feraw_ImageFlipHorizontal)
 {
     Image image = image_constructor(bruter_pop_pointer(stack));
     ImageFlipHorizontal(&image);
     bruter_push_pointer(stack, image_to_list(image), NULL, BRUTER_TYPE_LIST);
 }
 
-function(raylib_image_rotate)
+function(feraw_ImageRotate)
 {
     Image image = image_constructor(bruter_pop_pointer(stack));
     float degrees = bruter_pop_float(stack);
@@ -3378,21 +3308,21 @@ function(raylib_image_rotate)
     bruter_push_pointer(stack, image_to_list(image), NULL, BRUTER_TYPE_LIST);
 }
 
-function(raylib_image_rotate_cw)
+function(feraw_ImageRotateCw)
 {
     Image image = image_constructor(bruter_pop_pointer(stack));
     ImageRotateCW(&image);
     bruter_push_pointer(stack, image_to_list(image), NULL, BRUTER_TYPE_LIST);
 }
 
-function(raylib_image_rotate_ccw)
+function(feraw_ImageRotateCcw)
 {
     Image image = image_constructor(bruter_pop_pointer(stack));
     ImageRotateCCW(&image);
     bruter_push_pointer(stack, image_to_list(image), NULL, BRUTER_TYPE_LIST);
 }
 
-function(raylib_image_color_tint)
+function(feraw_ImageColorTint)
 {
     Image image = image_constructor(bruter_pop_pointer(stack));
     Color color = color_from_int(bruter_pop_int(stack));
@@ -3400,21 +3330,21 @@ function(raylib_image_color_tint)
     bruter_push_pointer(stack, image_to_list(image), NULL, BRUTER_TYPE_LIST);
 }
 
-function(raylib_image_color_invert)
+function(feraw_ImageColorInvert)
 {
     Image image = image_constructor(bruter_pop_pointer(stack));
     ImageColorInvert(&image);
     bruter_push_pointer(stack, image_to_list(image), NULL, BRUTER_TYPE_LIST);
 }
 
-function(raylib_image_color_grayscale)
+function(feraw_ImageColorGrayscale)
 {
     Image image = image_constructor(bruter_pop_pointer(stack));
     ImageColorGrayscale(&image);
     bruter_push_pointer(stack, image_to_list(image), NULL, BRUTER_TYPE_LIST);
 }
 
-function(raylib_image_color_contrast)
+function(feraw_ImageColorContrast)
 {
     Image image = image_constructor(bruter_pop_pointer(stack));
     float contrast = bruter_pop_float(stack);
@@ -3422,7 +3352,7 @@ function(raylib_image_color_contrast)
     bruter_push_pointer(stack, image_to_list(image), NULL, BRUTER_TYPE_LIST);
 }
 
-function(raylib_image_color_brightness)
+function(feraw_ImageColorBrightness)
 {
     Image image = image_constructor(bruter_pop_pointer(stack));
     int brightness = bruter_pop_int(stack);
@@ -3430,7 +3360,7 @@ function(raylib_image_color_brightness)
     bruter_push_pointer(stack, image_to_list(image), NULL, BRUTER_TYPE_LIST);
 }
 
-function(raylib_image_color_replace)
+function(feraw_ImageColorReplace)
 {
     Image image = image_constructor(bruter_pop_pointer(stack));
     Color color = color_from_int(bruter_pop_int(stack));
@@ -3439,7 +3369,7 @@ function(raylib_image_color_replace)
     bruter_push_pointer(stack, image_to_list(image), NULL, BRUTER_TYPE_LIST);
 }
 
-function(raylib_load_image_colors)
+function(feraw_LoadImageColors)
 {
     Image image = image_constructor(bruter_pop_pointer(stack));
     Color *colors = LoadImageColors(image);
@@ -3448,30 +3378,27 @@ function(raylib_load_image_colors)
     bruter_push_int(stack, colorCount, NULL, BRUTER_TYPE_ANY);
 }
 
-function(raylib_load_image_palette)
+function(feraw_LoadImagePalette)
 {
     Image image = image_constructor(bruter_pop_pointer(stack));
     int maxPaletteSize = bruter_pop_int(stack);
     int *colorCount = (int*)bruter_pop_pointer(stack);
     Color *palette = LoadImagePalette(image, maxPaletteSize, colorCount);
-    int paletteSize = GetImagePaletteSize(image, maxPaletteSize);
     bruter_push_pointer(stack, palette, NULL, BRUTER_TYPE_BUFFER);
-    bruter_push_int(stack, paletteSize, NULL, BRUTER_TYPE_ANY);
 }
 
-function(raylib_unload_image_colors)
+function(feraw_UnloadImageColors)
 {
-    Color *colors = (Color*)bruter_pop_pointer(stack);
-    bruter_free(colors);
+    UnloadImageColors((Color*)bruter_pop_pointer(stack));
 }
 
-function(raylib_unload_image_palette)
+function(feraw_UnloadImagePalette)
 {
     Color *palette = (Color*)bruter_pop_pointer(stack);
-    bruter_free(palette);
+    UnloadImagePalette(palette);
 }
 
-function(raylib_get_image_alpha_border)
+function(feraw_GetImageAlphaBorder)
 {
     Image image = image_constructor(bruter_pop_pointer(stack));
     float threshold = bruter_pop_float(stack);
@@ -3479,7 +3406,7 @@ function(raylib_get_image_alpha_border)
     bruter_push_pointer(stack, rectangle_to_list(rec), NULL, BRUTER_TYPE_LIST);
 }
 
-function(raylib_get_image_color)
+function(feraw_GetImageColor)
 {
     Image image = image_constructor(bruter_pop_pointer(stack));
     int x = bruter_pop_int(stack);
@@ -3489,7 +3416,7 @@ function(raylib_get_image_color)
 }
 
 // image drawing functions
-function(raylib_image_clear_background)
+function(feraw_ImageClearBackground)
 {
     Image image = image_constructor(bruter_pop_pointer(stack));
     Color color = color_from_int(bruter_pop_int(stack));
@@ -3497,7 +3424,7 @@ function(raylib_image_clear_background)
     bruter_push_pointer(stack, image_to_list(image), NULL, BRUTER_TYPE_LIST);
 }
 
-function(raylib_image_draw_pixel)
+function(feraw_ImageDrawPixel)
 {
     Image image = image_constructor(bruter_pop_pointer(stack));
     int posX = bruter_pop_int(stack);
@@ -3507,16 +3434,7 @@ function(raylib_image_draw_pixel)
     bruter_push_pointer(stack, image_to_list(image), NULL, BRUTER_TYPE_LIST);
 }
 
-function(raylib_image_draw_pixel_v)
-{
-    Image image = image_constructor(bruter_pop_pointer(stack));
-    Vector2 pos = vector2_constructor(bruter_pop_pointer(stack));
-    Color color = color_from_int(bruter_pop_int(stack));
-    ImageDrawPixelV(&image, pos, color);
-    bruter_push_pointer(stack, image_to_list(image), NULL, BRUTER_TYPE_LIST);
-}
-
-function(raylib_image_draw_line)
+function(feraw_ImageDrawLine)
 {
     Image image = image_constructor(bruter_pop_pointer(stack));
     int startX = bruter_pop_int(stack);
@@ -3528,17 +3446,7 @@ function(raylib_image_draw_line)
     bruter_push_pointer(stack, image_to_list(image), NULL, BRUTER_TYPE_LIST);
 }
 
-function(raylib_image_draw_line_v)
-{
-    Image image = image_constructor(bruter_pop_pointer(stack));
-    Vector2 start = vector2_constructor(bruter_pop_pointer(stack));
-    Vector2 end = vector2_constructor(bruter_pop_pointer(stack));
-    Color color = color_from_int(bruter_pop_int(stack));
-    ImageDrawLineV(&image, start, end, color);
-    bruter_push_pointer(stack, image_to_list(image), NULL, BRUTER_TYPE_LIST);
-}
-
-function(raylib_image_draw_line_ex)
+function(feraw_ImageDrawLineEx)
 {
     Image image = image_constructor(bruter_pop_pointer(stack));
     Vector2 start = vector2_constructor(bruter_pop_pointer(stack));
@@ -3549,7 +3457,7 @@ function(raylib_image_draw_line_ex)
     bruter_push_pointer(stack, image_to_list(image), NULL, BRUTER_TYPE_LIST);
 }
 
-function(raylib_image_draw_circle)
+function(feraw_ImageDrawCircle)
 {
     Image image = image_constructor(bruter_pop_pointer(stack));
     int centerX = bruter_pop_int(stack);
@@ -3560,17 +3468,7 @@ function(raylib_image_draw_circle)
     bruter_push_pointer(stack, image_to_list(image), NULL, BRUTER_TYPE_LIST);
 }
 
-function(raylib_image_draw_circle_v)
-{
-    Image image = image_constructor(bruter_pop_pointer(stack));
-    Vector2 center = vector2_constructor(bruter_pop_pointer(stack));
-    int radius = bruter_pop_int(stack);
-    Color color = color_from_int(bruter_pop_int(stack));
-    ImageDrawCircleV(&image, center, radius, color);
-    bruter_push_pointer(stack, image_to_list(image), NULL, BRUTER_TYPE_LIST);
-}
-
-function(raylib_image_draw_circle_lines)
+function(feraw_ImageDrawCircleLines)
 {
     Image image = image_constructor(bruter_pop_pointer(stack));
     int centerX = bruter_pop_int(stack);
@@ -3581,17 +3479,7 @@ function(raylib_image_draw_circle_lines)
     bruter_push_pointer(stack, image_to_list(image), NULL, BRUTER_TYPE_LIST);
 }
 
-function(raylib_image_draw_circle_lines_v)
-{
-    Image image = image_constructor(bruter_pop_pointer(stack));
-    Vector2 center = vector2_constructor(bruter_pop_pointer(stack));
-    int radius = bruter_pop_int(stack);
-    Color color = color_from_int(bruter_pop_int(stack));
-    ImageDrawCircleLinesV(&image, center, radius, color);
-    bruter_push_pointer(stack, image_to_list(image), NULL, BRUTER_TYPE_LIST);
-}
-
-function(raylib_image_draw_rectangle)
+function(feraw_ImageDrawRectangle)
 {
     Image image = image_constructor(bruter_pop_pointer(stack));
     int posX = bruter_pop_int(stack);
@@ -3603,17 +3491,7 @@ function(raylib_image_draw_rectangle)
     bruter_push_pointer(stack, image_to_list(image), NULL, BRUTER_TYPE_LIST);
 }
 
-function(raylib_image_draw_rectangle_v)
-{
-    Image image = image_constructor(bruter_pop_pointer(stack));
-    Vector2 position = vector2_constructor(bruter_pop_pointer(stack));
-    Vector2 size = vector2_constructor(bruter_pop_pointer(stack));
-    Color color = color_from_int(bruter_pop_int(stack));
-    ImageDrawRectangleV(&image, position, size, color);
-    bruter_push_pointer(stack, image_to_list(image), NULL, BRUTER_TYPE_LIST);
-}
-
-function(raylib_image_draw_rectangle_rec)
+function(feraw_ImageDrawRectangleRec)
 {
     Image image = image_constructor(bruter_pop_pointer(stack));
     Rectangle rec = rectangle_constructor(bruter_pop_pointer(stack));
@@ -3622,7 +3500,7 @@ function(raylib_image_draw_rectangle_rec)
     bruter_push_pointer(stack, image_to_list(image), NULL, BRUTER_TYPE_LIST);
 }
 
-function(raylib_image_draw_rectangle_lines)
+function(feraw_ImageDrawRectangleLines)
 {
     Image image = image_constructor(bruter_pop_pointer(stack));
     Rectangle rec = rectangle_constructor(bruter_pop_pointer(stack));
@@ -3632,7 +3510,7 @@ function(raylib_image_draw_rectangle_lines)
     bruter_push_pointer(stack, image_to_list(image), NULL, BRUTER_TYPE_LIST);
 }
 
-function(raylib_image_draw_triangle)
+function(feraw_ImageDrawTriangle)
 {
     Image image = image_constructor(bruter_pop_pointer(stack));
     Vector2 p1 = vector2_constructor(bruter_pop_pointer(stack));
@@ -3643,7 +3521,7 @@ function(raylib_image_draw_triangle)
     bruter_push_pointer(stack, image_to_list(image), NULL, BRUTER_TYPE_LIST);
 }
 
-function(raylib_image_draw_triangle_ex)
+function(feraw_ImageDrawTriangleEx)
 {
     Image image = image_constructor(bruter_pop_pointer(stack));
     Vector2 p1 = vector2_constructor(bruter_pop_pointer(stack));
@@ -3656,7 +3534,7 @@ function(raylib_image_draw_triangle_ex)
     bruter_push_pointer(stack, image_to_list(image), NULL, BRUTER_TYPE_LIST);
 }
 
-function(raylib_image_draw_triangle_lines)
+function(feraw_ImageDrawTriangleLines)
 {
     Image image = image_constructor(bruter_pop_pointer(stack));
     Vector2 p1 = vector2_constructor(bruter_pop_pointer(stack));
@@ -3667,29 +3545,27 @@ function(raylib_image_draw_triangle_lines)
     bruter_push_pointer(stack, image_to_list(image), NULL, BRUTER_TYPE_LIST);
 }
 
-function(raylib_image_draw_triangle_fan)
+function(feraw_ImageDrawTriangleFan)
 {
     Image image = image_constructor(bruter_pop_pointer(stack));
-    BruterList *pointsList = bruter_pop_list(stack);
-    Vector2 *points = (Vector2*)bruter_list_to_pointer(pointsList);
-    int pointCount = bruter_list_length(pointsList);
+    Vector2 *points = (Vector2*)bruter_pop_pointer(stack);
+    int pointCount = bruter_pop_int(stack);
     Color color = color_from_int(bruter_pop_int(stack));
     ImageDrawTriangleFan(&image, points, pointCount, color);
     bruter_push_pointer(stack, image_to_list(image), NULL, BRUTER_TYPE_LIST);
 }
 
-function(raylib_image_draw_triangle_strip)
+function(feraw_ImageDrawTriangleStrip)
 {
     Image image = image_constructor(bruter_pop_pointer(stack));
-    BruterList *pointsList = bruter_pop_list(stack);
-    Vector2 *points = (Vector2*)bruter_list_to_pointer(pointsList);
-    int pointCount = bruter_list_length(pointsList);
+    Vector2 *points = (Vector2*)bruter_pop_pointer(stack);
+    int pointCount = bruter_pop_int(stack);
     Color color = color_from_int(bruter_pop_int(stack));
     ImageDrawTriangleStrip(&image, points, pointCount, color);
     bruter_push_pointer(stack, image_to_list(image), NULL, BRUTER_TYPE_LIST);
 }
 
-function(raylib_image_draw)
+function(feraw_ImageDraw)
 {
     Image image = image_constructor(bruter_pop_pointer(stack));
     Image src = image_constructor(bruter_pop_pointer(stack));
@@ -3700,7 +3576,7 @@ function(raylib_image_draw)
     bruter_push_pointer(stack, image_to_list(image), NULL, BRUTER_TYPE_LIST);
 }
 
-function(raylib_image_draw_text)
+function(feraw_ImageDrawText)
 {
     Image image = image_constructor(bruter_pop_pointer(stack));
     char *text = (char*)bruter_pop_pointer(stack);
@@ -3712,7 +3588,7 @@ function(raylib_image_draw_text)
     bruter_push_pointer(stack, image_to_list(image), NULL, BRUTER_TYPE_LIST);
 }
 
-function(raylib_image_draw_text_ex)
+function(feraw_ImageDrawTextEx)
 {
     Image image = image_constructor(bruter_pop_pointer(stack));
     Font font = font_constructor(bruter_pop_pointer(stack));
@@ -3727,21 +3603,21 @@ function(raylib_image_draw_text_ex)
 
 // Texture
 
-function(raylib_load_texture)
+function(feraw_LoadTexture)
 {
     char *fileName = (char*)bruter_pop_pointer(stack);
     Texture2D texture = LoadTexture(fileName);
     bruter_push_pointer(stack, texture_to_list(texture), NULL, BRUTER_TYPE_LIST);
 }
 
-function(raylib_load_texture_from_image)
+function(feraw_LoadTextureFromImage)
 {
     Image image = image_constructor(bruter_pop_pointer(stack));
     Texture2D texture = LoadTextureFromImage(image);
     bruter_push_pointer(stack, texture_to_list(texture), NULL, BRUTER_TYPE_LIST);
 }
 
-function(raylib_load_texture_cubemap)
+function(feraw_LoadTextureCubemap)
 {
     Image image = image_constructor(bruter_pop_pointer(stack));
     int layout = bruter_pop_int(stack); // Assuming layout is an int representing the cubemap layout
@@ -3750,7 +3626,7 @@ function(raylib_load_texture_cubemap)
 }
 
 
-function(raylib_load_render_rexture)
+function(feraw_LoadRenderRexture)
 {
     int width = bruter_pop_int(stack);
     int height = bruter_pop_int(stack);
@@ -3758,40 +3634,40 @@ function(raylib_load_render_rexture)
     bruter_push_pointer(stack, render_texture_to_list(renderTexture), NULL, BRUTER_TYPE_LIST);
 }
 
-function(raylib_is_texture_valid)
+function(feraw_IsTextureValid)
 {
     Texture2D texture = texture_constructor(bruter_pop_pointer(stack));
     bool isValid = IsTextureValid(texture);
     bruter_push_int(stack, isValid, NULL, BRUTER_TYPE_ANY);
 }
 
-function(raylib_unload_texture)
+function(feraw_UnloadTexture)
 {
     Texture2D texture = texture_constructor(bruter_pop_pointer(stack));
     UnloadTexture(texture);
 }
 
-function(raylib_is_render_texture_valid)
+function(feraw_IsRenderTextureValid)
 {
     RenderTexture2D renderTexture = render_texture_constructor(bruter_pop_pointer(stack));
     bool isValid = IsRenderTextureValid(renderTexture);
     bruter_push_int(stack, isValid, NULL, BRUTER_TYPE_ANY);
 }
 
-function(raylib_unload_render_texture)
+function(feraw_UnloadRenderTexture)
 {
     RenderTexture2D renderTexture = render_texture_constructor(bruter_pop_pointer(stack));
     UnloadRenderTexture(renderTexture);
 }
 
-function(raylib_update_texture)
+function(feraw_UpdateTexture)
 {
     Texture2D texture = texture_constructor(bruter_pop_pointer(stack));
     unsigned char *pixels = (unsigned char*)bruter_pop_pointer(stack);
     UpdateTexture(texture, pixels);
 }
 
-function(raylib_update_texture_rec)
+function(feraw_UpdateTextureRec)
 {
     Texture2D texture = texture_constructor(bruter_pop_pointer(stack));
     Rectangle rec = rectangle_constructor(bruter_pop_pointer(stack));
@@ -3800,21 +3676,21 @@ function(raylib_update_texture_rec)
 }
 
 // texture configuration functions
-function(raylib_gen_texture_mipmaps)
+function(feraw_GenTextureMipmaps)
 {
     Texture2D texture = texture_constructor(bruter_pop_pointer(stack));
     GenTextureMipmaps(&texture);
     bruter_push_pointer(stack, texture_to_list(texture), NULL, BRUTER_TYPE_LIST);
 }
 
-function(raylib_set_texture_filter)
+function(feraw_SetTextureFilter)
 {
     Texture2D texture = texture_constructor(bruter_pop_pointer(stack));
     int filter = bruter_pop_int(stack);
     SetTextureFilter(texture, filter);
 }
 
-function(raylib_set_texture_wrap)
+function(feraw_SetTextureWrap)
 {
     Texture2D texture = texture_constructor(bruter_pop_pointer(stack));
     int wrap = bruter_pop_int(stack);
@@ -3822,7 +3698,7 @@ function(raylib_set_texture_wrap)
 }
 
 // texture drawing functions
-function(raylib_draw_texture)
+function(feraw_DrawTexture)
 {
     Texture2D texture = texture_constructor(bruter_pop_pointer(stack));
     int posX = bruter_pop_int(stack);
@@ -3831,15 +3707,7 @@ function(raylib_draw_texture)
     DrawTexture(texture, posX, posY, tint);
 }
 
-function(raylib_draw_texture_v)
-{
-    Texture2D texture = texture_constructor(bruter_pop_pointer(stack));
-    Vector2 position = vector2_constructor(bruter_pop_pointer(stack));
-    Color tint = color_from_int(bruter_pop_int(stack));
-    DrawTextureV(texture, position, tint);
-}
-
-function(raylib_draw_texture_ex)
+function(feraw_DrawTextureEx)
 {
     Texture2D texture = texture_constructor(bruter_pop_pointer(stack));
     Vector2 position = vector2_constructor(bruter_pop_pointer(stack));
@@ -3849,7 +3717,7 @@ function(raylib_draw_texture_ex)
     DrawTextureEx(texture, position, rotation, scale, tint);
 }
 
-function(raylib_draw_texture_rec)
+function(feraw_DrawTextureRec)
 {
     Texture2D texture = texture_constructor(bruter_pop_pointer(stack));
     Rectangle sourceRec = rectangle_constructor(bruter_pop_pointer(stack));
@@ -3858,7 +3726,7 @@ function(raylib_draw_texture_rec)
     DrawTextureRec(texture, sourceRec, position, tint);
 }
 
-function(raylib_draw_texture_pro)
+function(feraw_DrawTexturePro)
 {
     Texture2D texture = texture_constructor(bruter_pop_pointer(stack));
     Rectangle sourceRec = rectangle_constructor(bruter_pop_pointer(stack));
@@ -3869,7 +3737,7 @@ function(raylib_draw_texture_pro)
     DrawTexturePro(texture, sourceRec, destRec, origin, rotation, tint);
 }
 
-function(raylib_draw_texture_npatch)
+function(feraw_DrawTextureNpatch)
 {
     Texture2D texture = texture_constructor(bruter_pop_pointer(stack));
     NPatchInfo nPatchInfo = npatch_info_constructor(bruter_pop_pointer(stack));
@@ -3882,7 +3750,7 @@ function(raylib_draw_texture_npatch)
 
 // color/pixel related functions
 
-function(raylib_color_is_equal)
+function(feraw_ColorIsEqual)
 {
     Color color1 = color_from_int(bruter_pop_int(stack));
     Color color2 = color_from_int(bruter_pop_int(stack));
@@ -3890,7 +3758,7 @@ function(raylib_color_is_equal)
     bruter_push_int(stack, isEqual, NULL, BRUTER_TYPE_ANY);
 }
 
-function(raylib_fade_color)
+function(feraw_FadeColor)
 {
     Color color = color_from_int(bruter_pop_int(stack));
     float alpha = bruter_pop_float(stack);
@@ -3898,35 +3766,35 @@ function(raylib_fade_color)
     bruter_push_int(stack, color_to_int(fadedColor), NULL, BRUTER_TYPE_ANY);
 }
 
-function(raylib_color_to_int)
+function(feraw_ColorToInt)
 {
     Color color = color_from_int(bruter_pop_int(stack));
     int colorInt = ColorToInt(color);
     bruter_push_int(stack, colorInt, NULL, BRUTER_TYPE_ANY);
 }
 
-function(raylib_color_normalize)
+function(feraw_ColorNormalize)
 {
     Color color = color_from_int(bruter_pop_int(stack));
     Vector4 normalizedColor = ColorNormalize(color);
     bruter_push_pointer(stack, vector4_to_list(normalizedColor), NULL, BRUTER_TYPE_LIST);
 }
 
-function(raylib_color_from_normalized)
+function(feraw_ColorFromNormalized)
 {
     Vector4 normalizedColor = vector4_constructor(bruter_pop_pointer(stack));
     Color color = ColorFromNormalized(normalizedColor);
     bruter_push_int(stack, color_to_int(color), NULL, BRUTER_TYPE_ANY);
 }
 
-function(raylib_color_to_hsv)
+function(feraw_ColorToHsv)
 {
     Color color = color_from_int(bruter_pop_int(stack));
     Vector3 hsv = ColorToHSV(color);
     bruter_push_pointer(stack, vector3_to_list(hsv), NULL, BRUTER_TYPE_LIST);
 }
 
-function(raylib_color_from_hsv)
+function(feraw_ColorFromHsv)
 {
     float hue = bruter_pop_float(stack);
     float saturation = bruter_pop_float(stack);
@@ -3935,7 +3803,7 @@ function(raylib_color_from_hsv)
     bruter_push_int(stack, color_to_int(color), NULL, BRUTER_TYPE_ANY);
 }
 
-function(raylib_color_tint)
+function(feraw_ColorTint)
 {
     Color color = color_from_int(bruter_pop_int(stack));
     Color tint = color_from_int(bruter_pop_int(stack));
@@ -3943,7 +3811,7 @@ function(raylib_color_tint)
     bruter_push_int(stack, color_to_int(tintedColor), NULL, BRUTER_TYPE_ANY);
 }
 
-function(raylib_color_brightness)
+function(feraw_ColorBrightness)
 {
     Color color = color_from_int(bruter_pop_int(stack));
     int brightness = bruter_pop_int(stack);
@@ -3951,7 +3819,7 @@ function(raylib_color_brightness)
     bruter_push_int(stack, color_to_int(brightenedColor), NULL, BRUTER_TYPE_ANY);
 }
 
-function(raylib_color_contrast)
+function(feraw_ColorContrast)
 {
     Color color = color_from_int(bruter_pop_int(stack));
     float contrast = bruter_pop_float(stack);
@@ -3959,7 +3827,7 @@ function(raylib_color_contrast)
     bruter_push_int(stack, color_to_int(contrastedColor), NULL, BRUTER_TYPE_ANY);
 }
 
-function(raylib_color_alpha)
+function(feraw_ColorAlpha)
 {
     Color color = color_from_int(bruter_pop_int(stack));
     float alpha = bruter_pop_float(stack);
@@ -3967,7 +3835,7 @@ function(raylib_color_alpha)
     bruter_push_int(stack, color_to_int(alphaColor), NULL, BRUTER_TYPE_ANY);
 }
 
-function(raylib_color_alpha_blend)
+function(feraw_ColorAlphaBlend)
 {
     Color dst = color_from_int(bruter_pop_int(stack));
     Color src = color_from_int(bruter_pop_int(stack));
@@ -3976,7 +3844,7 @@ function(raylib_color_alpha_blend)
     bruter_push_int(stack, color_to_int(blendedColor), NULL, BRUTER_TYPE_ANY);
 }
 
-function(raylib_color_lerp)
+function(feraw_ColorLerp)
 {
     Color color1 = color_from_int(bruter_pop_int(stack));
     Color color2 = color_from_int(bruter_pop_int(stack));
@@ -3985,14 +3853,14 @@ function(raylib_color_lerp)
     bruter_push_int(stack, color_to_int(lerpedColor), NULL, BRUTER_TYPE_ANY);
 }
 
-function(raylib_get_color)
+function(feraw_GetColor)
 {
     int hexColor = bruter_pop_int(stack);
     Color color = GetColor(hexColor);
     bruter_push_int(stack, color_to_int(color), NULL, BRUTER_TYPE_ANY);
 }
 
-function(raylib_get_pixel_color)
+function(feraw_GetPixelColor)
 {
     void* data = bruter_pop_pointer(stack);
     int format = bruter_pop_int(stack);
@@ -4000,7 +3868,7 @@ function(raylib_get_pixel_color)
     bruter_push_int(stack, color_to_int(color), NULL, BRUTER_TYPE_ANY);
 }
 
-function(raylib_set_pixel_color)
+function(feraw_SetPixelColor)
 {
     void *data = bruter_pop_pointer(stack);
     Color color = color_from_int(bruter_pop_int(stack));
@@ -4008,7 +3876,7 @@ function(raylib_set_pixel_color)
     SetPixelColor(data, color, format);
 }
 
-function(raylib_get_pixel_data_size)
+function(feraw_GetPixelDataSize)
 {
     int width = bruter_pop_int(stack);
     int height = bruter_pop_int(stack);
@@ -4019,20 +3887,20 @@ function(raylib_get_pixel_data_size)
 
 // font loading/unloading functions
 
-function(raylib_get_font_default)
+function(feraw_GetFontDefault)
 {
     Font font = GetFontDefault();
     bruter_push_pointer(stack, font_to_list(font), NULL, BRUTER_TYPE_LIST);
 }
 
-function(raylib_load_font)
+function(feraw_LoadFont)
 {
     char *fileName = (char*)bruter_pop_pointer(stack);
     Font font = LoadFont(fileName);
     bruter_push_pointer(stack, font_to_list(font), NULL, BRUTER_TYPE_LIST);
 }
 
-function(raylib_load_font_ex)
+function(feraw_LoadFontEx)
 {
     char *fileName = (char*)bruter_pop_pointer(stack);
     int fontSize = bruter_pop_int(stack);
@@ -4042,7 +3910,7 @@ function(raylib_load_font_ex)
     bruter_push_pointer(stack, font_to_list(font), NULL, BRUTER_TYPE_LIST);
 }
 
-function(raylib_load_font_from_image)
+function(feraw_LoadFontFromImage)
 {
     Image image = image_constructor(bruter_pop_pointer(stack));
     Color key = color_from_int(bruter_pop_int(stack));
@@ -4051,7 +3919,7 @@ function(raylib_load_font_from_image)
     bruter_push_pointer(stack, font_to_list(font), NULL, BRUTER_TYPE_LIST);
 }
 
-function(raylib_load_font_from_memory)
+function(feraw_LoadFontFromMemory)
 {
     const char* fileType = (const char*)bruter_pop_pointer(stack);
     unsigned char *fileData = (unsigned char*)bruter_pop_pointer(stack);
@@ -4063,14 +3931,14 @@ function(raylib_load_font_from_memory)
     bruter_push_pointer(stack, font_to_list(font), NULL, BRUTER_TYPE_LIST);
 }
 
-function(raylib_is_font_valid)
+function(feraw_IsFontValid)
 {
     Font font = font_constructor(bruter_pop_pointer(stack));
     bool isValid = IsFontValid(font);
     bruter_push_int(stack, isValid, NULL, BRUTER_TYPE_ANY);
 }
 
-function(raylib_load_font_data)
+function(feraw_LoadFontData)
 {
     void *fileData = (void*)bruter_pop_pointer(stack);
     int dataSize = bruter_pop_int(stack);
@@ -4079,10 +3947,10 @@ function(raylib_load_font_data)
     int codepointCount = bruter_pop_int(stack);
     int type = bruter_pop_int(stack); // Assuming type is an int representing the font type
     GlyphInfo *fontData = LoadFontData(fileData, dataSize, fontSize, codepoints, codepointCount, type);
-    bruter_push_pointer(stack, font_data_to_list(fontData), NULL, BRUTER_TYPE_LIST);
+    bruter_push_pointer(stack, fontData, NULL, BRUTER_TYPE_LIST);
 }
 
-function(raylib_gen_image_font_atlas)
+function(feraw_GenImageFontAtlas)
 {
     const GlyphInfo *fontData = (const GlyphInfo*)bruter_pop_pointer(stack);
     Rectangle **glyphRects = (Rectangle**)bruter_pop_pointer(stack);
@@ -4094,20 +3962,20 @@ function(raylib_gen_image_font_atlas)
     bruter_push_pointer(stack, image_to_list(atlas), NULL, BRUTER_TYPE_LIST);
 }
 
-function(raylib_unload_font_data)
+function(feraw_UnloadFontData)
 {
     GlyphInfo *fontData = (GlyphInfo*)bruter_pop_pointer(stack);
     int glyphCount = bruter_pop_int(stack);
     UnloadFontData(fontData, glyphCount);
 }
 
-function(raylib_unload_font)
+function(feraw_UnloadFont)
 {
     Font font = font_constructor(bruter_pop_pointer(stack));
     UnloadFont(font);
 }
 
-function(raylib_export_font_as_code)
+function(feraw_ExportFontAsCode)
 {
     Font font = font_constructor(bruter_pop_pointer(stack));
     char *fileName = (char*)bruter_pop_pointer(stack);
@@ -4115,14 +3983,14 @@ function(raylib_export_font_as_code)
 }
 
 // text drawing functions
-function(raylib_draw_FPS)
+function(feraw_DrawFPS)
 {
     int posX = bruter_pop_int(stack);
     int posY = bruter_pop_int(stack);
     DrawFPS(posX, posY);
 }
 
-function(raylib_draw_text)
+function(feraw_DrawText)
 {
     char *text = (char*)bruter_pop_pointer(stack);
     int posX = bruter_pop_int(stack);
@@ -4132,7 +4000,7 @@ function(raylib_draw_text)
     DrawText(text, posX, posY, fontSize, color);
 }
 
-function(raylib_draw_text_ex)
+function(feraw_DrawTextEx)
 {
     Font font = font_constructor(bruter_pop_pointer(stack));
     char *text = (char*)bruter_pop_pointer(stack);
@@ -4143,7 +4011,7 @@ function(raylib_draw_text_ex)
     DrawTextEx(font, text, position, fontSize, spacing, tint);
 }
 
-function(raylib_draw_text_pro)
+function(feraw_DrawTextPro)
 {
     Font font = font_constructor(bruter_pop_pointer(stack));
     char *text = (char*)bruter_pop_pointer(stack);
@@ -4156,7 +4024,7 @@ function(raylib_draw_text_pro)
     DrawTextPro(font, text, position, origin, rotation, fontSize, spacing, tint);
 }
 
-function(raylib_draw_text_codepoint)
+function(feraw_DrawTextCodepoint)
 {
     Font font = font_constructor(bruter_pop_pointer(stack));
     int codepoint = bruter_pop_int(stack);
@@ -4166,27 +4034,26 @@ function(raylib_draw_text_codepoint)
     DrawTextCodepoint(font, codepoint, position, fontSize, tint);
 }
 
-function(raylib_draw_text_codepoints)
+function(feraw_DrawTextCodepoints)
 {
     Font font = font_constructor(bruter_pop_pointer(stack));
-    BruterList *codepointsList = bruter_pop_list(stack);
+    const int *codepoints = (const int*)bruter_pop_pointer(stack);
+    int codepointCount = bruter_pop_int(stack);
     Vector2 position = vector2_constructor(bruter_pop_pointer(stack));
     float fontSize = bruter_pop_float(stack);
     float spacing = bruter_pop_float(stack);
     Color tint = color_from_int(bruter_pop_int(stack));
-    int *codepoints = (int*)bruter_list_to_pointer(codepointsList);
-    int codepointCount = bruter_list_length(codepointsList);
     DrawTextCodepoints(font, codepoints, codepointCount, position, fontSize, spacing, tint);
 }
 
 // text font info functions
-function(raylib_set_text_line_spacing)
+function(feraw_SetTextLineSpacing)
 {
     float spacing = bruter_pop_float(stack);
     SetTextLineSpacing(spacing);
 }
 
-function(raylib_measure_text)
+function(feraw_MeasureText)
 {
     char *text = (char*)bruter_pop_pointer(stack);
     int fontSize = bruter_pop_int(stack);
@@ -4194,7 +4061,7 @@ function(raylib_measure_text)
     bruter_push_int(stack, size, NULL, BRUTER_TYPE_ANY);
 }
 
-function(raylib_measure_text_ex)
+function(feraw_MeasureTextEx)
 {
     Font font = font_constructor(bruter_pop_pointer(stack));
     char *text = (char*)bruter_pop_pointer(stack);
@@ -4204,7 +4071,7 @@ function(raylib_measure_text_ex)
     bruter_push_pointer(stack, vector2_to_list(size), NULL, BRUTER_TYPE_LIST);
 }
 
-function(raylib_get_glyph_index)
+function(feraw_GetGlyphIndex)
 {
     Font font = font_constructor(bruter_pop_pointer(stack));
     int codepoint = bruter_pop_int(stack);
@@ -4212,7 +4079,7 @@ function(raylib_get_glyph_index)
     bruter_push_int(stack, glyphIndex, NULL, BRUTER_TYPE_ANY);
 }
 
-function(raylib_get_glyph_info)
+function(feraw_GetGlyphInfo)
 {
     Font font = font_constructor(bruter_pop_pointer(stack));
     int codepoint = bruter_pop_int(stack);
@@ -4220,7 +4087,7 @@ function(raylib_get_glyph_info)
     bruter_push_pointer(stack, glyph_info_to_list(glyphInfo), NULL, BRUTER_TYPE_LIST);
 }
 
-function(raylib_get_glyph_atlas_rec)
+function(feraw_GetGlyphAtlasRec)
 {
     Font font = font_constructor(bruter_pop_pointer(stack));
     int codepoint = bruter_pop_int(stack);
@@ -4229,15 +4096,15 @@ function(raylib_get_glyph_atlas_rec)
 }
 
 // text string managment functions
-function(raylib_text_copy)
+function(feraw_TextCopy)
 {
     char *text = (char*)bruter_pop_pointer(stack);
     char *src = (char*)bruter_pop_pointer(stack);
-    char *copiedText = TextCopy(text, src);
-    bruter_push_pointer(stack, copiedText, NULL, BRUTER_TYPE_BUFFER);
+    TextCopy(text, src);
+    bruter_push_pointer(stack, text, NULL, BRUTER_TYPE_BUFFER);
 }
 
-function(raylib_text_is_equal)
+function(feraw_TextIsEqual)
 {
     char *text1 = (char*)bruter_pop_pointer(stack);
     char *text2 = (char*)bruter_pop_pointer(stack);
@@ -4245,30 +4112,30 @@ function(raylib_text_is_equal)
     bruter_push_int(stack, isEqual, NULL, BRUTER_TYPE_ANY);
 }
 
-function(raylib_text_length)
+function(feraw_TextLength)
 {
     char *text = (char*)bruter_pop_pointer(stack);
     int length = TextLength(text);
     bruter_push_int(stack, length, NULL, BRUTER_TYPE_ANY);
 }
 
-function(raylib_text_format)
+function(feraw_TextFormat)
 {
     char *text = (char*)bruter_pop_pointer(stack);
-    char *formattedText = TextFormat(text);
+    char *formattedText = strdup(TextFormat(text));
     bruter_push_pointer(stack, formattedText, NULL, BRUTER_TYPE_BUFFER);
 }
 
-function(raylib_text_subtext)
+function(feraw_TextSubtext)
 {
     char *text = (char*)bruter_pop_pointer(stack);
     int position = bruter_pop_int(stack);
     int length = bruter_pop_int(stack);
-    char *subText = TextSubtext(text, position, length);
+    char *subText = strdup(TextSubtext(text, position, length));
     bruter_push_pointer(stack, subText, NULL, BRUTER_TYPE_BUFFER);
 }
 
-function(raylib_text_replace)
+function(feraw_TextReplace)
 {
     char *text = (char*)bruter_pop_pointer(stack);
     char *find = (char*)bruter_pop_pointer(stack);
@@ -4277,7 +4144,7 @@ function(raylib_text_replace)
     bruter_push_pointer(stack, replacedText, NULL, BRUTER_TYPE_BUFFER);
 }
 
-function(raylib_text_insert)
+function(feraw_TextInsert)
 {
     char *text = (char*)bruter_pop_pointer(stack);
     char *insert = (char*)bruter_pop_pointer(stack);
@@ -4286,34 +4153,39 @@ function(raylib_text_insert)
     bruter_push_pointer(stack, insertedText, NULL, BRUTER_TYPE_BUFFER);
 }
 
-function(raylib_text_join)
+function(feraw_TextJoin)
 {
-    const char **textList = bruter_pop_list(stack);
+    const char **textList = bruter_pop_pointer(stack);
     int count = bruter_pop_int(stack);
     char *delimiter = (char*)bruter_pop_pointer(stack);
-    char *joinedText = TextJoin(textList, count, delimiter);
-    bruter_push_pointer(stack, joinedText, NULL, BRUTER_TYPE_BUFFER);
+    const char *joinedText = TextJoin(textList, count, delimiter);
+    bruter_push_pointer(stack, strdup(joinedText), NULL, BRUTER_TYPE_BUFFER);
 }
 
-function(raylib_text_split)
+function(feraw_TextSplit)
 {
     char *text = (char*)bruter_pop_pointer(stack);
     char delimiter = bruter_pop_int(stack);
-    int *count = (int*)bruter_pop_pointer(stack);
-    BruterList *splitList = TextSplit(text, delimiter, count);
-    bruter_push_pointer(stack, splitList, NULL, BRUTER_TYPE_LIST);
+    int count = 0;
+    const char **splited = TextSplit(text, delimiter, &count);
+    BruterList *splitedList = bruter_new(count, false, false);
+    for (int i = 0; i < count; i++)
+    {
+        bruter_push_pointer(splitedList, strdup(splited[i]), NULL, BRUTER_TYPE_BUFFER);
+    }
+    bruter_push_pointer(stack, splitedList, NULL, BRUTER_TYPE_LIST);
 }
 
-function(raylib_text_append)
+function(feraw_TextAppend)
 {
     char *text = (char*)bruter_pop_pointer(stack);
     char *appendText = (char*)bruter_pop_pointer(stack);
     int position = bruter_pop_int(stack);
-    TextAppend(text, appendText, position);
+    TextAppend(text, appendText, &position);
     bruter_push_pointer(stack, text, NULL, BRUTER_TYPE_BUFFER);
 }
 
-function(raylib_text_find_index)
+function(feraw_TextFindIndex)
 {
     char *text = (char*)bruter_pop_pointer(stack);
     char *find = (char*)bruter_pop_pointer(stack);
@@ -4321,58 +4193,58 @@ function(raylib_text_find_index)
     bruter_push_int(stack, index, NULL, BRUTER_TYPE_ANY);
 }
 
-function(raylib_text_to_upper)
+function(feraw_TextToUpper)
 {
     char *text = (char*)bruter_pop_pointer(stack);
-    char *upperText = TextToUpper(text);
-    bruter_push_pointer(stack, upperText, NULL, BRUTER_TYPE_BUFFER);
+    const char *upperText = TextToUpper(text);
+    bruter_push_pointer(stack, strdup(upperText), NULL, BRUTER_TYPE_BUFFER);
 }
 
-function(raylib_text_to_lower)
+function(feraw_TextToLower)
 {
     char *text = (char*)bruter_pop_pointer(stack);
-    char *lowerText = TextToLower(text);
+    char *lowerText = strdup(TextToLower(text));
     bruter_push_pointer(stack, lowerText, NULL, BRUTER_TYPE_BUFFER);
 }
 
-function(raylib_text_to_pascal)
+function(feraw_TextToPascal)
 {
     char *text = (char*)bruter_pop_pointer(stack);
-    char *pascalText = TextToPascal(text);
+    char *pascalText = strdup(TextToPascal(text));
     bruter_push_pointer(stack, pascalText, NULL, BRUTER_TYPE_BUFFER);
 }
 
-function(raylib_text_to_snake)
+function(feraw_TextToSnake)
 {
     char *text = (char*)bruter_pop_pointer(stack);
-    char *snakeText = TextToSnake(text);
+    char *snakeText = strdup(TextToSnake(text));
     bruter_push_pointer(stack, snakeText, NULL, BRUTER_TYPE_BUFFER);
 }
 
-function(raylib_text_to_camel)
+function(feraw_TextToCamel)
 {
     char *text = (char*)bruter_pop_pointer(stack);
-    char *camelText = TextToCamel(text);
+    char *camelText = strdup(TextToCamel(text));
     bruter_push_pointer(stack, camelText, NULL, BRUTER_TYPE_BUFFER);
 }
 
-function(raylib_text_to_integer)
+function(feraw_TextToInteger)
 {
     char *text = (char*)bruter_pop_pointer(stack);
     int value = TextToInteger(text);
     bruter_push_int(stack, value, NULL, BRUTER_TYPE_ANY);
 }
 
-function(raylib_text_to_float)
+function(feraw_TextToFloat)
 {
     char *text = (char*)bruter_pop_pointer(stack);
     float value = TextToFloat(text);
     bruter_push_float(stack, value, NULL, BRUTER_TYPE_ANY);
 }
 
-// basic geometric 3d shapes drawing functions
+// basic geometric 3D shapes drawing functions
 
-function(raylib_draw_line_3d)
+function(feraw_DrawLine3D)
 {
     Vector3 start = vector3_constructor(bruter_pop_pointer(stack));
     Vector3 end = vector3_constructor(bruter_pop_pointer(stack));
@@ -4380,14 +4252,14 @@ function(raylib_draw_line_3d)
     DrawLine3D(start, end, color);
 }
 
-function(raylib_draw_point_3d)
+function(feraw_DrawPoint3D)
 {
     Vector3 position = vector3_constructor(bruter_pop_pointer(stack));
     Color color = color_from_int(bruter_pop_int(stack));
     DrawPoint3D(position, color);
 }
 
-function(raylib_draw_circle_3d)
+function(feraw_DrawCircle3D)
 {
     Vector3 center = vector3_constructor(bruter_pop_pointer(stack));
     float radius = bruter_pop_float(stack);
@@ -4397,7 +4269,7 @@ function(raylib_draw_circle_3d)
     DrawCircle3D(center, radius, rotationAxis, rotationAngle, color);
 }
 
-function(raylib_draw_triangle_3d)
+function(feraw_DrawTriangle3D)
 {
     Vector3 p1 = vector3_constructor(bruter_pop_pointer(stack));
     Vector3 p2 = vector3_constructor(bruter_pop_pointer(stack));
@@ -4406,16 +4278,15 @@ function(raylib_draw_triangle_3d)
     DrawTriangle3D(p1, p2, p3, color);
 }
 
-function(raylib_draw_triangle_strip_3d)
+function(feraw_DrawTriangleStrip3D)
 {
-    BruterList *pointsList = bruter_pop_list(stack);
-    Vector3 *points = (Vector3*)bruter_list_to_pointer(pointsList);
-    int pointCount = bruter_list_length(pointsList);
+    const Vector3 *points = bruter_pop_pointer(stack);
+    int pointCount = bruter_pop_int(stack);
     Color color = color_from_int(bruter_pop_int(stack));
     DrawTriangleStrip3D(points, pointCount, color);
 }
 
-function(raylib_draw_cube)
+function(feraw_DrawCube)
 {
     Vector3 position = vector3_constructor(bruter_pop_pointer(stack));
     float width = bruter_pop_float(stack);
@@ -4425,15 +4296,7 @@ function(raylib_draw_cube)
     DrawCube(position, width, height, length, color);
 }
 
-function(raylib_draw_cube_v)
-{
-    Vector3 position = vector3_constructor(bruter_pop_pointer(stack));
-    Vector3 size = vector3_constructor(bruter_pop_pointer(stack));
-    Color color = color_from_int(bruter_pop_int(stack));
-    DrawCubeV(position, size, color);
-}
-
-function(raylib_draw_cube_wires)
+function(feraw_DrawCubeWires)
 {
     Vector3 position = vector3_constructor(bruter_pop_pointer(stack));
     float width = bruter_pop_float(stack);
@@ -4443,15 +4306,7 @@ function(raylib_draw_cube_wires)
     DrawCubeWires(position, width, height, length, color);
 }
 
-function(raylib_draw_cube_wires_v)
-{
-    Vector3 position = vector3_constructor(bruter_pop_pointer(stack));
-    Vector3 size = vector3_constructor(bruter_pop_pointer(stack));
-    Color color = color_from_int(bruter_pop_int(stack));
-    DrawCubeWiresV(position, size, color);
-}
-
-function(raylib_draw_sphere)
+function(feraw_DrawSphere)
 {
     Vector3 center = vector3_constructor(bruter_pop_pointer(stack));
     float radius = bruter_pop_float(stack);
@@ -4459,7 +4314,7 @@ function(raylib_draw_sphere)
     DrawSphere(center, radius, color);
 }
 
-function(raylib_draw_sphere_ex)
+function(feraw_DrawSphereEx)
 {
     Vector3 center = vector3_constructor(bruter_pop_pointer(stack));
     float radius = bruter_pop_float(stack);
@@ -4469,7 +4324,7 @@ function(raylib_draw_sphere_ex)
     DrawSphereEx(center, radius, rings, slices, color);
 }
 
-function(raylib_draw_sphere_wires)
+function(feraw_DrawSphereWires)
 {
     Vector3 center = vector3_constructor(bruter_pop_pointer(stack));
     float radius = bruter_pop_float(stack);
@@ -4479,7 +4334,7 @@ function(raylib_draw_sphere_wires)
     DrawSphereWires(center, radius, rings, slices, color);
 }
 
-function(raylib_draw_cylinder)
+function(feraw_DrawCylinder)
 {
     Vector3 position = vector3_constructor(bruter_pop_pointer(stack));
     float radiusTop = bruter_pop_float(stack);
@@ -4490,7 +4345,7 @@ function(raylib_draw_cylinder)
     DrawCylinder(position, radiusTop, radiusBottom, height, slices, color);
 }
 
-function(raylib_draw_cylinder_ex)
+function(feraw_DrawCylinderEx)
 {
     Vector3 startPos = vector3_constructor(bruter_pop_pointer(stack));
     Vector3 endPos = vector3_constructor(bruter_pop_pointer(stack));
@@ -4501,7 +4356,7 @@ function(raylib_draw_cylinder_ex)
     DrawCylinderEx(startPos, endPos, radiusTop, radiusBottom, slices, color);
 }
 
-function(raylib_draw_cylinder_wires)
+function(feraw_DrawCylinderWires)
 {
     Vector3 position = vector3_constructor(bruter_pop_pointer(stack));
     float radiusTop = bruter_pop_float(stack);
@@ -4512,7 +4367,7 @@ function(raylib_draw_cylinder_wires)
     DrawCylinderWires(position, radiusTop, radiusBottom, height, slices, color);
 }
 
-function(raylib_draw_cylinder_wires_ex)
+function(feraw_DrawCylinderWiresEx)
 {
     Vector3 startPos = vector3_constructor(bruter_pop_pointer(stack));
     Vector3 endPos = vector3_constructor(bruter_pop_pointer(stack));
@@ -4523,7 +4378,7 @@ function(raylib_draw_cylinder_wires_ex)
     DrawCylinderWiresEx(startPos, endPos, radiusTop, radiusBottom, slices, color);
 }
 
-function(raylib_draw_capsule)
+function(feraw_DrawCapsule)
 {
     Vector3 startPos = vector3_constructor(bruter_pop_pointer(stack));
     Vector3 endPos = vector3_constructor(bruter_pop_pointer(stack));
@@ -4534,7 +4389,7 @@ function(raylib_draw_capsule)
     DrawCapsule(startPos, endPos, radius, slices, rings, color);
 }
 
-function(raylib_draw_plane)
+function(feraw_DrawPlane)
 {
     Vector3 center = vector3_constructor(bruter_pop_pointer(stack));
     Vector2 size = vector2_constructor(bruter_pop_pointer(stack));
@@ -4542,14 +4397,14 @@ function(raylib_draw_plane)
     DrawPlane(center, size, color);
 }
 
-function(raylib_draw_ray)
+function(feraw_DrawRay)
 {
     Ray ray = ray_constructor(bruter_pop_pointer(stack));
     Color color = color_from_int(bruter_pop_int(stack));
     DrawRay(ray, color);
 }
 
-function(raylib_draw_grid)
+function(feraw_DrawGrid)
 {
     int slices = bruter_pop_int(stack);
     float spacing = bruter_pop_float(stack);
@@ -4558,34 +4413,34 @@ function(raylib_draw_grid)
 
 // model managment functions
 
-function(raylib_load_model)
+function(feraw_LoadModel)
 {
     char *fileName = (char*)bruter_pop_pointer(stack);
     Model model = LoadModel(fileName);
     bruter_push_pointer(stack, model_to_list(model), NULL, BRUTER_TYPE_LIST);
 }
 
-function(raylib_load_model_from_mesh)
+function(feraw_LoadModelFromMesh)
 {
     Mesh mesh = mesh_constructor(bruter_pop_pointer(stack));
     Model model = LoadModelFromMesh(mesh);
     bruter_push_pointer(stack, model_to_list(model), NULL, BRUTER_TYPE_LIST);
 }
 
-function(raylib_is_model_valid)
+function(feraw_IsModelValid)
 {
     Model model = model_constructor(bruter_pop_pointer(stack));
     bool isValid = IsModelValid(model);
     bruter_push_int(stack, isValid, NULL, BRUTER_TYPE_ANY);
 }
 
-function(raylib_unload_model)
+function(feraw_UnloadModel)
 {
     Model model = model_constructor(bruter_pop_pointer(stack));
     UnloadModel(model);
 }
 
-function(raylib_get_model_bounding_box)
+function(feraw_GetModelBoundingBox)
 {
     Model model = model_constructor(bruter_pop_pointer(stack));
     BoundingBox boundingBox = GetModelBoundingBox(model);
@@ -4593,7 +4448,7 @@ function(raylib_get_model_bounding_box)
 }
 
 // model drawing functions
-function(raylib_draw_model)
+function(feraw_DrawModel)
 {
     Model model = model_constructor(bruter_pop_pointer(stack));
     Vector3 position = vector3_constructor(bruter_pop_pointer(stack));
@@ -4602,7 +4457,7 @@ function(raylib_draw_model)
     DrawModel(model, position, scale, tint);
 }
 
-function(raylib_draw_model_ex)
+function(feraw_DrawModelEx)
 {
     Model model = model_constructor(bruter_pop_pointer(stack));
     Vector3 position = vector3_constructor(bruter_pop_pointer(stack));
@@ -4613,7 +4468,7 @@ function(raylib_draw_model_ex)
     DrawModelEx(model, position, rotationAxis, rotationAngle, scale, tint);
 }
 
-function(raylib_draw_model_wires)
+function(feraw_DrawModelWires)
 {
     Model model = model_constructor(bruter_pop_pointer(stack));
     Vector3 position = vector3_constructor(bruter_pop_pointer(stack));
@@ -4622,7 +4477,7 @@ function(raylib_draw_model_wires)
     DrawModelWires(model, position, scale, tint);
 }
 
-function(raylib_draw_model_wires_ex)
+function(feraw_DrawModelWiresEx)
 {
     Model model = model_constructor(bruter_pop_pointer(stack));
     Vector3 position = vector3_constructor(bruter_pop_pointer(stack));
@@ -4633,7 +4488,7 @@ function(raylib_draw_model_wires_ex)
     DrawModelWiresEx(model, position, rotationAxis, rotationAngle, scale, tint);
 }
 
-function(raylib_draw_points)
+function(feraw_DrawPoints)
 {
     Model model = model_constructor(bruter_pop_pointer(stack));
     Vector3 position = vector3_constructor(bruter_pop_pointer(stack));
@@ -4642,7 +4497,7 @@ function(raylib_draw_points)
     DrawModelPoints(model, position, scale, tint);
 }
 
-function(raylib_draw_points_ex)
+function(feraw_DrawPointsEx)
 {
     Model model = model_constructor(bruter_pop_pointer(stack));
     Vector3 position = vector3_constructor(bruter_pop_pointer(stack));
@@ -4653,14 +4508,14 @@ function(raylib_draw_points_ex)
     DrawModelPointsEx(model, position, rotationAxis, rotationAngle, scale, tint);
 }
 
-function(raylib_draw_bouding_box)
+function(feraw_DrawBoudingBox)
 {
     BoundingBox box = bounding_box_constructor(bruter_pop_pointer(stack));
     Color color = color_from_int(bruter_pop_int(stack));
     DrawBoundingBox(box, color);
 }
 
-function(raylib_draw_billboard)
+function(feraw_DrawBillboard)
 {
     Camera camera = camera3d_constructor(bruter_pop_pointer(stack));
     Texture2D texture = texture_constructor(bruter_pop_pointer(stack));
@@ -4670,7 +4525,7 @@ function(raylib_draw_billboard)
     DrawBillboard(camera, texture, position, size, tint);
 }
 
-function(raylib_draw_billboard_rec)
+function(feraw_DrawBillboardRec)
 {
     Camera camera = camera3d_constructor(bruter_pop_pointer(stack));
     Texture2D texture = texture_constructor(bruter_pop_pointer(stack));
@@ -4681,7 +4536,7 @@ function(raylib_draw_billboard_rec)
     DrawBillboardRec(camera, texture, sourceRec, position, size, tint);
 }
 
-function(raylib_draw_billboard_pro)
+function(feraw_DrawBillboardPro)
 {
     Camera camera = camera3d_constructor(bruter_pop_pointer(stack));
     Texture2D texture = texture_constructor(bruter_pop_pointer(stack));
@@ -4696,7 +4551,7 @@ function(raylib_draw_billboard_pro)
 }
 
 // mesh management functions
-function(raylib_upload_mesh)
+function(feraw_UploadMesh)
 {
     Mesh mesh = mesh_constructor(bruter_pop_pointer(stack));
     bool dynamic = bruter_pop_int(stack);
@@ -4704,7 +4559,7 @@ function(raylib_upload_mesh)
     bruter_push_pointer(stack, mesh_to_list(mesh), NULL, BRUTER_TYPE_LIST);
 }
 
-function(raylib_update_mesh_buffer)
+function(feraw_UpdateMeshBuffer)
 {
     Mesh mesh = mesh_constructor(bruter_pop_pointer(stack));
     int index = bruter_pop_int(stack);
@@ -4715,13 +4570,13 @@ function(raylib_update_mesh_buffer)
     bruter_push_pointer(stack, mesh_to_list(mesh), NULL, BRUTER_TYPE_LIST);
 }
 
-function(raylib_unload_mesh)
+function(feraw_UnloadMesh)
 {
     Mesh mesh = mesh_constructor(bruter_pop_pointer(stack));
     UnloadMesh(mesh);
 }
 
-function(raylib_draw_mesh)
+function(feraw_DrawMesh)
 {
     Mesh mesh = mesh_constructor(bruter_pop_pointer(stack));
     Material material = material_constructor(bruter_pop_pointer(stack));
@@ -4729,7 +4584,7 @@ function(raylib_draw_mesh)
     DrawMesh(mesh, material, transform);
 }
 
-function(raylib_draw_mesh_instanced)
+function(feraw_DrawMeshInstanced)
 {
     Mesh mesh = mesh_constructor(bruter_pop_pointer(stack));
     Material material = material_constructor(bruter_pop_pointer(stack));
@@ -4738,28 +4593,28 @@ function(raylib_draw_mesh_instanced)
     DrawMeshInstanced(mesh, material, transforms, instanceCount);
 }
 
-function(raylib_get_mesh_bounding_box)
+function(feraw_GetMeshBoundingBox)
 {
     Mesh mesh = mesh_constructor(bruter_pop_pointer(stack));
     BoundingBox boundingBox = GetMeshBoundingBox(mesh);
     bruter_push_pointer(stack, bounding_box_to_list(boundingBox), NULL, BRUTER_TYPE_LIST);
 }
 
-function(raylib_gen_mesh_tangents)
+function(feraw_GenMeshTangents)
 {
     Mesh mesh = mesh_constructor(bruter_pop_pointer(stack));
     GenMeshTangents(&mesh);
     bruter_push_pointer(stack, mesh_to_list(mesh), NULL, BRUTER_TYPE_LIST);
 }
 
-function(raylib_export_mesh)
+function(feraw_ExportMesh)
 {
     Mesh mesh = mesh_constructor(bruter_pop_pointer(stack));
     char *fileName = (char*)bruter_pop_pointer(stack);
     ExportMesh(mesh, fileName);
 }
 
-function(raylib_export_mesh_as_code)
+function(feraw_ExportMeshAsCode)
 {
     Mesh mesh = mesh_constructor(bruter_pop_pointer(stack));
     char *fileName = (char*)bruter_pop_pointer(stack);
@@ -4767,7 +4622,7 @@ function(raylib_export_mesh_as_code)
 }
 
 // mesh generation functions
-function(raylib_gen_mesh_poly)
+function(feraw_GenMeshPoly)
 {
     int sides = bruter_pop_int(stack);
     float radius = bruter_pop_float(stack);
@@ -4775,7 +4630,7 @@ function(raylib_gen_mesh_poly)
     bruter_push_pointer(stack, mesh_to_list(mesh), NULL, BRUTER_TYPE_LIST);
 }
 
-function(raylib_gen_mesh_plane)
+function(feraw_GenMeshPlane)
 {
     float width = bruter_pop_float(stack);
     float length = bruter_pop_float(stack);
@@ -4785,7 +4640,7 @@ function(raylib_gen_mesh_plane)
     bruter_push_pointer(stack, mesh_to_list(mesh), NULL, BRUTER_TYPE_LIST);
 }
 
-function(raylib_gen_mesh_cube)
+function(feraw_GenMeshCube)
 {
     float width = bruter_pop_float(stack);
     float height = bruter_pop_float(stack);
@@ -4794,7 +4649,7 @@ function(raylib_gen_mesh_cube)
     bruter_push_pointer(stack, mesh_to_list(mesh), NULL, BRUTER_TYPE_LIST);
 }
 
-function(raylib_gen_mesh_sphere)
+function(feraw_GenMeshSphere)
 {
     float radius = bruter_pop_float(stack);
     int rings = bruter_pop_int(stack);
@@ -4803,7 +4658,7 @@ function(raylib_gen_mesh_sphere)
     bruter_push_pointer(stack, mesh_to_list(mesh), NULL, BRUTER_TYPE_LIST);
 }
 
-function(raylib_gen_mesh_hemi_sphere)
+function(feraw_GenMeshHemiSphere)
 {
     float radius = bruter_pop_float(stack);
     int rings = bruter_pop_int(stack);
@@ -4812,7 +4667,7 @@ function(raylib_gen_mesh_hemi_sphere)
     bruter_push_pointer(stack, mesh_to_list(mesh), NULL, BRUTER_TYPE_LIST);
 }
 
-function(raylib_gen_mesh_cylinder)
+function(feraw_GenMeshCylinder)
 {
     float radius = bruter_pop_float(stack);
     float height = bruter_pop_float(stack);
@@ -4821,7 +4676,7 @@ function(raylib_gen_mesh_cylinder)
     bruter_push_pointer(stack, mesh_to_list(mesh), NULL, BRUTER_TYPE_LIST);
 }
 
-function(raylib_gen_mesh_cone)
+function(feraw_GenMeshCone)
 {
     float radius = bruter_pop_float(stack);
     float height = bruter_pop_float(stack);
@@ -4830,7 +4685,7 @@ function(raylib_gen_mesh_cone)
     bruter_push_pointer(stack, mesh_to_list(mesh), NULL, BRUTER_TYPE_LIST);
 }
 
-function(raylib_gen_mesh_torus)
+function(feraw_GenMeshTorus)
 {
     float radius = bruter_pop_float(stack);
     float tubeRadius = bruter_pop_float(stack);
@@ -4840,7 +4695,7 @@ function(raylib_gen_mesh_torus)
     bruter_push_pointer(stack, mesh_to_list(mesh), NULL, BRUTER_TYPE_LIST);
 }
 
-function(raylib_gen_mesh_knot)
+function(feraw_GenMeshKnot)
 {
     float radius = bruter_pop_float(stack);
     float tubeRadius = bruter_pop_float(stack);
@@ -4850,7 +4705,7 @@ function(raylib_gen_mesh_knot)
     bruter_push_pointer(stack, mesh_to_list(mesh), NULL, BRUTER_TYPE_LIST);
 }
 
-function(raylib_gen_mesh_heightmap)
+function(feraw_GenMeshHeightmap)
 {
     Image heightmap = image_constructor(bruter_pop_pointer(stack));
     Vector3 size = vector3_constructor(bruter_pop_pointer(stack));
@@ -4858,7 +4713,7 @@ function(raylib_gen_mesh_heightmap)
     bruter_push_pointer(stack, mesh_to_list(mesh), NULL, BRUTER_TYPE_LIST);
 }
 
-function(raylib_gen_mesh_cubicmap)
+function(feraw_GenMeshCubicmap)
 {
     Image cubicmap = image_constructor(bruter_pop_pointer(stack));
     Vector3 cubeSize = vector3_constructor(bruter_pop_pointer(stack));
@@ -4867,33 +4722,33 @@ function(raylib_gen_mesh_cubicmap)
 }
 
 // material loading/unloading functions
-function(raylib_load_materials)
+function(feraw_LoadMaterials)
 {
     char *fileName = (char*)bruter_pop_pointer(stack);
     int *materialCount = (int*)bruter_pop_pointer(stack);
-    bruter_push_pointer(stack, material_list_to_pointer(LoadMaterials(fileName, materialCount)), NULL, BRUTER_TYPE_LIST);
+    bruter_push_pointer(stack, LoadMaterials(fileName, materialCount), NULL, BRUTER_TYPE_LIST);
 }
 
-function(raylib_load_material_default)
+function(feraw_LoadMaterialDefault)
 {
     Material material = LoadMaterialDefault();
     bruter_push_pointer(stack, material_to_list(material), NULL, BRUTER_TYPE_LIST);
 }
 
-function(raylib_is_material_valid)
+function(feraw_IsMaterialValid)
 {
     Material material = material_constructor(bruter_pop_pointer(stack));
     bool isValid = IsMaterialValid(material);
     bruter_push_int(stack, isValid, NULL, BRUTER_TYPE_ANY);
 }
 
-function(raylib_unload_material)
+function(feraw_UnloadMaterial)
 {
     Material material = material_constructor(bruter_pop_pointer(stack));
     UnloadMaterial(material);
 }
 
-function(raylib_set_material_texture)
+function(feraw_SetMaterialTexture)
 {
     Material material = material_constructor(bruter_pop_pointer(stack));
     int mapType = bruter_pop_int(stack); // Assuming mapType is an int representing the texture type
@@ -4902,7 +4757,7 @@ function(raylib_set_material_texture)
     bruter_push_pointer(stack, material_to_list(material), NULL, BRUTER_TYPE_LIST);
 }
 
-function(raylib_set_model_mesh_material)
+function(feraw_SetModelMeshMaterial)
 {
     Model model = model_constructor(bruter_pop_pointer(stack));
     int meshId = bruter_pop_int(stack);
@@ -4912,15 +4767,15 @@ function(raylib_set_model_mesh_material)
 }
 
 // model animations loading/unloading functions
-function(raylib_load_model_animations)
+function(feraw_LoadModelAnimations)
 {
     char *fileName = (char*)bruter_pop_pointer(stack);
     int *animCount = (int*)bruter_pop_pointer(stack);
     ModelAnimation *animations = LoadModelAnimations(fileName, animCount);
-    bruter_push_pointer(stack, model_animation_list_to_pointer(animations, *animCount), NULL, BRUTER_TYPE_LIST);
+    bruter_push_pointer(stack, animations, NULL, BRUTER_TYPE_BUFFER);
 }
 
-function(raylib_update_model_animation)
+function(feraw_UpdateModelAnimation)
 {
     Model model = model_constructor(bruter_pop_pointer(stack));
     ModelAnimation animation = model_animation_constructor(bruter_pop_pointer(stack));
@@ -4929,27 +4784,29 @@ function(raylib_update_model_animation)
     bruter_push_pointer(stack, model_to_list(model), NULL, BRUTER_TYPE_LIST);
 }
 
-function(raylib_unload_model_animation_bones)
+function(feraw_UpdateModelAnimationBones)
 {
     Model model = model_constructor(bruter_pop_pointer(stack));
     ModelAnimation animation = model_animation_constructor(bruter_pop_pointer(stack));
-    UnloadModelAnimationBones(&model, animation);
+    int frame = bruter_pop_int(stack);
+    UpdateModelAnimationBones(model, animation, frame);
+    bruter_push_pointer(stack, model_to_list(model), NULL, BRUTER_TYPE_LIST);
 }
 
-function(raylib_unload_model_animation)
+function(feraw_UnloadModelAnimation)
 {
     ModelAnimation animation = model_animation_constructor(bruter_pop_pointer(stack));
     UnloadModelAnimation(animation);
 }
 
-function(raylib_unload_model_animations)
+function(feraw_UnloadModelAnimations)
 {
     ModelAnimation *animations = (ModelAnimation*)bruter_pop_pointer(stack);
     int animCount = bruter_pop_int(stack);
     UnloadModelAnimations(animations, animCount);
 }
 
-function(raylib_is_model_animation_valid)
+function(feraw_IsModelAnimationValid)
 {
     Model model = model_constructor(bruter_pop_pointer(stack));
     ModelAnimation animation = model_animation_constructor(bruter_pop_pointer(stack));
@@ -4959,7 +4816,7 @@ function(raylib_is_model_animation_valid)
 
 // collision detection functions
 
-function(raylib_check_collision_spheres)
+function(feraw_CheckCollisionSpheres)
 {
     Vector3 center1 = vector3_constructor(bruter_pop_pointer(stack));
     float radius1 = bruter_pop_float(stack);
@@ -4969,7 +4826,7 @@ function(raylib_check_collision_spheres)
     bruter_push_int(stack, collision, NULL, BRUTER_TYPE_ANY);
 }
 
-function(raylib_check_collision_boxes)
+function(feraw_CheckCollisionBoxes)
 {
     BoundingBox box1 = bounding_box_constructor(bruter_pop_pointer(stack));
     BoundingBox box2 = bounding_box_constructor(bruter_pop_pointer(stack));
@@ -4977,7 +4834,7 @@ function(raylib_check_collision_boxes)
     bruter_push_int(stack, collision, NULL, BRUTER_TYPE_ANY);
 }
 
-function(raylib_check_collision_box_sphere)
+function(feraw_CheckCollisionBoxSphere)
 {
     BoundingBox box = bounding_box_constructor(bruter_pop_pointer(stack));
     Vector3 center = vector3_constructor(bruter_pop_pointer(stack));
@@ -4986,7 +4843,7 @@ function(raylib_check_collision_box_sphere)
     bruter_push_int(stack, collision, NULL, BRUTER_TYPE_ANY);
 }
 
-function(raylib_get_ray_collision_sphere)
+function(feraw_GetRayCollisionSphere)
 {
     Ray ray = ray_constructor(bruter_pop_pointer(stack));
     Vector3 center = vector3_constructor(bruter_pop_pointer(stack));
@@ -4995,7 +4852,7 @@ function(raylib_get_ray_collision_sphere)
     bruter_push_pointer(stack, ray_collision_to_list(collision), NULL, BRUTER_TYPE_LIST);
 }
 
-function(raylib_get_ray_collision_box)
+function(feraw_GetRayCollisionBox)
 {
     Ray ray = ray_constructor(bruter_pop_pointer(stack));
     BoundingBox box = bounding_box_constructor(bruter_pop_pointer(stack));
@@ -5003,7 +4860,7 @@ function(raylib_get_ray_collision_box)
     bruter_push_pointer(stack, ray_collision_to_list(collision), NULL, BRUTER_TYPE_LIST);
 }
 
-function(raylib_get_ray_collision_mesh)
+function(feraw_GetRayCollisionMesh)
 {
     Ray ray = ray_constructor(bruter_pop_pointer(stack));
     Mesh mesh = mesh_constructor(bruter_pop_pointer(stack));
@@ -5012,7 +4869,7 @@ function(raylib_get_ray_collision_mesh)
     bruter_push_pointer(stack, ray_collision_to_list(collision), NULL, BRUTER_TYPE_LIST);
 }
 
-function(raylib_get_ray_collision_triangle)
+function(feraw_GetRayCollisionTriangle)
 {
     Ray ray = ray_constructor(bruter_pop_pointer(stack));
     Vector3 p1 = vector3_constructor(bruter_pop_pointer(stack));
@@ -5022,7 +4879,7 @@ function(raylib_get_ray_collision_triangle)
     bruter_push_pointer(stack, ray_collision_to_list(collision), NULL, BRUTER_TYPE_LIST);
 }
 
-function(raylib_get_ray_collision_quad)
+function(feraw_GetRayCollisionQuad)
 {
     Ray ray = ray_constructor(bruter_pop_pointer(stack));
     Vector3 p1 = vector3_constructor(bruter_pop_pointer(stack));
@@ -5034,29 +4891,29 @@ function(raylib_get_ray_collision_quad)
 }
 
 // audio loading/unloading functions
-function(raylib_init_audio_device)
+function(feraw_InitAudioDevice)
 {
     InitAudioDevice();
 }
 
-function(raylib_close_audio_device)
+function(feraw_CloseAudioDevice)
 {
     CloseAudioDevice();
 }
 
-function(raylib_is_audio_device_ready)
+function(feraw_IsAudioDeviceReady)
 {
     bool isReady = IsAudioDeviceReady();
     bruter_push_int(stack, isReady, NULL, BRUTER_TYPE_ANY);
 }
 
-function(raylib_set_master_volume)
+function(feraw_SetMasterVolume)
 {
     float volume = bruter_pop_float(stack);
     SetMasterVolume(volume);
 }
 
-function(raylib_get_master_volume)
+function(feraw_GetMasterVolume)
 {
     float volume = GetMasterVolume();
     bruter_push_float(stack, volume, NULL, BRUTER_TYPE_ANY);
@@ -5064,14 +4921,14 @@ function(raylib_get_master_volume)
 
 // wave/sound loading/unloading functions
 
-function(raylib_load_wave)
+function(feraw_LoadWave)
 {
     char *fileName = (char*)bruter_pop_pointer(stack);
     Wave wave = LoadWave(fileName);
     bruter_push_pointer(stack, wave_to_list(wave), NULL, BRUTER_TYPE_LIST);
 }
 
-function(raylib_load_wave_from_memory)
+function(feraw_LoadWaveFromMemory)
 {
     char *fileType = (char*)bruter_pop_pointer(stack);
     void *data = bruter_pop_pointer(stack);
@@ -5080,42 +4937,42 @@ function(raylib_load_wave_from_memory)
     bruter_push_pointer(stack, wave_to_list(wave), NULL, BRUTER_TYPE_LIST);
 }
 
-function(raylib_is_wave_valid)
+function(feraw_IsWaveValid)
 {
     Wave wave = wave_constructor(bruter_pop_pointer(stack));
     bool isValid = IsWaveValid(wave);
     bruter_push_int(stack, isValid, NULL, BRUTER_TYPE_ANY);
 }
 
-function(raylib_load_sound)
+function(feraw_LoadSound)
 {
     char *fileName = (char*)bruter_pop_pointer(stack);
     Sound sound = LoadSound(fileName);
     bruter_push_pointer(stack, sound_to_list(sound), NULL, BRUTER_TYPE_LIST);
 }
 
-function(raylib_load_sound_from_wave)
+function(feraw_LoadSoundFromWave)
 {
     Wave wave = wave_constructor(bruter_pop_pointer(stack));
     Sound sound = LoadSoundFromWave(wave);
     bruter_push_pointer(stack, sound_to_list(sound), NULL, BRUTER_TYPE_LIST);
 }
 
-function(raylib_load_sound_alias)
+function(feraw_LoadSoundAlias)
 {
     Sound sound = sound_constructor(bruter_pop_pointer(stack));
     Sound aliasSound = LoadSoundAlias(sound);
     bruter_push_pointer(stack, sound_to_list(aliasSound), NULL, BRUTER_TYPE_LIST);
 }
 
-function(raylib_is_sound_valid)
+function(feraw_IsSoundValid)
 {
     Sound sound = sound_constructor(bruter_pop_pointer(stack));
     bool isValid = IsSoundValid(sound);
     bruter_push_int(stack, isValid, NULL, BRUTER_TYPE_ANY);
 }
 
-function(raylib_update_sound)
+function(feraw_UpdateSound)
 {
     Sound sound = sound_constructor(bruter_pop_pointer(stack));
     void *data = bruter_pop_pointer(stack);
@@ -5124,32 +4981,32 @@ function(raylib_update_sound)
     bruter_push_pointer(stack, sound_to_list(sound), NULL, BRUTER_TYPE_LIST);
 }
 
-function(raylib_unload_wave)
+function(feraw_UnloadWave)
 {
     Wave wave = wave_constructor(bruter_pop_pointer(stack));
     UnloadWave(wave);
 }
 
-function(raylib_unload_sound)
+function(feraw_UnloadSound)
 {
     Sound sound = sound_constructor(bruter_pop_pointer(stack));
     UnloadSound(sound);
 }
 
-function(raylib_unload_sound_alias)
+function(feraw_UnloadSoundAlias)
 {
     Sound sound = sound_constructor(bruter_pop_pointer(stack));
     UnloadSoundAlias(sound);
 }
 
-function(raylib_export_wave)
+function(feraw_ExportWave)
 {
     Wave wave = wave_constructor(bruter_pop_pointer(stack));
     char *fileName = (char*)bruter_pop_pointer(stack);
     ExportWave(wave, fileName);
 }
 
-function(raylib_export_wave_as_code)
+function(feraw_ExportWaveAsCode)
 {
     Wave wave = wave_constructor(bruter_pop_pointer(stack));
     char *fileName = (char*)bruter_pop_pointer(stack);
@@ -5157,38 +5014,38 @@ function(raylib_export_wave_as_code)
 }
 
 // wave/sound management functions
-function(raylib_play_sound)
+function(feraw_PlaySound)
 {
     Sound sound = sound_constructor(bruter_pop_pointer(stack));
     PlaySound(sound);
 }
 
-function(raylib_stop_sound)
+function(feraw_StopSound)
 {
     Sound sound = sound_constructor(bruter_pop_pointer(stack));
     StopSound(sound);
 }
 
-function(raylib_pause_sound)
+function(feraw_PauseSound)
 {
     Sound sound = sound_constructor(bruter_pop_pointer(stack));
     PauseSound(sound);
 }
 
-function(raylib_resume_sound)
+function(feraw_ResumeSound)
 {
     Sound sound = sound_constructor(bruter_pop_pointer(stack));
     ResumeSound(sound);
 }
 
-function(raylib_is_sound_playing)
+function(feraw_IsSoundPlaying)
 {
     Sound sound = sound_constructor(bruter_pop_pointer(stack));
     bool isPlaying = IsSoundPlaying(sound);
     bruter_push_int(stack, isPlaying, NULL, BRUTER_TYPE_ANY);
 }
 
-function(raylib_set_sound_volume)
+function(feraw_SetSoundVolume)
 {
     Sound sound = sound_constructor(bruter_pop_pointer(stack));
     float volume = bruter_pop_float(stack);
@@ -5196,7 +5053,7 @@ function(raylib_set_sound_volume)
     bruter_push_pointer(stack, sound_to_list(sound), NULL, BRUTER_TYPE_LIST);
 }
 
-function(raylib_set_sound_pitch)
+function(feraw_SetSoundPitch)
 {
     Sound sound = sound_constructor(bruter_pop_pointer(stack));
     float pitch = bruter_pop_float(stack);
@@ -5204,7 +5061,7 @@ function(raylib_set_sound_pitch)
     bruter_push_pointer(stack, sound_to_list(sound), NULL, BRUTER_TYPE_LIST);
 }
 
-function(raylib_set_sound_pan)
+function(feraw_SetSoundPan)
 {
     Sound sound = sound_constructor(bruter_pop_pointer(stack));
     float pan = bruter_pop_float(stack);
@@ -5212,14 +5069,14 @@ function(raylib_set_sound_pan)
     bruter_push_pointer(stack, sound_to_list(sound), NULL, BRUTER_TYPE_LIST);
 }
 
-function(raylib_wave_copy)
+function(feraw_WaveCopy)
 {
     Wave wave = wave_constructor(bruter_pop_pointer(stack));
     Wave copiedWave = WaveCopy(wave);
     bruter_push_pointer(stack, wave_to_list(copiedWave), NULL, BRUTER_TYPE_LIST);
 }
 
-function(raylib_wave_crop)
+function(feraw_WaveCrop)
 {
     Wave wave = wave_constructor(bruter_pop_pointer(stack));
     int initSample = bruter_pop_int(stack);
@@ -5228,7 +5085,7 @@ function(raylib_wave_crop)
     bruter_push_pointer(stack, wave_to_list(wave), NULL, BRUTER_TYPE_LIST);
 }
 
-function(raylib_wave_format)
+function(feraw_WaveFormat)
 {
     Wave wave = wave_constructor(bruter_pop_pointer(stack));
     int sampleRate = bruter_pop_int(stack);
@@ -5238,28 +5095,28 @@ function(raylib_wave_format)
     bruter_push_pointer(stack, wave_to_list(wave), NULL, BRUTER_TYPE_LIST);
 }
 
-function(raylib_load_wave_samples)
+function(feraw_LoadWaveSamples)
 {
     Wave wave = wave_constructor(bruter_pop_pointer(stack));
     void *samples = LoadWaveSamples(wave);
     bruter_push_pointer(stack, samples, NULL, BRUTER_TYPE_BUFFER);
 }
 
-function(raylib_unload_wave_samples)
+function(feraw_UnloadWaveSamples)
 {
     void *samples = bruter_pop_pointer(stack);
     UnloadWaveSamples(samples);
 }
 
 // music management functions
-function(raylib_load_music_stream)
+function(feraw_LoadMusicStream)
 {
     char *fileName = (char*)bruter_pop_pointer(stack);
     Music music = LoadMusicStream(fileName);
     bruter_push_pointer(stack, music_to_list(music), NULL, BRUTER_TYPE_LIST);
 }
 
-function(raylib_load_music_stream_from_memory)
+function(feraw_LoadMusicStreamFromMemory)
 {
     char *fileType = (char*)bruter_pop_pointer(stack);
     void *data = bruter_pop_pointer(stack);
@@ -5268,58 +5125,58 @@ function(raylib_load_music_stream_from_memory)
     bruter_push_pointer(stack, music_to_list(music), NULL, BRUTER_TYPE_LIST);
 }
 
-function(raylib_is_music_valid)
+function(feraw_IsMusicValid)
 {
     Music music = music_constructor(bruter_pop_pointer(stack));
     bool isValid = IsMusicValid(music);
     bruter_push_int(stack, isValid, NULL, BRUTER_TYPE_ANY);
 }
 
-function(raylib_unload_music_stream)
+function(feraw_UnloadMusicStream)
 {
     Music music = music_constructor(bruter_pop_pointer(stack));
     UnloadMusicStream(music);
 }
 
-function(raylib_play_music_stream)
+function(feraw_PlayMusicStream)
 {
     Music music = music_constructor(bruter_pop_pointer(stack));
     PlayMusicStream(music);
 }
 
-function(raylib_is_music_stream_playing)
+function(feraw_IsMusicStreamPlaying)
 {
     Music music = music_constructor(bruter_pop_pointer(stack));
-    bool isPlaying = IsMusicPlaying(music);
+    bool isPlaying = IsMusicStreamPlaying(music);
     bruter_push_int(stack, isPlaying, NULL, BRUTER_TYPE_ANY);
 }
 
-function(raylib_update_music_stream)
+function(feraw_UpdateMusicStream)
 {
     Music music = music_constructor(bruter_pop_pointer(stack));
     UpdateMusicStream(music);
     bruter_push_pointer(stack, music_to_list(music), NULL, BRUTER_TYPE_LIST);
 }
 
-function(raylib_stop_music_stream)
+function(feraw_StopMusicStream)
 {
     Music music = music_constructor(bruter_pop_pointer(stack));
     StopMusicStream(music);
 }
 
-function(raylib_pause_music_stream)
+function(feraw_PauseMusicStream)
 {
     Music music = music_constructor(bruter_pop_pointer(stack));
     PauseMusicStream(music);
 }
 
-function(raylib_resume_music_stream)
+function(feraw_ResumeMusicStream)
 {
     Music music = music_constructor(bruter_pop_pointer(stack));
     ResumeMusicStream(music);
 }
 
-function(raylib_seek_music_stream)
+function(feraw_SeekMusicStream)
 {
     Music music = music_constructor(bruter_pop_pointer(stack));
     float position = bruter_pop_float(stack);
@@ -5327,7 +5184,7 @@ function(raylib_seek_music_stream)
     bruter_push_pointer(stack, music_to_list(music), NULL, BRUTER_TYPE_LIST);
 }
 
-function(raylib_set_music_volume)
+function(feraw_SetMusicVolume)
 {
     Music music = music_constructor(bruter_pop_pointer(stack));
     float volume = bruter_pop_float(stack);
@@ -5335,7 +5192,7 @@ function(raylib_set_music_volume)
     bruter_push_pointer(stack, music_to_list(music), NULL, BRUTER_TYPE_LIST);
 }
 
-function(raylib_set_music_pitch)
+function(feraw_SetMusicPitch)
 {
     Music music = music_constructor(bruter_pop_pointer(stack));
     float pitch = bruter_pop_float(stack);
@@ -5343,7 +5200,7 @@ function(raylib_set_music_pitch)
     bruter_push_pointer(stack, music_to_list(music), NULL, BRUTER_TYPE_LIST);
 }
 
-function(raylib_set_music_pan)
+function(feraw_SetMusicPan)
 {
     Music music = music_constructor(bruter_pop_pointer(stack));
     float pan = bruter_pop_float(stack);
@@ -5351,14 +5208,14 @@ function(raylib_set_music_pan)
     bruter_push_pointer(stack, music_to_list(music), NULL, BRUTER_TYPE_LIST);
 }
 
-function(raylib_get_music_time_length)
+function(feraw_GetMusicTimeLength)
 {
     Music music = music_constructor(bruter_pop_pointer(stack));
     float length = GetMusicTimeLength(music);
     bruter_push_float(stack, length, NULL, BRUTER_TYPE_ANY);
 }
 
-function(raylib_get_music_time_played)
+function(feraw_GetMusicTimePlayed)
 {
     Music music = music_constructor(bruter_pop_pointer(stack));
     float playedTime = GetMusicTimePlayed(music);
@@ -5366,7 +5223,7 @@ function(raylib_get_music_time_played)
 }
 
 // audiostream management functions
-function(raylib_load_audio_stream)
+function(feraw_LoadAudioStream)
 {
     int sampleRate = bruter_pop_int(stack);
     int sampleSize = bruter_pop_int(stack);
@@ -5375,20 +5232,20 @@ function(raylib_load_audio_stream)
     bruter_push_pointer(stack, audio_stream_to_list(stream), NULL, BRUTER_TYPE_LIST);
 }
 
-function(raylib_is_audio_stream_valid)
+function(feraw_IsAudioStreamValid)
 {
     AudioStream stream = audio_stream_constructor(bruter_pop_pointer(stack));
     bool isValid = IsAudioStreamValid(stream);
     bruter_push_int(stack, isValid, NULL, BRUTER_TYPE_ANY);
 }
 
-function(raylib_unload_audio_stream)
+function(feraw_UnloadAudioStream)
 {
     AudioStream stream = audio_stream_constructor(bruter_pop_pointer(stack));
     UnloadAudioStream(stream);
 }
 
-function(raylib_update_audio_stream)
+function(feraw_UpdateAudioStream)
 {
     AudioStream stream = audio_stream_constructor(bruter_pop_pointer(stack));
     void *data = bruter_pop_pointer(stack);
@@ -5397,38 +5254,38 @@ function(raylib_update_audio_stream)
     bruter_push_pointer(stack, audio_stream_to_list(stream), NULL, BRUTER_TYPE_LIST);
 }
 
-function(raylib_is_audio_stream_processed)
+function(feraw_IsAudioStreamProcessed)
 {
     AudioStream stream = audio_stream_constructor(bruter_pop_pointer(stack));
     bool isProcessed = IsAudioStreamProcessed(stream);
     bruter_push_int(stack, isProcessed, NULL, BRUTER_TYPE_ANY);
 }
 
-function(raylib_play_audio_stream)
+function(feraw_PlayAudioStream)
 {
     AudioStream stream = audio_stream_constructor(bruter_pop_pointer(stack));
     PlayAudioStream(stream);
 }
 
-function(raylib_pause_audio_stream)
+function(feraw_PauseAudioStream)
 {
     AudioStream stream = audio_stream_constructor(bruter_pop_pointer(stack));
     StopAudioStream(stream);
 }
 
-function(raylib_stop_audio_stream)
+function(feraw_StopAudioStream)
 {
     AudioStream stream = audio_stream_constructor(bruter_pop_pointer(stack));
     PauseAudioStream(stream);
 }
 
-function(raylib_resume_audio_stream)
+function(feraw_ResumeAudioStream)
 {
     AudioStream stream = audio_stream_constructor(bruter_pop_pointer(stack));
     ResumeAudioStream(stream);
 }
 
-function(raylib_set_audio_stream_volume)
+function(feraw_SetAudioStreamVolume)
 {
     AudioStream stream = audio_stream_constructor(bruter_pop_pointer(stack));
     float volume = bruter_pop_float(stack);
@@ -5436,7 +5293,7 @@ function(raylib_set_audio_stream_volume)
     bruter_push_pointer(stack, audio_stream_to_list(stream), NULL, BRUTER_TYPE_LIST);
 }
 
-function(raylib_set_audio_stream_pitch)
+function(feraw_SetAudioStreamPitch)
 {
     AudioStream stream = audio_stream_constructor(bruter_pop_pointer(stack));
     float pitch = bruter_pop_float(stack);
@@ -5444,7 +5301,7 @@ function(raylib_set_audio_stream_pitch)
     bruter_push_pointer(stack, audio_stream_to_list(stream), NULL, BRUTER_TYPE_LIST);
 }
 
-function(raylib_set_audio_stream_pan)
+function(feraw_SetAudioStreamPan)
 {
     AudioStream stream = audio_stream_constructor(bruter_pop_pointer(stack));
     float pan = bruter_pop_float(stack);
@@ -5452,13 +5309,13 @@ function(raylib_set_audio_stream_pan)
     bruter_push_pointer(stack, audio_stream_to_list(stream), NULL, BRUTER_TYPE_LIST);
 }
 
-function(raylib_set_audio_stream_buffer_size_default)
+function(feraw_SetAudioStreamBufferSizeDefault)
 {
     int size = bruter_pop_int(stack);
     SetAudioStreamBufferSizeDefault(size);
 }
 
-function(raylib_set_audio_stream_callback)
+function(feraw_SetAudioStreamCallback)
 {
     AudioStream stream = audio_stream_constructor(bruter_pop_pointer(stack));
     AudioCallback callback = (AudioCallback)bruter_pop_pointer(stack);
@@ -5466,7 +5323,7 @@ function(raylib_set_audio_stream_callback)
     bruter_push_pointer(stack, audio_stream_to_list(stream), NULL, BRUTER_TYPE_LIST);
 }
 
-function(raylib_attach_audio_stream_processor)
+function(feraw_AttachAudioStreamProcessor)
 {
     AudioStream stream = audio_stream_constructor(bruter_pop_pointer(stack));
     AudioCallback processor = (AudioCallback)bruter_pop_pointer(stack);
@@ -5474,7 +5331,7 @@ function(raylib_attach_audio_stream_processor)
     bruter_push_pointer(stack, audio_stream_to_list(stream), NULL, BRUTER_TYPE_LIST);
 }
 
-function(raylib_detach_audio_stream_processor)
+function(feraw_DetachAudioStreamProcessor)
 {
     AudioStream stream = audio_stream_constructor(bruter_pop_pointer(stack));
     AudioCallback processor = (AudioCallback)bruter_pop_pointer(stack);
@@ -5482,13 +5339,13 @@ function(raylib_detach_audio_stream_processor)
     bruter_push_pointer(stack, audio_stream_to_list(stream), NULL, BRUTER_TYPE_LIST);
 }
 
-function(raylib_attach_audio_mixed_processor)
+function(feraw_AttachAudioMixedProcessor)
 {
     AudioCallback processor = (AudioCallback)bruter_pop_pointer(stack);
     AttachAudioMixedProcessor(processor);
 }
 
-function(raylib_detach_audio_mixed_processor)
+function(feraw_DetachAudioMixedProcessor)
 {
     AudioCallback processor = (AudioCallback)bruter_pop_pointer(stack);
     DetachAudioMixedProcessor(processor);

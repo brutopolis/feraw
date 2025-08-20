@@ -1,5 +1,5 @@
 PACKAGE="feraw"
-VERSION="0.2.1"
+VERSION="0.2.2"
 
 if [ -z "$2" ]; then
     FILENAME="object"
@@ -52,5 +52,24 @@ debug-bsr()
     ./$FILENAME.exe
 }
 
+debug-raylib()
+{
+    node feraw.js "example/raylib/$FILENAME.feraw" "example/raylib/$FILENAME.debug.c"
+    gcc -o $FILENAME.exe "example/raylib/$FILENAME.debug.c" /usr/local/lib/libraylib.a -O3 -g -lm -lpthread -ldl -lrt -lGL -lX11
+    valgrind \
+    --leak-check=full \
+    --show-leak-kinds=definite \
+    --track-origins=yes \
+    --log-file=./valgrind-out.txt \
+    --verbose \
+    ./$FILENAME.exe
+}
+
+run-raylib()
+{
+    node feraw.js "example/raylib/$FILENAME.feraw" "example/raylib/$FILENAME.debug.c"
+    gcc -o $FILENAME.exe "example/raylib/$FILENAME.debug.c" /usr/local/lib/libraylib.a -O3 -g -lm -lpthread -ldl -lrt -lGL -lX11
+    ./$FILENAME.exe
+}
 
 "$@"
