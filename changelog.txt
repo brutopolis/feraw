@@ -1,5 +1,8 @@
 # bruter changelog https://github.com/brutopolis/feraw
 
-(20/08/2025) - version 0.2.3
+(21/08/2025) - version 0.2.3
 
 - jus some more raylib examples;
+- read and write binries;
+- some more functions added to bsr module;
+- new file format .argb, basically a raw ARGB buffer with a 8 byte header;

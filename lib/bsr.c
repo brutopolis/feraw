@@ -132,7 +132,7 @@ static void mouse_scroll(struct mfb_window *window, mfb_key_mod mod, float delta
 }
 // functions
 
-function(bsr_new_window) 
+function(new_window) 
 {
     char *title = bruter_pop_pointer(stack);
     int width = bruter_pop_int(stack);
@@ -178,7 +178,7 @@ function(bsr_new_window)
     bruter_push_pointer(stack, bsr_window, NULL, BRUTER_TYPE_BUFFER);
 }
 
-function(bsr_close_window)
+function(close_window)
 {
     BSRWindow *current_window = (BSRWindow*)(bruter_pop_pointer(stack));
     struct mfb_window *window = (struct mfb_window*)(current_window)->window;
@@ -205,7 +205,7 @@ function(bsr_close_window)
     mfb_close(window);
 }
 
-function(bsr_update_window) 
+function(update_window) 
 {
     BSRWindow *current_window = (BSRWindow*)(bruter_pop_pointer(stack));
     struct mfb_window *window = (struct mfb_window*)(current_window)->window;
@@ -223,7 +223,7 @@ function(bsr_update_window)
     return;
 }
 
-function(bsr_update_window_events) 
+function(update_window_events) 
 {
     BSRWindow *current_window = (BSRWindow*)(bruter_pop_pointer(stack));
     struct mfb_window *window = (struct mfb_window*)(current_window)->window;
@@ -235,12 +235,12 @@ function(bsr_update_window_events)
     mfb_update_events(window);
 }
 
-function(bsr_is_window_active)
+function(is_window_active)
 {
     bruter_push_int(stack, mfb_is_window_active((struct mfb_window*)((BSRWindow*)(bruter_pop_pointer(stack)))->window), NULL, BRUTER_TYPE_ANY);
 }
 
-function(bsr_get_window_width)
+function(get_window_width)
 {
     BSRWindow *current_window = (BSRWindow*)(bruter_pop_pointer(stack));
     struct mfb_window *window = (struct mfb_window*)(current_window)->window;
@@ -253,7 +253,7 @@ function(bsr_get_window_width)
     bruter_push_int(stack, mfb_get_window_width(window), NULL, BRUTER_TYPE_ANY);
 }
 
-function(bsr_get_window_height)
+function(get_window_height)
 {
     BSRWindow *current_window = (BSRWindow*)(bruter_pop_pointer(stack));
     struct mfb_window *window = (struct mfb_window*)(current_window)->window;
@@ -266,7 +266,7 @@ function(bsr_get_window_height)
     bruter_push_int(stack, mfb_get_window_height(window), NULL, BRUTER_TYPE_ANY);
 }
 
-function(bsr_get_mouse_x)
+function(get_mouse_x)
 {
     BSRWindow *current_window = (BSRWindow*)(bruter_pop_pointer(stack));
     struct mfb_window *window = (struct mfb_window*)(current_window)->window;
@@ -279,7 +279,7 @@ function(bsr_get_mouse_x)
     bruter_push_int(stack, mfb_get_mouse_x(window), NULL, BRUTER_TYPE_ANY);
 }
 
-function(bsr_get_mouse_y)
+function(get_mouse_y)
 {
     BSRWindow *current_window = (BSRWindow*)(bruter_pop_pointer(stack));
     struct mfb_window *window = (struct mfb_window*)(current_window)->window;
@@ -292,7 +292,7 @@ function(bsr_get_mouse_y)
     bruter_push_int(stack, mfb_get_mouse_y(window), NULL, BRUTER_TYPE_ANY);
 }
 
-function(bsr_get_mouse_scroll_x)
+function(get_mouse_scroll_x)
 {
     BSRWindow *current_window = (BSRWindow*)(bruter_pop_pointer(stack));
     struct mfb_window *window = (struct mfb_window*)(current_window)->window;
@@ -305,7 +305,7 @@ function(bsr_get_mouse_scroll_x)
     bruter_push_int(stack, mfb_get_mouse_scroll_x(window), NULL, BRUTER_TYPE_ANY);
 }
 
-function(bsr_get_mouse_scroll_y)
+function(get_mouse_scroll_y)
 {
     BSRWindow *current_window = (BSRWindow*)(bruter_pop_pointer(stack));
     struct mfb_window *window = (struct mfb_window*)(current_window)->window;
@@ -318,7 +318,7 @@ function(bsr_get_mouse_scroll_y)
     bruter_push_int(stack, mfb_get_mouse_scroll_y(window), NULL, BRUTER_TYPE_ANY);
 }
 
-function(bsr_wait_sync)
+function(wait_sync)
 {
     BSRWindow *current_window = (BSRWindow*)(bruter_pop_pointer(stack));
     struct mfb_window *window = (struct mfb_window*)(current_window)->window;
@@ -332,7 +332,7 @@ function(bsr_wait_sync)
 
 // io functions
 
-function(bsr_is_key_pressed)
+function(is_key_pressed)
 {
     BSRWindow *current_window = (BSRWindow*)(bruter_pop_pointer(stack));
     struct mfb_window *window = (struct mfb_window*)(current_window)->window;
@@ -345,7 +345,7 @@ function(bsr_is_key_pressed)
     bruter_push_int(stack, current_window->keys[key], NULL, BRUTER_TYPE_ANY);
 }
 
-function(bsr_get_framebuffer)
+function(get_framebuffer)
 {
     BSRWindow *current_window = (BSRWindow*)(bruter_pop_pointer(stack));
     struct mfb_window *window = (struct mfb_window*)(current_window)->window;
@@ -366,7 +366,7 @@ function(bsr_get_framebuffer)
 
 
 // drawing functions
-function(bsr_fill)
+function(fill)
 {
     Olivec_Canvas* canvas = (Olivec_Canvas*)bruter_pop_pointer(stack);
     
@@ -375,7 +375,7 @@ function(bsr_fill)
     olivec_fill(*canvas, color);    
 }
 
-function(bsr_draw_rect)
+function(draw_rect)
 {
     Olivec_Canvas* canvas = (Olivec_Canvas*)bruter_pop_pointer(stack);
     
@@ -388,7 +388,7 @@ function(bsr_draw_rect)
     olivec_rect(*canvas, x, y, width, height, color);
 }
 
-function(bsr_draw_frame)
+function(draw_frame)
 {
     Olivec_Canvas* canvas = (Olivec_Canvas*)bruter_pop_pointer(stack);
     
@@ -402,7 +402,7 @@ function(bsr_draw_frame)
     olivec_frame(*canvas, x, y, width, height, thickness, color);
 }
 
-function(bsr_draw_circle)
+function(draw_circle)
 {
     Olivec_Canvas* canvas = (Olivec_Canvas*)bruter_pop_pointer(stack);
     
@@ -414,7 +414,7 @@ function(bsr_draw_circle)
     olivec_circle(*canvas, x, y, radius, color);
 }
 
-function(bsr_draw_ellipse)
+function(draw_ellipse)
 {
     Olivec_Canvas* canvas = (Olivec_Canvas*)bruter_pop_pointer(stack);
     
@@ -427,7 +427,7 @@ function(bsr_draw_ellipse)
     olivec_ellipse(*canvas, x, y, radius_x, radius_y, color);
 }
 
-function(bsr_draw_line)
+function(draw_line)
 {
     Olivec_Canvas* canvas = (Olivec_Canvas*)bruter_pop_pointer(stack);
     
@@ -441,7 +441,7 @@ function(bsr_draw_line)
 }
 
 
-function(bsr_draw_triangle)
+function(draw_triangle)
 {
     Olivec_Canvas* canvas = (Olivec_Canvas*)bruter_pop_pointer(stack);
     
@@ -456,7 +456,7 @@ function(bsr_draw_triangle)
     olivec_triangle(*canvas, x1, y1, x2, y2, x3, y3, color);
 }
 
-function(bsr_draw_triangle3c)
+function(draw_triangle3c)
 {
     Olivec_Canvas* canvas = (Olivec_Canvas*)bruter_pop_pointer(stack);
     
@@ -473,7 +473,7 @@ function(bsr_draw_triangle3c)
     olivec_triangle3c(*canvas, x1, y1, x2, y2, x3, y3, c1, c2, c3);
 }
 
-function(bsr_draw_triangle3z)
+function(draw_triangle3z)
 {
     Olivec_Canvas* canvas = (Olivec_Canvas*)bruter_pop_pointer(stack);
     
@@ -490,7 +490,7 @@ function(bsr_draw_triangle3z)
     olivec_triangle3z(*canvas, x1, y1, x2, y2, x3, y3, z1, z2, z3);
 }
 
-function(bsr_draw_triangle3uv)
+function(draw_triangle3uv)
 {
     Olivec_Canvas* canvas = (Olivec_Canvas*)bruter_pop_pointer(stack);
     int x1 = bruter_pop_int(stack);
@@ -517,7 +517,7 @@ function(bsr_draw_triangle3uv)
     olivec_triangle3uv(*canvas, x1, y1, x2, y2, x3, y3, tx1, ty1, tx2, ty2, tx3, ty3, z1, z2, z3, *texture);
 }
 
-function(bsr_draw_triangle3uv_bilinear)
+function(draw_triangle3uv_bilinear)
 {
     Olivec_Canvas* canvas = (Olivec_Canvas*)bruter_pop_pointer(stack);
     int x1 = bruter_pop_int(stack);
@@ -551,7 +551,7 @@ OLIVECDEF void olivec_sprite_copy_bilinear(Olivec_Canvas oc, int x, int y, int w
 
 */
 
-function(bsr_draw_sprite_blend)
+function(draw_sprite_blend)
 {
     Olivec_Canvas* canvas = (Olivec_Canvas*)bruter_pop_pointer(stack);
     
@@ -564,10 +564,9 @@ function(bsr_draw_sprite_blend)
     olivec_sprite_blend(*canvas, x, y, w, h, *sprite);
 }
 
-function(bsr_draw_sprite_copy)
+function(draw_sprite_copy)
 {
     Olivec_Canvas* canvas = (Olivec_Canvas*)bruter_pop_pointer(stack);
-    
     int x = bruter_pop_int(stack);
     int y = bruter_pop_int(stack);
     int w = bruter_pop_int(stack);
@@ -577,7 +576,7 @@ function(bsr_draw_sprite_copy)
     olivec_sprite_copy(*canvas, x, y, w, h, *sprite);
 }
 
-function(bsr_draw_sprite_copy_bilinear)
+function(draw_sprite_copy_bilinear)
 {
     Olivec_Canvas* canvas = (Olivec_Canvas*)bruter_pop_pointer(stack);
     
@@ -592,17 +591,17 @@ function(bsr_draw_sprite_copy_bilinear)
 
 function(argb_to_canvas)
 {
-    uint8_t *data = (unsigned char*)bruter_pop_pointer(stack);
-    uint8_t *ptr = data;
-    uint32_t width = ((uint32_t*)data)[0];
-    uint32_t height = ((uint32_t*)data)[1];
+    uint32_t *data = (uint32_t*)bruter_pop_pointer(stack);
+    uint32_t width = data[0];
+    uint32_t height = data[1];
     
     Olivec_Canvas* canvas = (Olivec_Canvas*)malloc(sizeof(Olivec_Canvas));
     if (canvas == NULL) {
         printf("Failed to allocate memory for Olivec_Canvas\n");
         return;
     }
-    canvas->pixels = (uint32_t*)(ptr + 8);
+    canvas->pixels = malloc(width * height * sizeof(uint32_t));
+    memcpy(canvas->pixels, data + 2, width * height * sizeof(uint32_t));
     canvas->width = width;
     canvas->height = height;
     canvas->stride = width;
@@ -633,7 +632,7 @@ function(new_canvas)
     bruter_push_pointer(stack, canvas, NULL, BRUTER_TYPE_BUFFER);
 }
 
-function(bsr_get_window_canvas)
+function(get_window_canvas)
 {
     BSRWindow *current_window = (BSRWindow*)(bruter_pop_pointer(stack));
     struct mfb_window *window = (struct mfb_window*)(current_window)->window;
@@ -669,6 +668,21 @@ function(canvas_get_height)
     }
     
     bruter_push_int(stack, canvas->height, NULL, BRUTER_TYPE_ANY);
+}
+
+function(free_canvas)
+{
+    Olivec_Canvas* canvas = (Olivec_Canvas*)bruter_pop_pointer(stack);
+    if (canvas == NULL)
+    {
+        printf("Canvas is NULL\n");
+        return;
+    }
+    if (canvas->pixels != NULL)
+    {
+        free(canvas->pixels);
+    }
+    free(canvas);
 }
 
 void __bsr_at_exit(void)

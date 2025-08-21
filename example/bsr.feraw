@@ -6,9 +6,100 @@ cc{
 
     function(periclaoimg_get)
     {
-        void *new_buffer = malloc(PERICLAOIMG_WIDTH * PERICLAOIMG_HEIGHT * 4);
+        void *new_buffer = calloc(PERICLAOIMG_WIDTH * PERICLAOIMG_HEIGHT, 4);
         memcpy(new_buffer, periclaoimg_pixels, PERICLAOIMG_WIDTH * PERICLAOIMG_HEIGHT * 4);
         bruter_push_pointer(stack, new_buffer, "periclaoimg", BRUTER_TYPE_BUFFER);
+
+    }
+
+    
+    
+/* lê um u32 little-endian do arquivo (independente da endianness da CPU) */
+static int read_u32_le(FILE *f, uint32_t *out) {
+    uint8_t b[4];
+    if (fread(b, 1, 4, f) != 4) return 0;
+    *out = (uint32_t)b[0] | ((uint32_t)b[1]<<8) | ((uint32_t)b[2]<<16) | ((uint32_t)b[3]<<24);
+    return 1;
+}
+
+/* Retorna arr no layout: arr[0]=w, arr[1]=h, arr[2..]=pixels em 0xAARRGGBB.
+   Retorna NULL em erro. Use free() no retorno. */
+    uint32_t *load_argb_as_header_layout(const char *path) {
+        FILE *f = fopen(path, "rb");
+        if (!f) { perror("fopen"); return NULL; }
+
+        uint32_t w, h;
+        if (!read_u32_le(f, &w) || !read_u32_le(f, &h)) {
+            fprintf(stderr, "header inválido em %s\n", path);
+            fclose(f);
+            return NULL;
+        }
+
+        /* checa overflow em w*h*4 */
+        if (h != 0 && w > SIZE_MAX / 4 / h) {
+            fprintf(stderr, "overflow: %ux%u muito grande\n", w, h);
+            fclose(f);
+            return NULL;
+        }
+        size_t pixels = (size_t)w * (size_t)h;
+
+        /* valida tamanho do arquivo: 8 + w*h*4 */
+        if (fseek(f, 0, SEEK_END) != 0) { perror("fseek"); fclose(f); return NULL; }
+        long fsz = ftell(f);
+        if (fsz < 0) { perror("ftell"); fclose(f); return NULL; }
+        long expected = 8 + (long)pixels * 4;
+        if (fsz != expected) {
+            fprintf(stderr, "tamanho incorreto: arquivo=%ld, esperado=%ld (%ux%u)\n",
+                    fsz, expected, w, h);
+            fclose(f);
+            return NULL;
+        }
+        if (fseek(f, 8, SEEK_SET) != 0) { perror("fseek"); fclose(f); return NULL; }
+
+        /* lê payload ARGB (bytes A,R,G,B) */
+        uint8_t *tmp = (uint8_t *)malloc(pixels * 4);
+        if (!tmp) { fprintf(stderr, "malloc tmp falhou\n"); fclose(f); return NULL; }
+        if (fread(tmp, 1, pixels * 4, f) != pixels * 4) {
+            fprintf(stderr, "erro lendo pixels\n");
+            free(tmp);
+            fclose(f);
+            return NULL;
+        }
+        fclose(f);
+
+        /* monta array no mesmo layout do .h */
+        uint32_t *arr = (uint32_t *)malloc((pixels + 2) * sizeof(uint32_t));
+        if (!arr) { fprintf(stderr, "malloc arr falhou\n"); free(tmp); return NULL; }
+
+        arr[0] = w;
+        arr[1] = h;
+
+        /* repack: (A,R,G,B bytes) -> 0xAARRGGBB uint32 */
+        for (size_t i = 0; i < pixels; i++) {
+            uint8_t a = tmp[4*i + 0];
+            uint8_t r = tmp[4*i + 1];
+            uint8_t g = tmp[4*i + 2];
+            uint8_t b = tmp[4*i + 3];
+            arr[2 + i] = ((uint32_t)a << 24) | ((uint32_t)r << 16) | ((uint32_t)g << 8) | (uint32_t)b;
+        }
+
+        free(tmp);
+        return arr;
+    }
+
+
+    function(feraw_load_argb)
+    {
+        const char *filename = bruter_pop_pointer(stack);
+        uint32_t *pixels = load_argb_as_header_layout(filename);
+        if (pixels) 
+        {
+            bruter_push_pointer(stack, pixels, NULL, BRUTER_TYPE_BUFFER);
+        } 
+        else 
+        {
+            bruter_push_pointer(stack, NULL, NULL, BRUTER_TYPE_NULL);
+        }
     }
 };
 
@@ -19,13 +110,16 @@ ls(@);
 win = bsr_new_window("BSR Example", 640, 480, 0); 
 canvas = bsr_get_window_canvas(win);
 
-periclaoimg = argb_to_canvas(periclaoimg_get());
+argb_img = load_argb("example/periclao.argb");
 
 img = list(0);
+img.canvas = argb_to_canvas(argb_img);
 img.x = 0;
 img.y = 0;
 img.w = 64;
 img.h = 64;
+
+free(argb_img); // Libera a memória do buffer ARGB após converter para canvas
 
 while (bsr_wait_sync(win))
 {
@@ -34,7 +128,7 @@ while (bsr_wait_sync(win))
     // bsr_draw_line(canvas, 0, 0, 320, 240, 0xFF0000FF);
     // bsr_draw_line(canvas, 320, 0, 0, 240, 0xFF0000FF);
     // bsr_draw_rect(canvas, 10, 10, 30, 22, 0x7700FFFF);
-    bsr_draw_sprite_copy(canvas, img.x, img.y, img.w, img.h, periclaoimg);
+    bsr_draw_sprite_blend(canvas, img.x, img.y, img.w, img.h, img.canvas);
     bsr_update_window(win);
 
     if (bsr_is_key_pressed(win, 265)) 
@@ -79,11 +173,12 @@ while (bsr_wait_sync(win))
 
     if (bsr_is_key_pressed(win, 'Q')) 
     {
-        println("You pressed Q!") @msg;
+        println("You pressed Q!");
         ?(1, end);
     };
 }
 
 end:
 
-bsr_close_window(win);
+free_canvas(img.canvas);
+free(img);

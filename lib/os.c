@@ -66,6 +66,45 @@ bool file_exists(char* filename)
     return true;
 }
 
+function(feraw_read_bin)
+{
+    char *filename = bruter_pop_pointer(stack);
+    FILE *file = fopen(filename, "rb");
+    if (file == NULL)
+    {
+        bruter_push_pointer(stack, NULL, NULL, BRUTER_TYPE_BUFFER);
+        return;
+    }
+    fseek(file, 0, SEEK_END);
+    size_t size = ftell(file);
+    fseek(file, 0, SEEK_SET);
+    uint8_t *buffer = (uint8_t*)malloc(size);
+    if (buffer == NULL)
+    {
+        fclose(file);
+        bruter_push_pointer(stack, NULL, NULL, BRUTER_TYPE_BUFFER);
+        return;
+    }
+    fread(buffer, 1, size, file);
+    fclose(file);
+    bruter_push_pointer(stack, buffer, NULL, BRUTER_TYPE_BUFFER);
+}
+
+function(feraw_write_bin)
+{
+    char *filename = bruter_pop_pointer(stack);
+    uint8_t *buffer = bruter_pop_pointer(stack);
+    FILE *file = fopen(filename, "wb");
+    if (file == NULL)
+    {
+        return;
+    }
+    // Assuming the first 4 bytes of the buffer contain the size
+    uint32_t size = *((uint32_t*)buffer);
+    fwrite(buffer + 4, 1, size, file);
+    fclose(file);
+}
+
 function(feraw_read_file)
 {
     char *filename = bruter_pop_pointer(stack);
