@@ -2,7 +2,7 @@
 
   feraw is a bruter-code preprocessor, it allows you to write a very little abstracted minimal stack-oriented "c-like" code that transpiles to bruter-code.
 
-  feraw is currently written in javascript, and it is a single file `feraw.js`.
+  feraw is currently written in javascript, and it is a single file `feraw.js`, with no deps at all.
 
 # Usage
 

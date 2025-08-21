@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 let feraw_if_counter = 0;
 let feraw_while_counter = 0;
 let feraw_for_counter = 0;

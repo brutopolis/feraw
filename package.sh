@@ -29,7 +29,7 @@ buildweb()
 
 debug()
 {
-    node feraw.js "example/$FILENAME.feraw" "example/$FILENAME.debug.c"
+    ./feraw.js "example/$FILENAME.feraw" "example/$FILENAME.debug.c"
     gcc -o $FILENAME.exe "example/$FILENAME.debug.c" -O3 -g -lm 
     valgrind \
     --leak-check=full \
@@ -41,14 +41,14 @@ debug()
 
 run-bsr()
 {
-    node feraw.js "example/$FILENAME.feraw" "example/$FILENAME.debug.c"
+    ./feraw.js "example/$FILENAME.feraw" "example/$FILENAME.debug.c"
     gcc -o $FILENAME.exe "example/$FILENAME.debug.c" -O3 -g -lm -lminifb -lX11 -lGL
     ./$FILENAME.exe
 }
 
 debug-bsr()
 {
-    node feraw.js "example/$FILENAME.feraw" "example/$FILENAME.debug.c"
+    ./feraw.js "example/$FILENAME.feraw" "example/$FILENAME.debug.c"
     gcc -o $FILENAME.exe "example/$FILENAME.debug.c" -O3 -g -lm -lminifb -lX11 -lGL
     valgrind \
     --leak-check=full \
@@ -61,7 +61,7 @@ debug-bsr()
 
 debug-raylib()
 {
-    node feraw.js "example/raylib/$FILENAME.feraw" "example/raylib/$FILENAME.debug.c"
+    ./feraw.js "example/raylib/$FILENAME.feraw" "example/raylib/$FILENAME.debug.c"
     gcc -o $FILENAME.exe "example/raylib/$FILENAME.debug.c" /usr/local/lib/libraylib.a -O3 -g -lm -lpthread -ldl -lrt -lGL -lX11
     valgrind \
     --leak-check=full \
@@ -74,7 +74,7 @@ debug-raylib()
 
 run-raylib()
 {
-    node feraw.js "example/raylib/$FILENAME.feraw" "example/raylib/$FILENAME.debug.c"
+    ./feraw.js "example/raylib/$FILENAME.feraw" "example/raylib/$FILENAME.debug.c"
     gcc -o $FILENAME.exe "example/raylib/$FILENAME.debug.c" /usr/local/lib/libraylib.a -O3 -g -lm -lpthread -ldl -lrt -lGL -lX11
     ./$FILENAME.exe
 }
