@@ -3,15 +3,6 @@ cc{
     include("../lib/math.c");
     include("../lib/os.c");
     include("./periclaoimg.h");
-
-    function(periclaoimg_get)
-    {
-        void *new_buffer = calloc(PERICLAOIMG_WIDTH * PERICLAOIMG_HEIGHT, 4);
-        memcpy(new_buffer, periclaoimg_pixels, PERICLAOIMG_WIDTH * PERICLAOIMG_HEIGHT * 4);
-        bruter_push_pointer(stack, new_buffer, "periclaoimg", BRUTER_TYPE_BUFFER);
-
-    }
-
     
     
 /* lê um u32 little-endian do arquivo (independente da endianness da CPU) */
@@ -107,8 +98,8 @@ include("../lib/bsr.feraw");
 
 ls(@);
 
-win = bsr_new_window("BSR Example", 640, 480, 0); 
-canvas = bsr_get_window_canvas(win);
+win = new_window("BSR Example", 640, 480, 0); 
+canvas = get_window_canvas(win);
 
 argb_img = load_argb("example/periclao.argb");
 
@@ -121,57 +112,57 @@ img.h = 64;
 
 free(argb_img); // Libera a memória do buffer ARGB após converter para canvas
 
-while (bsr_wait_sync(win))
+while (wait_sync(win))
 {
-    bsr_fill(canvas, 0xFF005555);
-    // bsr_draw_circle(canvas, 160, 120, 50, 0x7700FF00);
-    // bsr_draw_line(canvas, 0, 0, 320, 240, 0xFF0000FF);
-    // bsr_draw_line(canvas, 320, 0, 0, 240, 0xFF0000FF);
-    // bsr_draw_rect(canvas, 10, 10, 30, 22, 0x7700FFFF);
-    bsr_draw_sprite_blend(canvas, img.x, img.y, img.w, img.h, img.canvas);
-    bsr_update_window(win);
+    fill(canvas, 0xFF005555);
+    // draw_circle(canvas, 160, 120, 50, 0x7700FF00);
+    // draw_line(canvas, 0, 0, 320, 240, 0xFF0000FF);
+    // draw_line(canvas, 320, 0, 0, 240, 0xFF0000FF);
+    // draw_rect(canvas, 10, 10, 30, 22, 0x7700FFFF);
+    draw_sprite_blend(canvas, img.x, img.y, img.w, img.h, img.canvas);
+    update_window(win);
 
-    if (bsr_is_key_pressed(win, 265)) 
+    if (is_key_pressed(win, 265)) 
     {
         img.y = sub(img.y, 7);
     };
 
-    if (bsr_is_key_pressed(win, 263)) 
+    if (is_key_pressed(win, 263)) 
     {
         img.x = sub(img.x, 7);
     };
 
-    if (bsr_is_key_pressed(win, 262)) 
+    if (is_key_pressed(win, 262)) 
     {
         img.x = add(img.x, 7);
     };
 
-    if (bsr_is_key_pressed(win, 264)) 
+    if (is_key_pressed(win, 264)) 
     {
         img.y = add(img.y, 7);
     };
 
-    if (bsr_is_key_pressed(win, 'S')) 
+    if (is_key_pressed(win, 'S')) 
     {
         img.h = add(img.h, 7);
     };
 
-    if (bsr_is_key_pressed(win, 'W')) 
+    if (is_key_pressed(win, 'W')) 
     {
         img.h = sub(img.h, 7);
     };
 
-    if (bsr_is_key_pressed(win, 'D')) 
+    if (is_key_pressed(win, 'D')) 
     {
         img.w = add(img.w, 7);
     };
 
-    if (bsr_is_key_pressed(win, 'A')) 
+    if (is_key_pressed(win, 'A')) 
     {
         img.w = sub(img.w, 7);
     };
 
-    if (bsr_is_key_pressed(win, 'Q')) 
+    if (is_key_pressed(win, 'Q')) 
     {
         println("You pressed Q!");
         ?(1, end);
