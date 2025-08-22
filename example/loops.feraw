@@ -1,8 +1,4 @@
-cc{
-    include("../lib/std.c");
-    include("../lib/condition.c");
-    include("../lib/math.c");
-};
+include("../lib/std.feraw");
 // this example, unlike the hello-world example this is probably not so familiar to most people
 // the good part of having no rules at all is that no code is arbitrary, even when it is
 // in this case everything is expected and predictable, so i would not consider it arbitrary

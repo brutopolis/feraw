@@ -1,4 +1,9 @@
-# bruter changelog https://github.com/brutopolis/feraw
+# feraw changelog https://github.com/brutopolis/feraw
+
+(22/08/2025) - version 0.2.4
+
+- feraw has some new fetures, you can now get and set a.name a.length and a.type;
+- std libs centralized in one folder;
 
 (21/08/2025) - version 0.2.3
 

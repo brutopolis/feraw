@@ -1,7 +1,4 @@
-cc{
-    include("../lib/std.c");
-    include("../lib/condition.c");
-};
+include("../lib/std.feraw");
 
 a = 5;
 b = 5;

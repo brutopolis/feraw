@@ -1,8 +1,4 @@
-cc{
-    include("../lib/std.c");
-    include("../lib/math.c");
-    include("../lib/condition.c");
-};
+include("../lib/std.feraw");
 
 number = 500;
 n1 = 0;

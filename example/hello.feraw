@@ -1,4 +1,3 @@
-cc{
-    include("../lib/std.c");
-};
+include("../lib/std.feraw");
+
 println("hello world!");

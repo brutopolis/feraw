@@ -1,13 +1,4 @@
-cc{
-    include("../lib/std.c");
-    include("../lib/string.c");
-    include("../lib/condition.c");
-};
-
-cc{
-    include("../lib/math.c");
-    include("../lib/mem.c");
-};
+include("../lib/std.feraw");
 
 fill_buffer = macro{
     for (i = 0; less(i, mul(get($0, "x"), get($0, "y"))); i = add(i, 1)) 

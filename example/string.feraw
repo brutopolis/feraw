@@ -1,7 +1,4 @@
-cc {
-include("../lib/std.c");
-include("../lib/string.c");
-};
+include("../lib/std.feraw");
 
 // string in feraw
 

@@ -1,17 +1,4 @@
-
-include("../lib/types.feraw");
-
-cc{
-    include("../lib/std.c");
-    include("../lib/string.c");
-    include("../lib/condition.c");
-};
-
-cc{
-    include("../lib/math.c");
-    include("../lib/mem.c");
-};
-
+include("../lib/std.feraw");
 
 
 // this example is probably what shows the more familiar code for most people

@@ -1,0 +1,12 @@
+include("../lib/std.feraw");
+ls(code);
+
+for (a = 0; less(a, length(code)); a = add(a, 1))
+{
+    print("code[");
+    print(a);
+    print("] = ");
+    
+    print_string(code[a]);
+    println("");
+}

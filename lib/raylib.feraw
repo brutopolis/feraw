@@ -1,6 +1,6 @@
 
-cc {
-    include("../lib/std.c");
+include("../lib/std.feraw");
+cc{
     include("../lib/mem.c");
     include("raylib.c");
 };

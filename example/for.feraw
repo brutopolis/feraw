@@ -1,9 +1,4 @@
-cc{
-    include("../lib/std.c");
-    include("../lib/math.c");
-    include("../lib/condition.c");
-};
-
+include("../lib/std.feraw");
 
 for(i = 0; less(i, 5); i = add(i, 1))
 {

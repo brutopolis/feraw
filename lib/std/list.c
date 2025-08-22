@@ -5,58 +5,6 @@
 // functions
 // functions
 
-function (feraw_print)
-{
-    BruterMeta value = bruter_pop_meta(stack);
-    switch (value.type)
-    {
-        case BRUTER_TYPE_FLOAT:
-            printf("%f", value.value.f);
-            break;
-        case BRUTER_TYPE_BUFFER:
-            printf("%s", (char*)value.value.p);
-            break;
-        case BRUTER_TYPE_LIST:
-            for (BruterInt i = 0; i < ((BruterList*)value.value.p)->size; i++)
-            {
-                BruterMeta item = bruter_get_meta((BruterList*)value.value.p, i);
-                switch (item.type)
-                {
-                    case BRUTER_TYPE_FLOAT:
-                        printf("%f ", item.value.f);
-                        break;
-                    case BRUTER_TYPE_BUFFER:
-                        printf("%s ", (char*)item.value.p);
-                        break;
-                    case BRUTER_TYPE_LIST:
-                        printf("[List] ");
-                        break;
-                    default:
-                        printf("%ld ", item.value.i);
-                        break;
-                }
-            }
-            break;
-        default:
-            printf("%ld", value.value.i);
-            break;
-    }
-}
-
-function(feraw_println)
-{
-    feraw_print(stack);
-    printf("\n");
-}
-
-function(feraw_retype)
-{
-    BruterInt new_type = bruter_pop_int(stack);
-    BruterMeta value = bruter_pop_meta(stack);
-    value.type = new_type; // Update the type of the value
-    bruter_push_meta(stack, value);
-}
-
 function(feraw_list)
 {
     BruterInt size = bruter_pop_int(stack);
@@ -394,44 +342,16 @@ function(feraw_free)
     // No action needed for other types, as they are not dynamically allocated
 }
 
-function(feraw_ls)
-{
-    // [index, type, "name"] = value;
-    BruterList* list = bruter_pop_pointer(stack);
-    for (BruterInt i = 0; i < list->size; i++)
-    {
-        if (list->keys != NULL && list->keys[i] != NULL)
-        {
-            printf("[%ld, %d, \"%s\"] = ", i, list->types[i], list->keys[i]);
-        }
-        else
-        {
-            printf("[%ld, %d] = ", i, list->types[i]);
-        }
-
-        switch (list->types[i])
-        {
-            case BRUTER_TYPE_FLOAT:
-                printf("%f\n", list->data[i].f);
-                break;
-            case BRUTER_TYPE_BUFFER:
-                printf("%s\n", (char*)list->data[i].p);
-                break;
-            case BRUTER_TYPE_LIST:
-                printf("[List]\n");
-                break;
-            default:
-                printf("%ld\n", list->data[i].i);
-                break;
-        }
-    }
-}
-
 function(feraw_rename)
 {
     BruterList* list = bruter_pop_pointer(stack);
     char* old_name = bruter_pop_pointer(stack);
     char* new_name = bruter_pop_pointer(stack);
+    if (list == NULL || old_name == NULL || new_name == NULL)
+    {
+        fprintf(stderr, "ERROR: cannot rename, list or names are NULL\n");
+        exit(EXIT_FAILURE);
+    }
 
     for (BruterInt i = 0; i < list->size; i++)
     {
@@ -453,4 +373,56 @@ function(feraw_eval)
     char* code = bruter_pop_pointer(stack);
     BruterList* result = bruter_parse(context, code);
     bruter_push_pointer(stack, result, NULL, BRUTER_TYPE_LIST);
+}
+
+function(feraw_drop)
+{
+    bruter_pop_pointer(stack);
+}
+
+function(feraw_drop_all)
+{
+    while(stack->size > 0)
+    {
+        bruter_pop_pointer(stack);
+    }
+}
+
+function(feraw_key)
+{
+    BruterList* list = bruter_pop_pointer(stack);
+    BruterMeta index_meta = bruter_pop_meta(stack);
+    switch (index_meta.type)
+    {
+        case BRUTER_TYPE_FLOAT:
+            index_meta.value.i = (BruterInt)index_meta.value.f; // Convert float to integer if necessary
+            break;
+        case BRUTER_TYPE_ANY:
+            // No conversion needed
+            break;
+        case BRUTER_TYPE_BUFFER:
+            index_meta.value.i = bruter_find_key(list, (char*)index_meta.value.p);
+            if (index_meta.value.i < 0)
+            {
+                fprintf(stderr, "ERROR: key '%s' not found in list\n", (char*)index_meta.value.p);
+                exit(EXIT_FAILURE);
+            }
+            break;
+        default:
+            fprintf(stderr, "ERROR: key expects a float or any type, got %d\n", index_meta.type);
+            exit(EXIT_FAILURE);
+    }
+
+    if (index_meta.value.i < 0)
+    {
+        index_meta.value.i += list->size; // Adjust negative index to positive
+    }
+
+    if (index_meta.value.i < 0 || index_meta.value.i >= list->size)
+    {
+        fprintf(stderr, "ERROR: key index %" PRIdPTR " out of range in list of size %" PRIdPTR "\n", index_meta.value.i, list->size);
+        exit(EXIT_FAILURE);
+    }
+
+    bruter_push_meta(stack, (BruterMeta){.value = {.p = list->keys[index_meta.value.i]}, .key = NULL, .type = BRUTER_TYPE_BUFFER});
 }

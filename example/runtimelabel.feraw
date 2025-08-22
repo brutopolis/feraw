@@ -1,0 +1,11 @@
+include("../lib/std.feraw");
+
+a = 1;
+:start;
+print("a = ");
+println(a);
+a = add(a, 1);
+?(less(a, 20), start);
+
+print("start label = ");
+println(start);

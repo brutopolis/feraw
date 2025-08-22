@@ -259,7 +259,6 @@ function tokenize(input)
     {
         let str = '';
         i++; // skip opening "
-        let needCompaction = false;
         if (!input.includes('='))
         {
             isAssignment = true; // if there is no =, we assume this is a string assignment
@@ -276,37 +275,30 @@ function tokenize(input)
             if (input[i] === ',') 
             {
                 str += String.fromCharCode(24);
-                needCompaction = true;
             }
             else if (input[i] === ';')
             {
                 str += String.fromCharCode(25); // semicolon
-                needCompaction = true;
             }
             else if (input[i] === '\n')
             {
                 str += String.fromCharCode(26); // newline
-                needCompaction = true;
             }
             else if (input[i] === '\r')
             {
                 str += String.fromCharCode(28); // carriage return
-                needCompaction = true;
             }
             else if (input[i] === '\t')
             {
                 str += String.fromCharCode(29); // tab
-                needCompaction = true;
             }
             else if (input[i] === ' ')
             {
                 str += String.fromCharCode(30); // space
-                needCompaction = true;
             }
             else if (input[i] === ':')
             {
                 str += String.fromCharCode(31); // colon
-                needCompaction = true;
             }
             else 
             {
@@ -316,16 +308,7 @@ function tokenize(input)
             i++;
         }
 
-        // if it need to be compacted to a single token we mark it with a comma bcause it will needto be corrected before used
-        if (needCompaction || str.includes('\\'))
-        {
-            tokens.push(',' + str);
-        }
-        // if it is a simple string without any special characters, we can mark it with a semicolon, this avoid the parser trying to correct the string
-        else 
-        {
-            tokens.push(';' + str); 
-        }
+        tokens.push(',' + str);
     }
     
     function parseBlock(depth = 0)
@@ -393,7 +376,7 @@ function tokenize(input)
         let name = parseRawToken();
         if (!name) throw new Error("parseExpr: invalid or empty token");
 
-        if (["true", "false", "null", "stack", "context"].includes(name))
+        if (["true", "false", "null", "stack", "context", "code"].includes(name))
         {
             switch (name)
             {
@@ -404,13 +387,16 @@ function tokenize(input)
                     tokens.push('0');
                     return;
                 case "null":
-                    tokens.push('!', 'retype', '0', '0');
+                    tokens.push('!', 'pun', '0', '0');
                     return;
                 case "stack":
                     tokens.push('&');
                     return;
                 case "context":
                     tokens.push('@');
+                    return;
+                case "code":
+                    tokens.push('$');
                     return;
             } 
         }
@@ -541,15 +527,7 @@ function tokenize(input)
             i++;
             skipWhitespace();
             tokens.push("!", "set", "@");
-            if (name.includes(31) || name.includes(30) || name.includes(29) || name.includes(28) || name.includes(26) || name.includes(25) || name.includes(24))
-            {
-                // if the name has any special character, we need to compact it
-                tokens.push("," + name);
-            }
-            else 
-            {
-                tokens.push(";" + name);
-            }
+            tokens.push("," + name);
             parseExpr();
         } 
         else 
@@ -1356,128 +1334,176 @@ function feraw_expand_fors(input) {
     return out;
 }
 
-function feraw_expand_brackets(str) 
-{
+function feraw_expand_props(str) {
     let out = '';
     let i = 0;
     let inDoubleQuotes = false;
     let inBackticks = false;
     let escape = false;
 
-    while (i < str.length) 
-    {
+    while (i < str.length) {
         let c = str[i];
 
-        // Handle string literals
-        if (escape) 
-        {
-            out += c;
-            escape = false;
-            i++;
-            continue;
-        }
-
-        if (c === '\\') 
-        {
-            out += c;
-            escape = true;
-            i++;
-            continue;
-        }
-
+        // Handle strings
+        if (escape) { out += c; escape = false; i++; continue; }
+        if (c === '\\') { out += c; escape = true; i++; continue; }
         if (!inDoubleQuotes && !inBackticks && (c === '"' || c === '`')) {
-            if (c === '"') inDoubleQuotes = true;
-            else inBackticks = true;
-            out += c;
-            i++;
-            continue;
+            if (c === '"') inDoubleQuotes = true; else inBackticks = true;
+            out += c; i++; continue;
         }
+        if (inDoubleQuotes && c === '"') { inDoubleQuotes = false; out += c; i++; continue; }
+        if (inBackticks && c === '`') { inBackticks = false; out += c; i++; continue; }
+        if (inDoubleQuotes || inBackticks) { out += c; i++; continue; }
 
-        if (inDoubleQuotes && c === '"') 
-        {
-            inDoubleQuotes = false;
-            out += c;
-            i++;
-            continue;
-        }
-
-        if (inBackticks && c === '`') 
-        {
-            inBackticks = false;
-            out += c;
-            i++;
-            continue;
-        }
-
-        if (inDoubleQuotes || inBackticks) 
-        {
-            out += c;
-            i++;
-            continue;
-        }
-
-        // Not inside a string, process brackets
+        // Detecta identificador base
         let nameMatch = /^([a-zA-Z_$][a-zA-Z0-9_$]*)/.exec(str.slice(i));
-        if (nameMatch) {
-            let base = nameMatch[1];
-            i += base.length;
+        if (!nameMatch) { out += str[i++]; continue; }
 
-            let indexes = [];
-            while (i < str.length && str[i] === '[') {
-                let end = findMatching(str, i, '[', ']');
-                if (end === -1) break;
-                let inner = str.slice(i + 1, end);
-                indexes.push(inner);
-                i = end + 1;
-            }
+        let base = nameMatch[1];
+        i += base.length;
 
-            if (indexes.length > 0) {
-                // olhar adiante até o próximo ;
-                let lookaheadEnd = str.indexOf(';', i);
-                if (lookaheadEnd === -1) lookaheadEnd = str.length;
-                let rightSide = str.slice(i, lookaheadEnd);
-
-                // remover espaços do início
-                let trimmedRight = rightSide.trimStart();
-                if (trimmedRight.startsWith('=')) {
-                    // tem atribuição: a[b][c] = ...
-                    let valueExpr = trimmedRight.slice(1).trim(); // remove '='
-                    // processa valor recursivamente pra pegar gets internos
-                    valueExpr = feraw_expand_brackets(valueExpr);
-
-                    if (indexes.length === 1) {
-                        // caso simples: a[b] = X
-                        out += `set(${base}, ${indexes[0]}, ${valueExpr})`;
-                    } else {
-                        // último índice vira chave final, os anteriores viram get encadeado
-                        let objExpr = base;
-                        for (let j = 0; j < indexes.length - 1; j++) {
-                            objExpr = `get(${objExpr}, ${indexes[j]})`;
-                        }
-                        let lastKey = indexes[indexes.length - 1];
-                        out += `set(${objExpr}, ${lastKey}, ${valueExpr})`;
-                    }
-                    i = lookaheadEnd; // pular até ;
-                    continue;
-                } else {
-                    // sem atribuição → só get encadeado
-                    let expr = base;
-                    for (let idx of indexes) {
-                        expr = `get(${expr}, ${idx})`;
-                    }
-                    out += expr;
-                    continue;
-                }
-            } else {
-                out += base;
+        // Captura props encadeados (.foo ou [expr])
+        let props = [];
+        while (i < str.length) {
+            if (str[i] === '.') {
+                i++;
+                let propMatch = /^([a-zA-Z_$][a-zA-Z0-9_$]*)/.exec(str.slice(i));
+                if (!propMatch) break;
+                props.push({ key: `"${propMatch[1]}"` });
+                i += propMatch[1].length;
                 continue;
             }
+            if (str[i] === '[') {
+                let end = findMatching(str, i, '[', ']');
+                if (end === -1) break;
+                let inner = str.slice(i + 1, end).trim();
+                if (/^"(.*?)"$/.test(inner)) {
+                    props.push({ key: inner });
+                } else {
+                    props.push({ key: inner });
+                }
+                i = end + 1;
+                continue;
+            }
+            break;
         }
-        out += str[i++];
+
+        if (props.length > 0) {
+            // olha até ; pra ver se é atribuição
+            let lookaheadEnd = str.indexOf(';', i);
+            if (lookaheadEnd === -1) lookaheadEnd = str.length;
+            let rightSide = str.slice(i, lookaheadEnd);
+            let trimmedRight = rightSide.trimStart();
+
+            if (trimmedRight.startsWith('=')) {
+                // assignment (já tá certo da msg anterior)
+                let valueExpr = trimmedRight.slice(1).trim();
+                valueExpr = feraw_expand_props(valueExpr);
+
+                if (props.length === 1) {
+                    let k = props[0].key;
+                    if (k === `"type"`) {
+                        out += `${base} = pun(${base}, ${valueExpr})`;
+                    } else if (k === `"name"`) {
+                        out += `rename(${base}, "${base}", ${valueExpr})`;
+                    } else {
+                        out += `set(${base}, ${k}, ${valueExpr})`;
+                    }
+                } else {
+                    let lastKey = props[props.length - 1].key;
+
+                    if (lastKey === `"type"`) {
+                        let objExpr = base;
+                        for (let j = 0; j < props.length - 1; j++) {
+                            objExpr = `get(${objExpr}, ${props[j].key})`;
+                        }
+                        out += `${objExpr} = pun(${objExpr}, ${valueExpr})`;
+
+                    } else if (lastKey === `"name"`) {
+                        let objExpr = base;
+                        for (let j = 0; j < props.length - 2; j++) {
+                            objExpr = `get(${objExpr}, ${props[j].key})`;
+                        }
+                        let prevKey = props[props.length - 2].key;
+                        out += `rename(${objExpr}, ${prevKey}, ${valueExpr})`;
+
+                    } else {
+                        let objExpr = base;
+                        for (let j = 0; j < props.length - 1; j++) {
+                            objExpr = `get(${objExpr}, ${props[j].key})`;
+                        }
+                        out += `set(${objExpr}, ${lastKey}, ${valueExpr})`;
+                    }
+                }
+                i = lookaheadEnd;
+                continue;
+            } else {
+                // ----------- GET MODE -----------
+                let lastKey = props[props.length - 1].key;
+
+                if (lastKey === `"name"`) {
+                    if (props.length === 1) {
+                        out += `key(@, "${base}")`;
+                    } else {
+                        let objExpr = base;
+                        for (let j = 0; j < props.length - 2; j++) {
+                            objExpr = `get(${objExpr}, ${props[j].key})`;
+                        }
+                        let prevKey = props[props.length - 2].key;
+                        out += `key(${objExpr}, ${prevKey})`;
+                    }
+                } else if (lastKey === `"type"`) {
+                    if (props.length === 1) {
+                        out += `typeof(${base})`;
+                    } else {
+                        let objExpr = base;
+                        for (let j = 0; j < props.length - 1; j++) {
+                            objExpr = `get(${objExpr}, ${props[j].key})`;
+                        }
+                        out += `typeof(${objExpr})`;
+                    }
+                } else if (lastKey === `"length"`) {
+                    if (props.length === 1) {
+                        out += `length(${base})`;
+                    } else {
+                        let objExpr = base;
+                        for (let j = 0; j < props.length - 1; j++) {
+                            objExpr = `get(${objExpr}, ${props[j].key})`;
+                        }
+                        out += `length(${objExpr})`;
+                    }
+                } else {
+                    // default: get encadeado
+                    let expr = base;
+                    for (let p of props) {
+                        expr = `get(${expr}, ${p.key})`;
+                    }
+                    out += expr;
+                }
+
+                continue;
+            }
+        } else {
+            out += base;
+            continue;
+        }
     }
 
     return out;
 }
+
+function findMatching(str, start, open, close) {
+    let depth = 0;
+    for (let i = start; i < str.length; i++) {
+        if (str[i] === open) depth++;
+        else if (str[i] === close) {
+            depth--;
+            if (depth === 0) return i;
+        }
+    }
+    return -1;
+}
+
 
 function feraw_expand_inline_br(input)
 {
@@ -1512,119 +1538,11 @@ function feraw_expand_inline_br(input)
     return out;
 }
 
-function feraw_expand_dots(str) 
+function feraw_expand_macro_calls(code) 
 {
-    let out = '';
-    let i = 0;
-    let inDoubleQuotes = false;
-    let inBackticks = false;
-    let escape = false;
-
-    while (i < str.length) {
-        let c = str[i];
-
-        // Handle string literals
-        if (escape) {
-            out += c;
-            escape = false;
-            i++;
-            continue;
-        }
-        if (c === '\\') {
-            out += c;
-            escape = true;
-            i++;
-            continue;
-        }
-        if (!inDoubleQuotes && !inBackticks && (c === '"' || c === '`')) {
-            if (c === '"') inDoubleQuotes = true;
-            else inBackticks = true;
-            out += c;
-            i++;
-            continue;
-        }
-        if (inDoubleQuotes && c === '"') {
-            inDoubleQuotes = false;
-            out += c;
-            i++;
-            continue;
-        }
-        if (inBackticks && c === '`') {
-            inBackticks = false;
-            out += c;
-            i++;
-            continue;
-        }
-        if (inDoubleQuotes || inBackticks) {
-            out += c;
-            i++;
-            continue;
-        }
-
-        // captura identificador inicial
-        let nameMatch = /^([a-zA-Z_$][a-zA-Z0-9_$]*)/.exec(str.slice(i));
-        if (nameMatch) {
-            let base = nameMatch[1];
-            i += base.length;
-
-            let props = [];
-            while (i < str.length && str[i] === '.') {
-                i++; // pula o "."
-                let propMatch = /^([a-zA-Z_$][a-zA-Z0-9_$]*)/.exec(str.slice(i));
-                if (!propMatch) break;
-                props.push(propMatch[1]);
-                i += propMatch[1].length;
-            }
-
-            if (props.length > 0) {
-                // olhar adiante até o próximo ';'
-                let lookaheadEnd = str.indexOf(';', i);
-                if (lookaheadEnd === -1) lookaheadEnd = str.length;
-                let rightSide = str.slice(i, lookaheadEnd);
-
-                let trimmedRight = rightSide.trimStart();
-                if (trimmedRight.startsWith('=')) {
-                    // atribuição
-                    let valueExpr = trimmedRight.slice(1).trim(); // remove '='
-                    valueExpr = feraw_expand_dots(valueExpr); // processa recursivamente
-
-                    if (props.length === 1) {
-                        // foo.bar = X
-                        out += `set(${base}, "${props[0]}", ${valueExpr})`;
-                    } else {
-                        // foo.bar.baz = X
-                        let objExpr = base;
-                        for (let j = 0; j < props.length - 1; j++) {
-                            objExpr = `get(${objExpr}, "${props[j]}")`;
-                        }
-                        let lastKey = props[props.length - 1];
-                        out += `set(${objExpr}, "${lastKey}", ${valueExpr})`;
-                    }
-                    i = lookaheadEnd; // pular até ;
-                    continue;
-                } else {
-                    // só acesso → get encadeado
-                    let expr = base;
-                    for (let p of props) {
-                        expr = `get(${expr}, "${p}")`;
-                    }
-                    out += expr;
-                    continue;
-                }
-            } else {
-                out += base;
-                continue;
-            }
-        }
-        out += str[i++];
-    }
-
-    return out;
-}
-
-function feraw_expand_macro_calls(code) {
     // Helper: find matching close char ignoring "strings", `backticks`, and 'single quotes'
-    function findMatchingWithBT(s, start, openChar, closeChar) {
+    function findMatchingWithBT(s, start, openChar, closeChar) 
+    {
         let depth = 1;
         let inDouble = false;
         let inBacktick = false;
@@ -1799,8 +1717,7 @@ function feraw_expand_all(input)
 {
     input = feraw_expand_macro_calls(input);
     input = feraw_isolate_labels(input);
-    input = feraw_expand_brackets(input);
-    input = feraw_expand_dots(input);
+    input = feraw_expand_props(input);
     input = feraw_expand_macros(input);
     input = feraw_expand_ifs(input);
     input = feraw_expand_whiles(input);
@@ -1864,9 +1781,11 @@ if (process)
                             content.push('');
                         } else {
                             content.push(`/* missing include: ${incFile} */`);
+                            console.warn(`Missing include file: ${incFile} at ${incPath}`);
                         }
                     } catch (err) {
                         content.push(`/* error including ${incFile}: ${err.message} */`);
+                        console.error(`Error including ${incFile}:`, err.message);
                     }
                 } else {
                     content.push(line);
@@ -1874,6 +1793,7 @@ if (process)
             }
         } catch (err) {
             content.push(`/* error processing ${filePath}: ${err.message} */`);
+            console.error(`Error processing ${filePath}:`, err.message);
         }
         
         return content;
@@ -1882,7 +1802,7 @@ if (process)
     function processContent(content) {
         const ccBlocks = [];
         const functions = [];
-        const otherLines = [];
+        let otherLines = [];
         let insideCC = false;
         let depth = 0;
         let ccBuffer = [];
@@ -1944,7 +1864,7 @@ if (process)
         return { ccBlocks, functions, otherLines };
     }
 
-    function generateOutput(outputPath, { ccBlocks, functions, otherLines }) {
+    function generateOutputC(outputPath, { ccBlocks, functions, otherLines }) {
         let output = `#include "bruter.h"\n`;
         output += `#include <stdlib.h>\n\n`;
         
@@ -1990,12 +1910,21 @@ if (process)
         fs.writeFileSync(outputPath, output);
     }
 
-    // Main execution
-    if (process.argv.length < 4) {
-        console.error(`Usage: ${path.basename(process.argv[1])} <input.feraw> <output.c>`);
-        process.exit(1);
+    function generateOutputFeraw(outputPath, { otherLines }) {
+        let joinedCode = otherLines.join('\n');
+        joinedCode = feraw_compile(joinedCode);
+        fs.writeFileSync(outputPath, joinedCode);
     }
 
+    // Main execution
+    if (process.argv.length < 3) {
+        console.error(`Usage: ${path.basename(process.argv[1])} <input.feraw> <output.(c|feraw)>`);
+        process.exit(1);
+    }
+    else if (process.argv.length == 3) {
+        process.stdout.write(feraw_compile(fs.readFileSync(process.argv[2], 'utf8')));
+        process.exit(0);
+    };
     const inputFile = path.resolve(process.argv[2]);
     const outputFile = path.resolve(process.argv[3]);
 
@@ -2006,8 +1935,14 @@ if (process)
         // Step 2: Process content
         const processed = processContent(expandedContent);
         
-        // Step 3: Generate output
-        generateOutput(outputFile, processed);
+        // Step 3: Decide output based on extension
+        if (outputFile.endsWith(".c")) {
+            generateOutputC(outputFile, processed);
+        } else if (outputFile.endsWith(".feraw")) {
+            generateOutputFeraw(outputFile, processed);
+        } else {
+            throw new Error("Unsupported output extension, use .c or .feraw");
+        }
         
         console.log(`Successfully generated: ${outputFile}`);
     } catch (err) {

@@ -1,8 +1,4 @@
-cc {
-include("../lib/std.c");
-include("../lib/math.c");
-};
-
+include("../lib/std.feraw");
 
 a = 50;
 b = 500.123;

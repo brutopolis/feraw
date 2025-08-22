@@ -1,11 +1,4 @@
-cc {
-include("../lib/std.c");
-include("../lib/string.c");
-include("../lib/condition.c");
-include("../lib/math.c");
-};
-
-include("../lib/types.feraw");
+include("../lib/std.feraw");
 
 
 // this is a literal string, a pointer to the code itself
