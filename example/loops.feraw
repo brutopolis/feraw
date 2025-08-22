@@ -1,4 +1,101 @@
-include("../lib/std.feraw");
+cc {
+    function(feraw_dup)
+    {
+        BruterMeta value = bruter_pop_meta(stack);
+        bruter_push_meta(stack, value); // Push the value back to the stack
+        bruter_push_meta(stack, value); // Duplicate it
+    }
+
+    function(feraw_shift)
+    {
+        BruterList* list = bruter_pop_pointer(stack);
+        BruterMeta value = bruter_shift_meta(list);
+        free(value.key); // Free the key if it exists
+        bruter_push_meta(stack, value); // Push the shifted value back to the stack
+    }
+
+    function(feraw_add)
+    {
+        BruterMeta a = bruter_pop_meta(stack);
+        BruterMeta b = bruter_pop_meta(stack);
+        switch (a.type)
+        {
+            case BRUTER_TYPE_FLOAT:
+                switch (b.type)
+                {
+                    case BRUTER_TYPE_FLOAT:
+                        bruter_push_float(stack, a.value.f + b.value.f, NULL, BRUTER_TYPE_FLOAT);
+                        break;
+                    default:
+                        bruter_push_float(stack, a.value.f + b.value.i, NULL, BRUTER_TYPE_FLOAT);
+                        break;
+                }
+                break;
+            default:
+                switch (b.type)
+                {
+                    case BRUTER_TYPE_FLOAT:
+                        bruter_push_float(stack, a.value.i + b.value.f, NULL, BRUTER_TYPE_FLOAT);
+                        break;
+                    default:
+                        bruter_push_int(stack, a.value.i + b.value.i, NULL, BRUTER_TYPE_ANY);
+                        break;
+                }
+                break;
+        }
+    }
+
+    function(feraw_less)
+    {
+        BruterInt a = bruter_pop_int(stack);
+        BruterInt b = bruter_pop_int(stack);
+        bruter_push_int(stack, a < b ? 1 : 0, NULL, BRUTER_TYPE_ANY);
+    }
+
+    function (feraw_print)
+    {
+        BruterMeta value = bruter_pop_meta(stack);
+        switch (value.type)
+        {
+            case BRUTER_TYPE_FLOAT:
+                printf("%f", value.value.f);
+                break;
+            case BRUTER_TYPE_BUFFER:
+                printf("%s", (char*)value.value.p);
+                break;
+            case BRUTER_TYPE_LIST:
+                for (BruterInt i = 0; i < ((BruterList*)value.value.p)->size; i++)
+                {
+                    BruterMeta item = bruter_get_meta((BruterList*)value.value.p, i);
+                    switch (item.type)
+                    {
+                        case BRUTER_TYPE_FLOAT:
+                            printf("%f ", item.value.f);
+                            break;
+                        case BRUTER_TYPE_BUFFER:
+                            printf("%s ", (char*)item.value.p);
+                            break;
+                        case BRUTER_TYPE_LIST:
+                            printf("[List] ");
+                            break;
+                        default:
+                            printf("%ld ", item.value.i);
+                            break;
+                    }
+                }
+                break;
+            default:
+                printf("%ld", value.value.i);
+                break;
+        }
+    }
+
+    function(feraw_println)
+    {
+        feraw_print(stack);
+        printf("\n");
+    }
+};
 // this example, unlike the hello-world example this is probably not so familiar to most people
 // the good part of having no rules at all is that no code is arbitrary, even when it is
 // in this case everything is expected and predictable, so i would not consider it arbitrary
