@@ -6,19 +6,22 @@ include("../lib/std.feraw");
 // lets put the index into the stack
 // seems a loose call, but it will stay on the stack until something consumes it or manually removed
 // we will never let the index go out of stack
-dup(0);
+#dup(0);
+
+// the # is the static operator, it put the value directly on the code as literal
+// using static variables are way faster than search for a variable
 
 // & is the stack itself
 // if the index is less than 100000, we go back to the start label, 
 // we manipulate the stack directly(inside itself) bcause we want to reorganize the stack to the ifgo call
-while(less(shift(stack), 100000))
+while(#less(#shift(stack), 100000))
 {
     // print is receive no arguments, thus it wont push any args to the stack
     // but we already have 2 values on the stack we pushed before, so print will consume one of them
-    println();
+    #println();
     // we add 1 to whatever is on the stack, which is the index
     // and then we duplicate it
-    dup(add(1));
+    #dup(#add(1));
 };
 
 // end label is where i usually put the free's and such
