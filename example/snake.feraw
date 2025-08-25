@@ -17,14 +17,23 @@ cc{
 
 include("../lib/bsr.feraw");
 
+// $1 = map
+// $2 = x
+// $3 = y
+tile = macro{
+    $1.data[add(mul($1.size.w, $3), $2)]
+};
+
 ls(@);
 
 win = new_window("BSR Example", 640, 480, 0); 
 canvas = get_window_canvas(win);
 
-map_size = list(0);
-map_size.w = 32;
-map_size.h = 24;
+map = list(0);
+map.size = list(0);
+map.size.w = 32;
+map.size.h = 24;
+map.data = calloc(mul(map_size.w, map_size.h), 1);
 
 snake = list(0);
 snake.position = list(0);
@@ -38,7 +47,6 @@ right = 1;
 up = 2;
 down = 3;
 direction = right;
-
 
 argb_img = load_argb("example/periclao.argb");
 
@@ -109,7 +117,7 @@ while (wait_sync(win))
         ?(1, end);
     };
 
-    sleep(1000);
+    sleep(100);
 }
 
 end:

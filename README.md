@@ -26,7 +26,7 @@ print(str2); // prints "Hello World!"
 free(str2); // free the allocated string
 
 // this is a list
-list = new(); // create a new empty list
+list = list(0); // create a new empty list
 list[20] = "item at index 20"; // set the literal to index 20, and create all the previous indexes
 pop(list); // remove the last item from the list
 push(list, "new item"); // add a new item to the end of the list

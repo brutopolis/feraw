@@ -7,10 +7,11 @@ start:
 
     obj["age"] = 18;
     obj["height"] = 1.75;
-    obj["name"] = "joao";
+    obj["_name"] = "joao";
 
     print(obj["age"]);
     print(obj["name"]);
+    print(obj["_name"]);
     print(obj["height"]);
 
     obj["age"] = 55;

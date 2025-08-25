@@ -1,16 +1,21 @@
-cc{
-    include("../lib/os.c");
-};
-
 include("../lib/std.feraw");
 include("../lib/bsr.feraw");
 
 ls(@);
 
+images = list(0);
+images.player = list(0);
+images.player.idle = list(0);
+images.player.run = list(0);
+images.player.use = list(0);
+
+
+push(images.player.idle, load_argb("example/periclao.argb"));
+
+
 win = new_window("BSR Example", 640, 480, 0); 
 canvas = get_window_canvas(win);
 
-argb_img = load_argb("example/periclao.argb");
 
 img = list(0);
 img.canvas = argb_to_canvas(argb_img);

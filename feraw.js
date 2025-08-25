@@ -4,46 +4,6 @@ let feraw_while_counter = 0;
 let feraw_for_counter = 0;
 let feraw_switch_counter = 0;
 
-function feraw_isolate_labels(code) {
-    let result = '';
-    let inString = false;
-    let escape = false;
-    let i = 0;
-
-    while (i < code.length) {
-        const c = code[i];
-
-        if (inString) {
-            result += c;
-            if (escape) {
-                escape = false;
-            } else if (c === '\\') {
-                escape = true;
-            } else if (c === '"' || c === "'") {
-                inString = false;
-            }
-            i++;
-        } else {
-            if (c === '"' || c === "'") {
-                inString = true;
-                result += c;
-                i++;
-            } else {
-                const match = code.slice(i).match(/^([a-zA-Z_]\w*):/);
-                if (match) {
-                    result += match[0] + ';'; 
-                    i += match[0].length;
-                } else {
-                    result += c;
-                    i++;
-                }
-            }
-        }
-    }
-
-    return result;
-}
-
 function splitOutsideStrings(input, char = ';') 
 {
     let parts = [];
@@ -272,15 +232,7 @@ function tokenize(input)
                 break;
             }
 
-            if (input[i] === ',') 
-            {
-                str += String.fromCharCode(24);
-            }
-            else if (input[i] === ';')
-            {
-                str += String.fromCharCode(25); // semicolon
-            }
-            else if (input[i] === '\n')
+            if (input[i] === '\n')
             {
                 str += String.fromCharCode(26); // newline
             }
@@ -295,10 +247,6 @@ function tokenize(input)
             else if (input[i] === ' ')
             {
                 str += String.fromCharCode(30); // space
-            }
-            else if (input[i] === ':')
-            {
-                str += String.fromCharCode(31); // colon
             }
             else 
             {
@@ -387,7 +335,7 @@ function tokenize(input)
                     tokens.push('0');
                     return;
                 case "null":
-                    tokens.push('!', 'pun', '0', '0');
+                    tokens.push('!', 'retype', '@', '0', '0');
                     return;
                 case "stack":
                     tokens.push('&');
@@ -395,8 +343,8 @@ function tokenize(input)
                 case "context":
                     tokens.push('@');
                     return;
-                case "code":
-                    tokens.push('$');
+                case "program":
+                    tokens.push('%');
                     return;
             } 
         }
@@ -628,381 +576,6 @@ function findMatching(input, start, openChar, closeChar)
         }
     }
     return -1;
-}
-
-function feraw_expand_macros(input) 
-{
-    const macroMap = new Map();
-
-    let i = 0;
-    let outputWithoutDefs = '';
-    while (i < input.length) 
-    {
-        // Basic string handling for definition parsing
-        if (input[i] === '"' || input[i] === "'") 
-        {
-            let stringChar = input[i];
-            outputWithoutDefs += input[i];
-            i++;
-            let escapeNext = false;
-            while (i < input.length) 
-            {
-                if (escapeNext) 
-                {
-                    outputWithoutDefs += input[i];
-                    escapeNext = false;
-                    i++;
-                    continue;
-                }
-                if (input[i] === '\\')
-                {
-                    outputWithoutDefs += input[i];
-                    escapeNext = true;
-                    i++;
-                    continue;
-                }
-                if (input[i] === stringChar) 
-                {
-                    outputWithoutDefs += input[i];
-                    i++;
-                    break;
-                }
-                outputWithoutDefs += input[i];
-                i++;
-            }
-            continue;
-        }
-        // Skip whitespace and comments for definition parsing
-        if (/\s/.test(input[i])) 
-        {
-            outputWithoutDefs += input[i];
-            i++;
-            continue;
-        }
-        if (input[i] === '/' && i + 1 < input.length) 
-        {
-            if (input[i + 1] === '/') 
-            {
-                // Consume single-line comment
-                while (i < input.length && input[i] !== '\n') 
-                {
-                    outputWithoutDefs += input[i];
-                    i++;
-                }
-                if (i < input.length) 
-                { // Add the newline if it exists
-                    outputWithoutDefs += input[i];
-                    i++;
-                }
-                continue;
-            } 
-            else if (input[i + 1] === '*') 
-            {
-                // Consume multi-line comment
-                outputWithoutDefs += input[i]; i++; // Add /
-                outputWithoutDefs += input[i]; i++; // Add *
-                while (i < input.length) 
-                {
-                    if (input[i] === '*' && i + 1 < input.length && input[i + 1] === '/') 
-                    {
-                        outputWithoutDefs += input[i]; i++; // Add *
-                        outputWithoutDefs += input[i]; i++; // Add /
-                        break;
-                    }
-                    outputWithoutDefs += input[i];
-                    i++;
-                }
-                continue;
-            }
-        }
-        let potentialStart = i;
-        let nameMatch = /^([a-zA-Z_$][a-zA-Z0-9_$]*)/.exec(input.substring(i));
-        if (nameMatch) 
-        {
-            let macroName = nameMatch[1];
-            i += nameMatch[0].length;
-            while (i < input.length && /\s/.test(input[i])) i++;
-            if (i < input.length && input[i] === '=') 
-            {
-                i++; // Skip '='
-                while (i < input.length && /\s/.test(input[i])) i++;
-                // Check for 'macro' keyword
-                if (i + 5 <= input.length && input.substring(i, i + 5) === 'macro') 
-                {
-                    i += 5; // Skip 'macro'
-                    while (i < input.length && /\s/.test(input[i])) i++;
-                    if (i < input.length && input[i] === '{') 
-                    {
-                        let bodyStart = i + 1;
-                        let bodyEnd = findMatching(input, i, '{', '}'); // Find matching ')'
-                        if (bodyEnd !== -1) 
-                        {
-                            let macroBody = input.substring(bodyStart, bodyEnd);
-                            // Store the macro definition
-                            macroMap.set(macroName, macroBody);
-                            // Skip the entire definition including ';'
-                            i = bodyEnd + 1; // Move past ')'
-                            while (i < input.length && /\s/.test(input[i])) i++;
-                            if (i < input.length && input[i] === ';') 
-                            {
-                                i++; // Skip ';'
-                            } // else maybe warn about missing semicolon?
-                            // Do NOT add this definition to outputWithoutDefs
-                            continue; // Continue processing the *rest* of the input
-                        } 
-                        else 
-                        {
-                            console.error("Unterminated macro definition for:", macroName);
-                            i = potentialStart; // Reset to try parsing normally
-                        }
-                    } 
-                    else 
-                    {
-                        // 'macro' not followed by '(', not a definition
-                        i = potentialStart;
-                    }
-                } 
-                else 
-                {
-                    // '=' not followed by 'macro', not a definition
-                    i = potentialStart;
-                }
-            } 
-            else 
-            {
-                // Name not followed by '=', not a definition
-                i = potentialStart;
-            }
-        }
-        outputWithoutDefs += input[potentialStart];
-        i = potentialStart + 1;
-    }
-
-    // --- Step 2: Expand Macro Calls (Corrected) ---
-    // Work on the input without definitions
-    input = outputWithoutDefs;
-    let previous;
-    do 
-    {
-        previous = input;
-        let outputAfterExpansion = '';
-        i = 0;
-        let inString = false; // Track if inside a string literal
-        let stringChar = '';  // Track the quote character for the current string
-
-        // --- Main Expansion Loop ---
-        while (i < input.length) 
-        {
-            let char = input[i];
-
-            // --- String Literal Handling ---
-            // Consistently handle strings to prevent misinterpreting comment chars inside them
-            if (!inString && (char === '"' || char === "'")) 
-            {
-                inString = true;
-                stringChar = char;
-                outputAfterExpansion += char;
-                i++;
-                continue;
-            } 
-            else if (inString && char === stringChar) 
-            {
-                // Check for escaped quote?
-                if (i > 0 && input[i-1] === '\\') 
-                {
-                    // The quote is escaped, treat it as a normal character
-                    // The backslash was already added in the 'else' part below or previous iteration
-                    // Just add the quote and continue
-                    outputAfterExpansion += char;
-                    i++;
-                    continue;
-                }
-                inString = false;
-                stringChar = '';
-                outputAfterExpansion += char;
-                i++;
-                continue;
-            }
-            if (inString) 
-            {
-                outputAfterExpansion += char;
-                i++;
-                continue;
-            }
-
-            // --- Comment Handling ---
-            // If not in a string, check for comment start
-            if (char === '/' && i + 1 < input.length) 
-            {
-                if (input[i + 1] === '/') 
-                {
-                    // Copy the entire single-line comment
-                    outputAfterExpansion += char; i++; // Add /
-                    outputAfterExpansion += input[i]; i++; // Add /
-                    while (i < input.length && input[i] !== '\n') 
-                    {
-                        outputAfterExpansion += input[i];
-                        i++;
-                    }
-                    if (i < input.length) 
-                    { // Add the newline if it exists
-                        outputAfterExpansion += input[i];
-                        i++;
-                    }
-                    continue; // Process the next character after the comment
-                } 
-                else if (input[i + 1] === '*') 
-                {
-                    // Copy the entire multi-line comment
-                    outputAfterExpansion += char; i++; // Add /
-                    outputAfterExpansion += input[i]; i++; // Add *
-                    while (i < input.length) 
-                    {
-                        outputAfterExpansion += input[i];
-                        if (input[i] === '*' && i + 1 < input.length && input[i + 1] === '/') 
-                        {
-                            outputAfterExpansion += input[i + 1]; // Add /
-                            i += 2; // Move past */
-                            break;
-                        }
-                        i++;
-                    }
-                    continue; // Process the next character after the comment
-                }
-            }
-
-            // --- Macro Call Expansion ---
-            // If we reach here, we are not in a string or comment.
-            // Attempt to Match a Macro Call: identifier '('
-            let nameMatch = /^([a-zA-Z_$][a-zA-Z0-9_$]*)/.exec(input.substring(i));
-            if (nameMatch) 
-            {
-                let callName = nameMatch[1];
-                let callStart = i + callName.length;
-                // Check if it's a macro call: name '(' (skip whitespace)
-                let tempIndex = callStart;
-                while (tempIndex < input.length && /\s/.test(input[tempIndex])) tempIndex++;
-                if (tempIndex < input.length && input[tempIndex] === '(') 
-                {
-                    let argsStart = tempIndex + 1;
-                    let argsEnd = findMatching(input, tempIndex, '(', ')');
-                    if (argsEnd !== -1) 
-                    {
-                        const macroBody = macroMap.get(callName);
-                        if (macroBody !== undefined) 
-                        {
-                            let argsStr = input.substring(argsStart, argsEnd);
-                            // --- Split Arguments Robustly ---
-                            function splitArgsRobust(str) 
-                            {
-                                let args = [];
-                                let current = '';
-                                let depth = 0;
-                                let inArgString = false;
-                                let argStringChar = '';
-                                let argEscapeNext = false;
-                                for (let j = 0; j < str.length; j++) 
-                                {
-                                    let argChar = str[j];
-                                    if (argEscapeNext) 
-                                    {
-                                        current += argChar;
-                                        argEscapeNext = false;
-                                        continue;
-                                    }
-                                    if (argChar === '\\') 
-                                    {
-                                        current += argChar;
-                                        argEscapeNext = true;
-                                        continue;
-                                    }
-                                    if (!inArgString && (argChar === '"' || argChar === "'")) 
-                                    {
-                                        inArgString = true;
-                                        argStringChar = argChar;
-                                        current += argChar;
-                                        continue;
-                                    } 
-                                    else if (inArgString && argChar === argStringChar) 
-                                    {
-                                        inArgString = false;
-                                        argStringChar = '';
-                                        current += argChar;
-                                        continue;
-                                    }
-                                    if (inArgString) 
-                                    {
-                                        current += argChar;
-                                        continue;
-                                    }
-                                    if (argChar === '(' || argChar === '[' || argChar === '{') 
-                                    {
-                                        depth++;
-                                    } 
-                                    else if (argChar === ')' || argChar === ']' || argChar === '}') 
-                                    {
-                                        depth--;
-                                    }
-                                    if (argChar === ',' && depth === 0) 
-                                    {
-                                        args.push(current.trim());
-                                        current = '';
-                                    } 
-                                    else 
-                                    {
-                                        current += argChar;
-                                    }
-                                }
-                                if (current.trim() !== '' || args.length > 0 || str.endsWith(",")) 
-                                {
-                                    args.push(current.trim());
-                                }
-                                return args;
-                            }
-                            const args = splitArgsRobust(argsStr);
-
-                            
-                            let expanded = macroBody;
-                            // 1. Replace $@ (all arguments joined as-is)
-                            expanded = expanded.replace(/\$all/g, args.join(', '));
-                            
-                            // 2. replace all $count by the argument count
-                            expanded = expanded.replace(/\$count/g, args.length.toString());
-
-                            // 3. replace all $macro_name by the macro name
-                            //expanded = expanded.replace(/\$count/g, args.length.toString());
-                            
-                            // 4. Replace numbered arguments $N from back to front
-                            for (let idx = args.length - 1; idx >= 0; idx--) 
-                            {
-                                const regExp = new RegExp(`\\$${idx}\\b`, 'g');
-                                expanded = expanded.replace(regExp, args[idx]);
-                            }
-                            
-                            expanded = expanded.replace(/\$@/g, args.join(', '));
-
-                            outputAfterExpansion += expanded;
-                            i = argsEnd + 1; // Move past the closing ')'
-                            continue; // Continue processing the rest of the input
-                        }
-                        // If macro not found, fall through to add the characters normally
-                    }
-                    else 
-                    {
-                        console.error("Unterminated macro call for:", callName);
-                        // Fall through to add characters normally or handle error
-                    }
-                }
-                // If it's not a '(' or the call is malformed, fall through
-            }
-            // Add current character if it wasn't the start of a string, comment, or recognized macro call
-            outputAfterExpansion += input[i];
-            i++;
-        }
-        input = outputAfterExpansion;
-    } while (previous !== input); // Repeat until no more expansions occur
-
-    return input;
 }
 
 function feraw_expand_ifs(input) {
@@ -1237,6 +810,146 @@ function feraw_expand_whiles(input) {
     return out;
 }
 
+function feraw_expand_functions(input) {
+    let i = 0;
+    let out = '';
+    let inDoubleQuotes = false;
+    let inBackticks = false;
+    let escape = false;
+
+    function isIdentChar(ch) {
+        if (!ch) return false;
+        const c = ch.charCodeAt(0);
+        return (c >= 48 && c <= 57) || (c >= 65 && c <= 90) || (c >= 97 && c <= 122) || ch === '_';
+    }
+
+    // Escapa " e \ para caber entre aspas duplas
+    function escapeForDoubleQuotedString(s) {
+        let r = '';
+        for (let k = 0; k < s.length; k++) {
+            const ch = s[k];
+            if (ch === '\\' || ch === '"') r += '\\' + ch;
+            else r += ch;
+        }
+        return r;
+    }
+
+    while (i < input.length) {
+        const c = input[i];
+
+        // --- Strings e escapes (mesma lógica do seu estilo) ---
+        if (escape) {
+            out += c;
+            escape = false;
+            i++;
+            continue;
+        }
+        if (c === '\\') {
+            out += c;
+            escape = true;
+            i++;
+            continue;
+        }
+        if (!inDoubleQuotes && !inBackticks && (c === '"' || c === '`')) {
+            if (c === '"') inDoubleQuotes = true; else inBackticks = true;
+            out += c;
+            i++;
+            continue;
+        }
+        if (inDoubleQuotes && c === '"') {
+            inDoubleQuotes = false;
+            out += c;
+            i++;
+            continue;
+        }
+        if (inBackticks && c === '`') {
+            inBackticks = false;
+            out += c;
+            i++;
+            continue;
+        }
+        if (inDoubleQuotes || inBackticks) {
+            out += c;
+            i++;
+            continue;
+        }
+
+        // --- Detecta EXACT "function{" (sem espaços) e não parte de identificador maior ---
+        // "function" tem 8 chars; "function{" tem 9 no total.
+        if (i + 9 <= input.length) {
+            // checa literal char-a-char pra não depender de startsWith
+            const f = input[i]     === 'f' &&
+                      input[i + 1] === 'u' &&
+                      input[i + 2] === 'n' &&
+                      input[i + 3] === 'c' &&
+                      input[i + 4] === 't' &&
+                      input[i + 5] === 'i' &&
+                      input[i + 6] === 'o' &&
+                      input[i + 7] === 'n' &&
+                      input[i + 8] === '{';
+
+            if (f) {
+                // evita pegar "myfunction{...}"
+                const prev = i > 0 ? input[i - 1] : '';
+                if (!isIdentChar(prev)) {
+                    // índice do '{'
+                    const openIdx = i + 8;
+                    // varre até achar o '}' pareado, com nesting e ignorando strings/escapes
+                    let j = openIdx + 1;
+                    let depth = 1;
+                    let inDQ2 = false;
+                    let inBT2 = false;
+                    let esc2 = false;
+
+                    while (j < input.length) {
+                        const ch = input[j];
+
+                        if (esc2) { esc2 = false; j++; continue; }
+                        if (ch === '\\') { esc2 = true; j++; continue; }
+
+                        if (!inDQ2 && !inBT2 && (ch === '"' || ch === '`')) {
+                            if (ch === '"') inDQ2 = true; else inBT2 = true;
+                            j++; continue;
+                        }
+                        if (inDQ2 && ch === '"') { inDQ2 = false; j++; continue; }
+                        if (inBT2 && ch === '`') { inBT2 = false; j++; continue; }
+
+                        if (!inDQ2 && !inBT2) {
+                            if (ch === '{') { depth++; j++; continue; }
+                            if (ch === '}') {
+                                depth--;
+                                if (depth === 0) break;
+                                j++; continue;
+                            }
+                        }
+
+                        j++;
+                    }
+
+                    if (depth !== 0) {
+                        // não fechou: copia literal e segue (fail-safe)
+                        out += input[i];
+                        i++;
+                        continue;
+                    }
+
+                    let content = feraw_compile(input.slice(openIdx + 1, j));
+                    //const escaped = escapeForDoubleQuotedString(content);
+                    out += '! strsplit "' + content + '"' + ' "\n \t\r"';
+                    i = j + 1;
+                    continue;
+                }
+            }
+        }
+
+        // default: copia
+        out += c;
+        i++;
+    }
+
+    return out;
+}
+
 function feraw_expand_fors(input) {
     let i = 0;
     let out = '';
@@ -1403,23 +1116,30 @@ function feraw_expand_props(str) {
                 if (props.length === 1) {
                     let k = props[0].key;
                     if (k === `"type"`) {
-                        out += `${base} = pun(${base}, ${valueExpr})`;
-                    } else if (k === `"name"`) {
+                        out += `retype(@, "${base}", ${valueExpr})`;
+                    } 
+                    else if (k === `"name"`) 
+                    {
                         out += `rename(${base}, "${base}", ${valueExpr})`;
                     } else {
                         out += `set(${base}, ${k}, ${valueExpr})`;
                     }
-                } else {
+                } 
+                else 
+                {
                     let lastKey = props[props.length - 1].key;
 
-                    if (lastKey === `"type"`) {
+                    if (lastKey === `"type"`) 
+                    {
                         let objExpr = base;
-                        for (let j = 0; j < props.length - 1; j++) {
+                        for (let j = 0; j < props.length - 2; j++) 
+                        {
                             objExpr = `get(${objExpr}, ${props[j].key})`;
                         }
-                        out += `${objExpr} = pun(${objExpr}, ${valueExpr})`;
-
-                    } else if (lastKey === `"name"`) {
+                        out += `retype(${objExpr}, ${props[props.length - 2].key}, ${valueExpr})`;
+                    } 
+                    else if (lastKey === `"name"`) 
+                    {
                         let objExpr = base;
                         for (let j = 0; j < props.length - 2; j++) {
                             objExpr = `get(${objExpr}, ${props[j].key})`;
@@ -1441,26 +1161,37 @@ function feraw_expand_props(str) {
                 // ----------- GET MODE -----------
                 let lastKey = props[props.length - 1].key;
 
-                if (lastKey === `"name"`) {
-                    if (props.length === 1) {
-                        out += `key(@, "${base}")`;
-                    } else {
+                if (lastKey === `"name"`) 
+                {
+                    if (props.length === 1) 
+                    {
+                        out += `nameof(@, "${base}")`;
+                    } 
+                    else 
+                    {
+                        let objExpr = base;
+                        for (let j = 0; j < props.length - 2; j++) 
+                        {
+                            objExpr = `get(${objExpr}, ${props[j].key})`;
+                        }
+                        let prevKey = props[props.length - 2].key;
+                        out += `nameof(${objExpr}, ${prevKey})`;
+                    }
+                }
+                else if (lastKey === `"type"`) 
+                {
+                    if (props.length === 1) 
+                    {
+                        out += `typeof(@, "${base}")`;
+                    } 
+                    else 
+                    {
                         let objExpr = base;
                         for (let j = 0; j < props.length - 2; j++) {
                             objExpr = `get(${objExpr}, ${props[j].key})`;
                         }
                         let prevKey = props[props.length - 2].key;
-                        out += `key(${objExpr}, ${prevKey})`;
-                    }
-                } else if (lastKey === `"type"`) {
-                    if (props.length === 1) {
-                        out += `typeof(${base})`;
-                    } else {
-                        let objExpr = base;
-                        for (let j = 0; j < props.length - 1; j++) {
-                            objExpr = `get(${objExpr}, ${props[j].key})`;
-                        }
-                        out += `typeof(${objExpr})`;
+                        out += `typeof(${objExpr}, ${prevKey})`;
                     }
                 } else if (lastKey === `"length"`) {
                     if (props.length === 1) {
@@ -1538,190 +1269,13 @@ function feraw_expand_inline_br(input)
     return out;
 }
 
-function feraw_expand_macro_calls(code) 
-{
-    // Helper: find matching close char ignoring "strings", `backticks`, and 'single quotes'
-    function findMatchingWithBT(s, start, openChar, closeChar) 
-    {
-        let depth = 1;
-        let inDouble = false;
-        let inBacktick = false;
-        let inSingle = false;
-        let escape = false;
-        for (let i = start + 1; i < s.length; i++) {
-            const ch = s[i];
-            if (escape) {
-                escape = false;
-                continue;
-            }
-            if (inDouble) {
-                if (ch === '\\') { escape = true; continue; }
-                if (ch === '"') { inDouble = false; continue; }
-                continue;
-            }
-            if (inBacktick) {
-                if (ch === '\\') { escape = true; continue; }
-                if (ch === '`') { inBacktick = false; continue; }
-                continue;
-            }
-            if (inSingle) {
-                if (ch === '\\') { escape = true; continue; }
-                if (ch === "'") { inSingle = false; continue; }
-                continue;
-            }
-
-            if (ch === '"') { inDouble = true; continue; }
-            if (ch === '`') { inBacktick = true; continue; }
-            if (ch === "'") { inSingle = true; continue; }
-
-            if (ch === openChar) depth++;
-            else if (ch === closeChar) {
-                depth--;
-                if (depth === 0) return i;
-            }
-        }
-        return -1;
-    }
-
-    // Pass 1: collect macro names, but never touch content inside "..." or `...`
-    const macros = new Set();
-    (function collectMacros() {
-        let i = 0;
-        let inDouble = false, inBacktick = false, inSingle = false, escape = false;
-        while (i < code.length) {
-            const ch = code[i];
-            if (escape) { escape = false; i++; continue; }
-            if (inDouble) {
-                if (ch === '\\') { escape = true; i++; continue; }
-                if (ch === '"') { inDouble = false; i++; continue; }
-                i++; continue;
-            }
-            if (inBacktick) {
-                if (ch === '\\') { escape = true; i++; continue; }
-                if (ch === '`') { inBacktick = false; i++; continue; }
-                i++; continue;
-            }
-            if (inSingle) {
-                if (ch === '\\') { escape = true; i++; continue; }
-                if (ch === "'") { inSingle = false; i++; continue; }
-                i++; continue;
-            }
-
-            if (ch === '"') { inDouble = true; i++; continue; }
-            if (ch === '`') { inBacktick = true; i++; continue; }
-            if (ch === "'") { inSingle = true; i++; continue; }
-
-            // Try to match: <name> = macro { ... };
-            const nameMatch = /^([a-zA-Z_$][a-zA-Z0-9_$]*)/.exec(code.slice(i));
-            if (!nameMatch) { i++; continue; }
-            const name = nameMatch[1];
-            let p = i + name.length;
-
-            // skip whitespace
-            while (p < code.length && /\s/.test(code[p])) p++;
-            if (code[p] !== '=') { i++; continue; }
-            p++;
-            while (p < code.length && /\s/.test(code[p])) p++;
-            if (code.slice(p, p + 5) !== 'macro') { i++; continue; }
-            p += 5;
-            while (p < code.length && /\s/.test(code[p])) p++;
-            if (code[p] !== '{') { i++; continue; }
-
-            const bodyEnd = findMatchingWithBT(code, p, '{', '}');
-            if (bodyEnd === -1) { i++; continue; }
-
-            macros.add(name);
-
-            // jump over definition; consume optional spaces and semicolon
-            i = bodyEnd + 1;
-            while (i < code.length && /\s/.test(code[i])) i++;
-            if (code[i] === ';') i++;
-        }
-    })();
-
-    if (macros.size === 0) return code;
-
-    // Pass 2: rewrite "lhs = MacroName(...);" into "MacroName(...); lhs =;"
-    let out = '';
-    let i = 0;
-    let inDouble = false, inBacktick = false, inSingle = false, escape = false;
-
-    while (i < code.length) {
-        const ch = code[i];
-
-        // Handle string contexts to avoid touching their content
-        if (escape) { out += ch; escape = false; i++; continue; }
-        if (inDouble) {
-            out += ch;
-            if (ch === '\\') escape = true;
-            else if (ch === '"') inDouble = false;
-            i++; continue;
-        }
-        if (inBacktick) {
-            out += ch;
-            if (ch === '\\') escape = true;
-            else if (ch === '`') inBacktick = false;
-            i++; continue;
-        }
-        if (inSingle) {
-            out += ch;
-            if (ch === '\\') escape = true;
-            else if (ch === "'") inSingle = false;
-            i++; continue;
-        }
-
-        if (ch === '"') { out += ch; inDouble = true; i++; continue; }
-        if (ch === '`') { out += ch; inBacktick = true; i++; continue; }
-        if (ch === "'") { out += ch; inSingle = true; i++; continue; }
-
-        // Try to detect: lhs = MacroName(args);
-        const lhsMatch = /^([a-zA-Z_$][a-zA-Z0-9_$]*)/.exec(code.slice(i));
-        if (!lhsMatch) { out += ch; i++; continue; }
-
-        const lhs = lhsMatch[1];
-        let p = i + lhs.length;
-
-        // save fallback output if pattern fails
-        const fallback = () => { out += code[i]; i++; };
-
-        // skip whitespace
-        while (p < code.length && /\s/.test(code[p])) p++;
-        if (p >= code.length || code[p] !== '=') { fallback(); continue; }
-        p++;
-        while (p < code.length && /\s/.test(code[p])) p++;
-        const macroNameMatch = /^([a-zA-Z_$][a-zA-Z0-9_$]*)/.exec(code.slice(p));
-        if (!macroNameMatch) { fallback(); continue; }
-        const macroName = macroNameMatch[1];
-        if (!macros.has(macroName)) { fallback(); continue; }
-        p += macroName.length;
-        while (p < code.length && /\s/.test(code[p])) p++;
-        if (p >= code.length || code[p] !== '(') { fallback(); continue; }
-
-        const close = findMatchingWithBT(code, p, '(', ')');
-        if (close === -1) { fallback(); continue; }
-
-        let k = close + 1;
-        while (k < code.length && /\s/.test(code[k])) k++;
-        if (k >= code.length || code[k] !== ';') { fallback(); continue; }
-
-        // Success: perform rewrite
-        const args = code.slice(p, close + 1); // includes parentheses
-        out += `${macroName}${args}; ${lhs} =;`;
-        i = k + 1; // move past semicolon
-    }
-
-    return out;
-}
-
 function feraw_expand_all(input)
 {
-    input = feraw_expand_macro_calls(input);
-    input = feraw_isolate_labels(input);
     input = feraw_expand_props(input);
-    input = feraw_expand_macros(input);
     input = feraw_expand_ifs(input);
     input = feraw_expand_whiles(input);
     input = feraw_expand_fors(input);
+    input = feraw_expand_functions(input);
     input = feraw_expand_inline_br(input);
     return input;
 }
@@ -1741,14 +1295,6 @@ function feraw_compile(input)
 
     let result_string = feraw_labelparser(result);
     result_string = result_string.replaceAll("\n\n", "\n"); // Remove double newlines
-    if (result_string.startsWith("\n")) 
-    {
-        result_string = result_string.slice(1); // Remove leading newline
-    }
-    if (result_string.endsWith("\n")) 
-    {
-        result_string = result_string.slice(0, -1); // Remove trailing newline
-    }
     return result_string;
 }
 
@@ -1902,7 +1448,7 @@ if (process)
         }
         output += `    ;\n\n`;
         
-        output += `    BruterList *result = bruter_parse(context, embedded_code);\n`;
+        output += `    BruterList *result = bruter_parse(context, embedded_code, NULL);\n`;
         output += `    bruter_free(result);\n`;
         output += `    bruter_free(context);\n`;
         output += `    return EXIT_SUCCESS;\n}\n`;

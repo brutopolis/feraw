@@ -37,7 +37,6 @@ typedef struct
     float mouse_scroll_delta_y; // mouse scroll y
     char character; // last character input
     uint8_t flags;
-
 } BSRWindow;
 
 BruterList *bsr_windows = NULL;

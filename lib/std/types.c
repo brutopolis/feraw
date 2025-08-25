@@ -1,20 +1,5 @@
 #include "bruter.h"
 
-function(feraw_pun)
-{
-    BruterMeta dest = bruter_pop_meta(stack);
-    BruterInt newType = bruter_pop_int(stack);
-
-    dest.type = newType;
-    bruter_push_meta(stack, dest);
-}
-
-function(feraw_typeof)
-{
-    BruterMeta meta = bruter_pop_meta(stack);
-    bruter_push_int(stack, meta.type, NULL, BRUTER_TYPE_ANY);
-}
-
 function(feraw_int)
 {
     BruterMeta meta = bruter_pop_meta(stack);
