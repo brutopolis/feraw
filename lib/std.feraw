@@ -20,3 +20,19 @@ Function = 5;
 null = 0;
 retype(@, "null", Null);
 
+split_tokens = "\n \t\r";
+
+fun_code = "split_tokens $0 strsplit ! ,function_code @ set !
+0 ,function_code_i @ set !
+24 function_code length ! function_code_i less ! ? 
+40 1 ?
+0 function_code_i function_code retype ! 
+1 function_code_i add ! ,function_code_i @ set !
+13 1 ?
+function_code";
+
+fun = strsplit(fun_code, split_tokens);
+for (function_code_i = 0; less(function_code_i, fun.length); function_code_i = add(function_code_i, 1)) 
+{
+    fun[function_code_i].type = 0;
+};

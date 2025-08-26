@@ -1,13 +1,11 @@
 include("../lib/std.feraw");
 
-a = 5.0;
-a.type = 99;
-println(a.type);
+println("function test");
 
-l = list(4, 1, 2, 3, 4);
-for (i = 0; less(i, l.length); i = add(i, 1)) 
-{
-
-    l[i].type = 99;
-    println(l[i].type);
+test = function{
+    print($0);
+    print(`, `);
+    println($1);
 };
+
+test(10, 20);

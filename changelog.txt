@@ -1,6 +1,6 @@
 # feraw changelog https://github.com/brutopolis/feraw
 
-(25/08/2025) - version 0.2.4
+(26/08/2025) - version 0.2.4
 
 - feraw has some new fetures, you can now get and set a.name a.length and a.type;
 - std libs centralized in one folder;
@@ -9,9 +9,7 @@
 - key renamed to nameof;
 - some other minor changes;
 
-TODO: implement $all $count etc to support feraw_function;
-TODO: create a function "feraw_function" to use instead of the current hack with strsplit + loop to retype each element of the list to type 0,
-    this function must me written in feraw itself;
+BUG: spaces in function calls are not being handled properly;
 
 (21/08/2025) - version 0.2.3
 
