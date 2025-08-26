@@ -1,23 +1,21 @@
 #!/usr/bin/env node
-// feraw compiler - mujs compatible version
-var feraw_if_counter = 0;
-var feraw_while_counter = 0;
-var feraw_for_counter = 0;
-var feraw_switch_counter = 0;
+let feraw_if_counter = 0;
+let feraw_while_counter = 0;
+let feraw_for_counter = 0;
+let feraw_switch_counter = 0;
 
-function splitOutsideStrings(input, char) 
+function splitOutsideStrings(input, char = ';') 
 {
-    if (char === undefined) char = ';';
-    var parts = [];
-    var current = '';
-    var inDoubleQuotes = false;
-    var inSingleQuotes = false;
-    var inBackticks = false;
-    var escape = false;
+    let parts = [];
+    let current = '';
+    let inDoubleQuotes = false;
+    let inSingleQuotes = false;
+    let inBackticks = false;
+    let escape = false;
 
-    for (var i = 0; i < input.length; i++) 
+    for (let i = 0; i < input.length; i++) 
     {
-        var c = input[i];
+        let c = input[i];
 
         if (escape) 
         {
@@ -56,7 +54,7 @@ function splitOutsideStrings(input, char)
 
         if (c === '{') // lets make sure we don't split inside a block
         {
-            var blockDepth = 1;
+            let blockDepth = 1;
             current += c;
             i++;
             while (i < input.length && blockDepth > 0) 
@@ -77,7 +75,7 @@ function splitOutsideStrings(input, char)
         }
         else if (c === '(' || c === ')') // lets make sure we don't split inside a function call
         {
-            var parenDepth = c === '(' ? 1 : -1;
+            let parenDepth = c === '(' ? 1 : -1;
             current += c;
             i++;
             while (i < input.length && parenDepth !== 0) 
@@ -98,7 +96,7 @@ function splitOutsideStrings(input, char)
         }
         else if (c === '[' || c === ']') // lets make sure we don't split inside a list
         {
-            var listDepth = c === '[' ? 1 : -1;
+            let listDepth = c === '[' ? 1 : -1;
             current += c;
             i++;
             while (i < input.length && listDepth !== 0) 
@@ -119,18 +117,18 @@ function splitOutsideStrings(input, char)
         }
         else if (c === '{' || c === '}') // lets make sure we don't split inside a obj
         {
-            var objDepth = c === '{' ? 1 : -1;
+            let listDepth = c === '{' ? 1 : -1;
             current += c;
             i++;
-            while (i < input.length && objDepth !== 0) 
+            while (i < input.length && listDepth !== 0) 
             {
                 if (input[i] === '{') 
                 {
-                    objDepth++;
+                    listDepth++;
                 } 
                 else if (input[i] === '}') 
                 {
-                    objDepth--;
+                    listDepth--;
                 }
                 current += input[i];
                 i++;
@@ -163,7 +161,7 @@ function splitOutsideStrings(input, char)
             continue;
         }
 
-        if (c === char && !inDoubleQuotes && !inSingleQuotes && !inBackticks) 
+        if (c === char && !inDoubleQuotes && !inSingleQuotes) 
         {
             parts.push(current.trim());
             current = '';
@@ -183,12 +181,12 @@ function splitOutsideStrings(input, char)
 
 function tokenize(input) 
 {
-    var tokens = [];
-    var i = 0;
+    let tokens = [];
+    let i = 0;
 
     function skipWhitespace() 
     {
-        var safety = 0;
+        let safety = 0;
         while (i < input.length) 
         {
 
@@ -219,17 +217,16 @@ function tokenize(input)
 
     function parseString() 
     {
-        var str = '';
-        var stringChar = input[i]; // store the opening quote character
-        i++; // skip opening quote
-        if (input.indexOf('=') === -1)
+        let str = '';
+        i++; // skip opening "
+        if (!input.includes('='))
         {
             isAssignment = true; // if there is no =, we assume this is a string assignment
         }
 
         while (i < input.length)
         {
-            if (input[i] === stringChar) // check for the matching closing quote
+            if (input[i] === '"') 
             {
                 i++;
                 break;
@@ -262,33 +259,30 @@ function tokenize(input)
         tokens.push(',' + str);
     }
     
-    function parseBlock(depth)
+    function parseBlock(depth = 0)
     {
-        if (depth === undefined) depth = 0;
         // to be used in future, for something i don't know yet
     }
 
     function parseRawToken() 
     {
-        var start = i;
-        while (i < input.length && !/\s/.test(input[i]) && "()[]{},=;".indexOf(input[i]) === -1) {
+        let start = i;
+        while (i < input.length && !/\s/.test(input[i]) && !"()[]{},=;".includes(input[i])) {
             i++;
         }
         return input.slice(start, i);
     }
 
-    function parseExpr(depth) 
+    function parseExpr(depth = 0) 
     {
-        if (depth === undefined) depth = 0;
         skipWhitespace();
         if (i >= input.length) return;
 
         if (input[i] === '"') return parseString();
-        if (input[i] === '`') return parseString(); // treat backticks like double quotes
         if (input[i] === "'") // char as int
         {
             i++; // skip opening '
-            var char = input[i++];
+            let char = input[i++];
             if (char === '\\') 
             {
                 char = input[i++];
@@ -310,7 +304,7 @@ function tokenize(input)
         // 0x, 0b, 0o, 1e8 etc
         if (input[i] >= '0' && input[i] <= '9' || (input[i] === '-' && (i + 1 < input.length && input[i + 1] >= '0' && input[i + 1] <= '9')) || input[i] == '.')
         {
-            var start = i;
+            let start = i;
             i++;
             while (
                 i < input.length &&
@@ -319,18 +313,18 @@ function tokenize(input)
                 i++;
             }
 
-            var numStr = input.slice(start, i);
-            var num = Number(numStr);
+            let numStr = input.slice(start, i);
+            let num = Number(numStr);
 
             if (isNaN(num)) throw new Error("parseExpr: invalid number format: " + numStr);
             tokens.push(num + '');
             return;
         }
 
-        var name = parseRawToken();
+        let name = parseRawToken();
         if (!name) throw new Error("parseExpr: invalid or empty token");
 
-        if (["true", "false", "null", "stack", "context", "code"].indexOf(name) !== -1)
+        if (["true", "false", "null", "stack", "context", "code"].includes(name))
         {
             switch (name)
             {
@@ -364,17 +358,17 @@ function tokenize(input)
 
         if (input[i] === '(')
         {
-            if (["!", "?"].indexOf(name) !== -1) 
+            if (["!", "?"].includes(name)) 
             {
                 tokens.push(name);
             }
             else if (name == "inline") 
             {
                 // lets find the end of the parentesis
-                var endParen = findMatching(input, i, '(', ')');
+                let endParen = findMatching(input, i, '(', ')');
                 // now we simply put the content as it is
                 if (endParen === -1) throw new Error("parseExpr: missing closing ) for br");
-                var content = input.slice(i + 1, endParen);
+                let content = input.slice(i + 1, endParen);
                 tokens.push(content);
                 i = endParen + 1; // move the index to after the closing parenthesis
                 return;
@@ -385,7 +379,7 @@ function tokenize(input)
             }
 
             i++; // skip '('
-            var safety = 0;
+            let safety = 0;
 
             while (true) 
             {
@@ -406,14 +400,14 @@ function tokenize(input)
         } 
         else 
         {
-            var exprTokens = [name]; 
+            let exprTokens = [name]; 
             while (true) 
             {
                 skipWhitespace();
                 if (input[i] === '(') 
                 {
                     i++; // skip '('
-                    var argTokens = [];
+                    let argTokens = [];
                     while (true) 
                     {
                         skipWhitespace();
@@ -425,12 +419,12 @@ function tokenize(input)
                         }
                         parseExpr(depth + 1); // Parse the argument expression
                         // Take the tokens generated for the argument
-                        argTokens = argTokens.concat(tokens.splice(tokens.length - 1)); 
+                        argTokens.push(...tokens.splice(tokens.length - 1)); 
                         skipWhitespace();
                         if (input[i] === ',') i++; // skip ','
                     }
 
-                    exprTokens = ['!'].concat(exprTokens).concat(argTokens); 
+                    exprTokens = ['!', ...exprTokens, ...argTokens]; 
                     continue; 
                 }
                 // --- Break Condition ---
@@ -454,26 +448,26 @@ function tokenize(input)
                 // Push in the order: value, variable_name, !, set
                 tokens.shift(); // Remove '!' from the start
                 tokens.shift(); // Remove 'get' from the start
-                tokens = ['!', 'set'].concat(tokens).concat(exprTokens);
+                tokens = ['!', 'set', ...tokens, ...exprTokens];
 
                 return; // Crucial: Stop parsing this expression after handling assignment
             }
             
             // --- Not an Assignment ---
             // Push the accumulated expression tokens (representing the access chain)
-            tokens = tokens.concat(exprTokens);
+            tokens.push(...exprTokens);
         }
     } // End of parseExpr function
 
 
-    var safety = 0;
+    let safety = 0;
     while (i < input.length) 
     {
         skipWhitespace();
         if (i >= input.length) break;
 
-        var start = i;
-        var name = parseRawToken();
+        let start = i;
+        let name = parseRawToken();
         skipWhitespace();
 
         if (input[i] === '=') 
@@ -497,66 +491,50 @@ function tokenize(input)
 function feraw_labelparser(original_input) 
 {
     // we need this to know exactly where the labels were positioned originally
-    var unreversed_input = [];
-    for (var i = 0; i < original_input.length; i++) {
-        unreversed_input.push(original_input[i].join(' '));
-    }
-    unreversed_input = unreversed_input.join(' ');
+    let unreversed_input = original_input.map(tokens => tokens.join(' ')).join(' ');
     
     // split by any kind of whitespace
-    var splited = unreversed_input.toString().split(/\s+/);
+    let splited = unreversed_input.toString().split(/\s+/);
     
-    var processedInput = [];
-    for (var i = 0; i < original_input.length; i++) {
-        var reversed = original_input[i].slice();
-        reversed.reverse();
-        processedInput.push(reversed.join(' '));
-    }
-    var input = processedInput.join('\n').toString();
+    let input = original_input.map(tokens => tokens.reverse().join(' '))
+        .join('\n').toString();
 
     // remove empty strings
-    var filteredSplited = [];
-    for (var i = 0; i < splited.length; i++) {
-        if (splited[i].trim() !== '') {
-            filteredSplited.push(splited[i]);
-        }
-    }
-    splited = filteredSplited;
+    splited = splited.filter(token => token.trim() !== '');
     
-    var labels = [];
-    var correction = 0;
-    for (var i = 0; i < splited.length; i++)
+    let labels = [];
+    let correction = 0;
+    for (let i = 0; i < splited.length; i++)
     {
-        var word = splited[i];
-        if (word.length > 0 && word.charAt(word.length - 1) === ':') 
+        let word = splited[i];
+        if (word.endsWith(':')) 
         {
-            var label = word.slice(0, -1);
+            let label = word.slice(0, -1);
             labels.push([label, i - correction]);
             correction++;
         }
     }
 
     // lets remove all label: from the input
-    input = input.replace(/(\w+):/g, '');
+    input = input.replaceAll(/(\w+):/g, '');
 
     
-    for (var i = 0; i < labels.length; i++) 
+    for (let label of labels) 
     {
-        var label = labels[i];
-        input = input.replace(new RegExp('\\b' + label[0] + '\\b', 'g'), label[1].toString());
+        input = input.replaceAll(new RegExp(`\\b${label[0]}\\b`, 'g'), `${label[1]}`);
     }
     return input;
 }
 
 function findMatching(input, start, openChar, closeChar) 
 {
-    var depth = 1;
-    var inString = false;
-    var stringChar = '';
-    var escapeNext = false;
-    for (var i = start + 1; i < input.length; i++) 
+    let depth = 1;
+    let inString = false;
+    let stringChar = '';
+    let escapeNext = false;
+    for (let i = start + 1; i < input.length; i++) 
     {
-        var char = input[i];
+        let char = input[i];
         if (escapeNext) 
         {
             escapeNext = false;
@@ -567,7 +545,7 @@ function findMatching(input, start, openChar, closeChar)
             escapeNext = true;
             continue;
         }
-        if (!inString && (char === '"' || char === "'" || char === '`')) 
+        if (!inString && (char === '"' || char === "'")) 
         {
             inString = true;
             stringChar = char;
@@ -601,14 +579,14 @@ function findMatching(input, start, openChar, closeChar)
 }
 
 function feraw_expand_ifs(input) {
-    var i = 0;
-    var out = '';
-    var inDoubleQuotes = false;
-    var inBackticks = false;
-    var escape = false;
+    let i = 0;
+    let out = '';
+    let inDoubleQuotes = false;
+    let inBackticks = false;
+    let escape = false;
 
     while (i < input.length) {
-        var c = input[i];
+        let c = input[i];
 
         // Handle string literals
         if (escape) {
@@ -650,7 +628,7 @@ function feraw_expand_ifs(input) {
 
         // Not inside a string, process if
         if (/^if\s*\(/.test(input.slice(i))) {
-            var id = feraw_if_counter++;
+            let id = feraw_if_counter++;
 
             i += 2;
             while (/\s/.test(input[i])) i++;
@@ -659,23 +637,23 @@ function feraw_expand_ifs(input) {
                 continue;
             }
 
-            var condStart = i;
-            var condEnd = findMatching(input, i, '(', ')');
-            var cond = input.slice(condStart + 1, condEnd);
+            let condStart = i;
+            let condEnd = findMatching(input, i, '(', ')');
+            let cond = input.slice(condStart + 1, condEnd);
             i = condEnd + 1;
             while (/\s/.test(input[i])) i++;
             if (input[i] !== '{') {
-                out += 'if(' + cond + ')';
+                out += `if(${cond})`;
                 continue;
             }
 
-            var ifBlockEnd = findMatching(input, i, '{', '}');
-            var ifBlock = input.slice(i + 1, ifBlockEnd);
+            let ifBlockEnd = findMatching(input, i, '{', '}');
+            let ifBlock = input.slice(i + 1, ifBlockEnd);
             i = ifBlockEnd + 1;
             while (/\s/.test(input[i])) i++;
 
-            var chain = [{ cond: cond, block: ifBlock }];
-            var elseBlock = '';
+            let chain = [{ cond, block: ifBlock }];
+            let elseBlock = '';
 
             while (/^else\b/.test(input.slice(i))) {
                 i += 4;
@@ -684,18 +662,18 @@ function feraw_expand_ifs(input) {
                     i += 2;
                     while (/\s/.test(input[i])) i++;
                     if (input[i] !== '(') break;
-                    var condStart = i;
-                    var condEnd = findMatching(input, i, '(', ')');
-                    var cond = input.slice(condStart + 1, condEnd);
+                    let condStart = i;
+                    let condEnd = findMatching(input, i, '(', ')');
+                    let cond = input.slice(condStart + 1, condEnd);
                     i = condEnd + 1;
                     while (/\s/.test(input[i])) i++;
                     if (input[i] !== '{') break;
-                    var blockEnd = findMatching(input, i, '{', '}');
-                    var block = input.slice(i + 1, blockEnd);
+                    let blockEnd = findMatching(input, i, '{', '}');
+                    let block = input.slice(i + 1, blockEnd);
                     i = blockEnd + 1;
-                    chain.push({ cond: cond, block: block });
+                    chain.push({ cond, block });
                 } else if (input[i] === '{') {
-                    var elseEnd = findMatching(input, i, '{', '}');
+                    let elseEnd = findMatching(input, i, '{', '}');
                     elseBlock = input.slice(i + 1, elseEnd);
                     i = elseEnd + 1;
                     break;
@@ -705,35 +683,32 @@ function feraw_expand_ifs(input) {
                 while (/\s/.test(input[i])) i++;
             }
 
-            for (var j = 0; j < chain.length; j++) {
+            for (let j = 0; j < chain.length; j++) {
                 chain[j].block = feraw_expand_all(chain[j].block);
             }
             if (elseBlock) {
                 elseBlock = feraw_expand_all(elseBlock);
             }
 
-            var trueLabels = [];
-            for (var j = 0; j < chain.length; j++) {
-                trueLabels.push('if' + id + '_true_' + j);
-            }
-            var afterLabel = 'if' + id + '_after';
+            let trueLabels = chain.map((_, idx) => `if${id}_true_${idx}`);
+            let afterLabel = `if${id}_after`;
 
-            out += '?(' + chain[0].cond + ', ' + trueLabels[0] + ');\n';
+            out += `?(${chain[0].cond}, ${trueLabels[0]});\n`;
             if (elseBlock) {
                 out += elseBlock + '\n';
-                out += '?(1, ' + afterLabel + ');\n';
+                out += `?(1, ${afterLabel});\n`;
             } else {
-                out += '?(1, ' + afterLabel + ');\n';
+                out += `?(1, ${afterLabel});\n`;
             }
-            for (var j = 0; j < chain.length; j++) {
-                out += trueLabels[j] + ':\n';
+            for (let j = 0; j < chain.length; j++) {
+                out += `${trueLabels[j]}:\n`;
                 out += chain[j].block + '\n';
                 if (j + 1 < chain.length) {
-                    out += '?(' + chain[j + 1].cond + ', ' + trueLabels[j + 1] + ');\n';
-                    out += '?(1, ' + afterLabel + ');\n';
+                    out += `?(${chain[j + 1].cond}, ${trueLabels[j + 1]});\n`;
+                    out += `?(1, ${afterLabel});\n`;
                 }
             }
-            out += afterLabel + ':\n';
+            out += `${afterLabel}:\n`;
             continue;
         }
 
@@ -744,14 +719,14 @@ function feraw_expand_ifs(input) {
 }
 
 function feraw_expand_whiles(input) {
-    var i = 0;
-    var out = '';
-    var inDoubleQuotes = false;
-    var inBackticks = false;
-    var escape = false;
+    let i = 0;
+    let out = '';
+    let inDoubleQuotes = false;
+    let inBackticks = false;
+    let escape = false;
 
     while (i < input.length) {
-        var c = input[i];
+        let c = input[i];
 
         // Handle string literals
         if (escape) {
@@ -793,39 +768,39 @@ function feraw_expand_whiles(input) {
 
         // Not inside a string, process while
         if (/^while\s*\(/.test(input.slice(i))) {
-            var id = feraw_while_counter++;
+            let id = feraw_while_counter++;
             i += 5;
             while (/\s/.test(input[i])) i++;
             if (input[i] !== '(') {
                 out += 'while';
                 continue;
             }
-            var condStart = i;
-            var condEnd = findMatching(input, i, '(', ')');
-            var cond = input.slice(condStart + 1, condEnd);
+            let condStart = i;
+            let condEnd = findMatching(input, i, '(', ')');
+            let cond = input.slice(condStart + 1, condEnd);
             i = condEnd + 1;
             while (/\s/.test(input[i])) i++;
             if (input[i] !== '{') {
-                out += 'while(' + cond + ')';
+                out += `while(${cond})`;
                 continue;
             }
-            var whileBlockEnd = findMatching(input, i, '{', '}');
-            var whileBlock = input.slice(i + 1, whileBlockEnd);
+            let whileBlockEnd = findMatching(input, i, '{', '}');
+            let whileBlock = input.slice(i + 1, whileBlockEnd);
             i = whileBlockEnd + 1;
             while (/\s/.test(input[i])) i++;
             whileBlock = feraw_expand_all(whileBlock);
 
-            var whileTrueLabel = 'while' + id + '_true';
-            var whileAfterLabel = 'while' + id + '_after';
-            var whileStartLabel = 'while' + id + '_start';
+            let whileTrueLabel = `while${id}_true`;
+            let whileAfterLabel = `while${id}_after`;
+            let whileStartLabel = `while${id}_start`;
 
-            out += whileStartLabel + ':\n';
-            out += '?(' + cond + ', ' + whileTrueLabel + ');\n';
-            out += '?(1, ' + whileAfterLabel + ');\n';
-            out += whileTrueLabel + ':\n';
+            out += `${whileStartLabel}:\n`;
+            out += `?(${cond}, ${whileTrueLabel});\n`;
+            out += `?(1, ${whileAfterLabel});\n`;
+            out += `${whileTrueLabel}:\n`;
             out += whileBlock + '\n';
-            out += '?(1, ' + whileStartLabel + ');\n';
-            out += whileAfterLabel + ':\n';
+            out += `?(1, ${whileStartLabel});\n`;
+            out += `${whileAfterLabel}:\n`;
             continue;
         }
 
@@ -835,154 +810,15 @@ function feraw_expand_whiles(input) {
     return out;
 }
 
-function feraw_expand_functions(input) {
-    var i = 0;
-    var out = '';
-    var inDoubleQuotes = false;
-    var inBackticks = false;
-    var escape = false;
-
-    function isIdentChar(ch) {
-        if (!ch) return false;
-        var c = ch.charCodeAt(0);
-        return (c >= 48 && c <= 57) || (c >= 65 && c <= 90) || (c >= 97 && c <= 122) || ch === '_';
-    }
-
-    // Escapa " e \ para caber entre aspas duplas
-    function escapeForDoubleQuotedString(s) {
-        var r = '';
-        for (var k = 0; k < s.length; k++) {
-            var ch = s[k];
-            if (ch === '\\' || ch === '"') r += '\\' + ch;
-            else r += ch;
-        }
-        return r;
-    }
-
-    while (i < input.length) {
-        var c = input[i];
-
-        // --- Strings e escapes (mesma lógica do seu estilo) ---
-        if (escape) {
-            out += c;
-            escape = false;
-            i++;
-            continue;
-        }
-        if (c === '\\') {
-            out += c;
-            escape = true;
-            i++;
-            continue;
-        }
-        if (!inDoubleQuotes && !inBackticks && (c === '"' || c === '`')) {
-            if (c === '"') inDoubleQuotes = true; else inBackticks = true;
-            out += c;
-            i++;
-            continue;
-        }
-        if (inDoubleQuotes && c === '"') {
-            inDoubleQuotes = false;
-            out += c;
-            i++;
-            continue;
-        }
-        if (inBackticks && c === '`') {
-            inBackticks = false;
-            out += c;
-            i++;
-            continue;
-        }
-        if (inDoubleQuotes || inBackticks) {
-            out += c;
-            i++;
-            continue;
-        }
-
-        // --- Detecta EXACT "function{" (sem espaços) e não parte de identificador maior ---
-        // "function" tem 8 chars; "function{" tem 9 no total.
-        if (i + 9 <= input.length) {
-            // checa literal char-a-char pra não depender de startsWith
-            var f = input[i]     === 'f' &&
-                      input[i + 1] === 'u' &&
-                      input[i + 2] === 'n' &&
-                      input[i + 3] === 'c' &&
-                      input[i + 4] === 't' &&
-                      input[i + 5] === 'i' &&
-                      input[i + 6] === 'o' &&
-                      input[i + 7] === 'n' &&
-                      input[i + 8] === '{';
-
-            if (f) {
-                // evita pegar "myfunction{...}"
-                var prev = i > 0 ? input[i - 1] : '';
-                if (!isIdentChar(prev)) {
-                    // índice do '{'
-                    var openIdx = i + 8;
-                    // varre até achar o '}' pareado, com nesting e ignorando strings/escapes
-                    var j = openIdx + 1;
-                    var depth = 1;
-                    var inDQ2 = false;
-                    var inBT2 = false;
-                    var esc2 = false;
-
-                    while (j < input.length) {
-                        var ch = input[j];
-
-                        if (esc2) { esc2 = false; j++; continue; }
-                        if (ch === '\\') { esc2 = true; j++; continue; }
-
-                        if (!inDQ2 && !inBT2 && (ch === '"' || ch === '`')) {
-                            if (ch === '"') inDQ2 = true; else inBT2 = true;
-                            j++; continue;
-                        }
-                        if (inDQ2 && ch === '"') { inDQ2 = false; j++; continue; }
-                        if (inBT2 && ch === '`') { inBT2 = false; j++; continue; }
-
-                        if (!inDQ2 && !inBT2) {
-                            if (ch === '{') { depth++; j++; continue; }
-                            if (ch === '}') {
-                                depth--;
-                                if (depth === 0) break;
-                                j++; continue;
-                            }
-                        }
-
-                        j++;
-                    }
-
-                    if (depth !== 0) {
-                        // não fechou: copia literal e segue (fail-safe)
-                        out += input[i];
-                        i++;
-                        continue;
-                    }
-
-                    var content = feraw_compile(input.slice(openIdx + 1, j));
-                    out += 'fun("' + content + '")';
-                    i = j + 1;
-                    continue;
-                }
-            }
-        }
-
-        // default: copia
-        out += c;
-        i++;
-    }
-
-    return out;
-}
-
 function feraw_expand_fors(input) {
-    var i = 0;
-    var out = '';
-    var inDoubleQuotes = false;
-    var inBackticks = false;
-    var escape = false;
+    let i = 0;
+    let out = '';
+    let inDoubleQuotes = false;
+    let inBackticks = false;
+    let escape = false;
 
     while (i < input.length) {
-        var c = input[i];
+        let c = input[i];
 
         // Handle string literals
         if (escape) {
@@ -1024,47 +860,45 @@ function feraw_expand_fors(input) {
 
         // Not inside a string, process for
         if (/^for\s*\(/.test(input.slice(i))) {
-            var id = feraw_for_counter++;
+            let id = feraw_for_counter++;
             i += 3;
             while (/\s/.test(input[i])) i++;
             if (input[i] !== '(') {
                 out += 'for';
                 continue;
             }
-            var headerStart = i;
-            var headerEnd = findMatching(input, i, '(', ')');
-            var header = input.slice(headerStart + 1, headerEnd);
+            let headerStart = i;
+            let headerEnd = findMatching(input, i, '(', ')');
+            let header = input.slice(headerStart + 1, headerEnd);
             i = headerEnd + 1;
             while (/\s/.test(input[i])) i++;
             if (input[i] !== '{') {
-                out += 'for(' + header + ')';
+                out += `for(${header})`;
                 continue;
             }
-            var forBlockEnd = findMatching(input, i, '{', '}');
-            var forBlock = input.slice(i + 1, forBlockEnd);
+            let forBlockEnd = findMatching(input, i, '{', '}');
+            let forBlock = input.slice(i + 1, forBlockEnd);
             i = forBlockEnd + 1;
             while (/\s/.test(input[i])) i++;
 
-            var headerParts = header.split(';');
-            var init = headerParts[0] ? headerParts[0].trim() : '';
-            var cond = headerParts[1] ? headerParts[1].trim() : '1';
-            var iter = headerParts[2] ? headerParts[2].trim() : '';
+            let [init, cond, iter] = header.split(';').map(s => s.trim());
+            if (!cond) cond = '1';
 
             forBlock = feraw_expand_all(forBlock);
 
-            var forStartLabel = 'for' + id + '_start';
-            var forTrueLabel = 'for' + id + '_true';
-            var forAfterLabel = 'for' + id + '_after';
+            let forStartLabel = `for${id}_start`;
+            let forTrueLabel = `for${id}_true`;
+            let forAfterLabel = `for${id}_after`;
 
-            out += init ? init + ';\n' : '';
-            out += forStartLabel + ':\n';
-            out += '?(' + cond + ', ' + forTrueLabel + ');\n';
-            out += '?(1, ' + forAfterLabel + ');\n';
-            out += forTrueLabel + ':\n';
+            out += init ? `${init};\n` : '';
+            out += `${forStartLabel}:\n`;
+            out += `?(${cond}, ${forTrueLabel});\n`;
+            out += `?(1, ${forAfterLabel});\n`;
+            out += `${forTrueLabel}:\n`;
             out += forBlock + '\n';
-            out += iter ? iter + ';\n' : '';
-            out += '?(1, ' + forStartLabel + ');\n';
-            out += forAfterLabel + ':\n';
+            out += iter ? `${iter};\n` : '';
+            out += `?(1, ${forStartLabel});\n`;
+            out += `${forAfterLabel}:\n`;
             continue;
         }
 
@@ -1074,14 +908,14 @@ function feraw_expand_fors(input) {
 }
 
 function feraw_expand_props(str) {
-    var out = '';
-    var i = 0;
-    var inDoubleQuotes = false;
-    var inBackticks = false;
-    var escape = false;
+    let out = '';
+    let i = 0;
+    let inDoubleQuotes = false;
+    let inBackticks = false;
+    let escape = false;
 
     while (i < str.length) {
-        var c = str[i];
+        let c = str[i];
 
         // Handle strings
         if (escape) { out += c; escape = false; i++; continue; }
@@ -1095,27 +929,27 @@ function feraw_expand_props(str) {
         if (inDoubleQuotes || inBackticks) { out += c; i++; continue; }
 
         // Detecta identificador base
-        var nameMatch = /^([a-zA-Z_$][a-zA-Z0-9_$]*)/.exec(str.slice(i));
+        let nameMatch = /^([a-zA-Z_$][a-zA-Z0-9_$]*)/.exec(str.slice(i));
         if (!nameMatch) { out += str[i++]; continue; }
 
-        var base = nameMatch[1];
+        let base = nameMatch[1];
         i += base.length;
 
         // Captura props encadeados (.foo ou [expr])
-        var props = [];
+        let props = [];
         while (i < str.length) {
             if (str[i] === '.') {
                 i++;
-                var propMatch = /^([a-zA-Z_$][a-zA-Z0-9_$]*)/.exec(str.slice(i));
+                let propMatch = /^([a-zA-Z_$][a-zA-Z0-9_$]*)/.exec(str.slice(i));
                 if (!propMatch) break;
-                props.push({ key: '"' + propMatch[1] + '"' });
+                props.push({ key: `"${propMatch[1]}"` });
                 i += propMatch[1].length;
                 continue;
             }
             if (str[i] === '[') {
-                var end = findMatching(str, i, '[', ']');
+                let end = findMatching(str, i, '[', ']');
                 if (end === -1) break;
-                var inner = str.slice(i + 1, end).trim();
+                let inner = str.slice(i + 1, end).trim();
                 if (/^"(.*?)"$/.test(inner)) {
                     props.push({ key: inner });
                 } else {
@@ -1129,120 +963,111 @@ function feraw_expand_props(str) {
 
         if (props.length > 0) {
             // olha até ; pra ver se é atribuição
-            var lookaheadEnd = str.indexOf(';', i);
+            let lookaheadEnd = str.indexOf(';', i);
             if (lookaheadEnd === -1) lookaheadEnd = str.length;
-            var rightSide = str.slice(i, lookaheadEnd);
-            
-            // Implementação manual de trimStart
-            var trimmedRight = rightSide;
-            while (trimmedRight.length > 0 && /\s/.test(trimmedRight.charAt(0))) {
-                trimmedRight = trimmedRight.slice(1);
-            }
+            let rightSide = str.slice(i, lookaheadEnd);
+            let trimmedRight = rightSide.trimStart();
 
-            if (trimmedRight.length > 0 && trimmedRight.charAt(0) === '=') {
-                // assignment
-                var valueExpr = trimmedRight.slice(1);
-                // trim manual
-                while (valueExpr.length > 0 && /\s/.test(valueExpr.charAt(0))) {
-                    valueExpr = valueExpr.slice(1);
-                }
+            if (trimmedRight.startsWith('=')) {
+                // assignment (já tá certo da msg anterior)
+                let valueExpr = trimmedRight.slice(1).trim();
                 valueExpr = feraw_expand_props(valueExpr);
 
                 if (props.length === 1) {
-                    var k = props[0].key;
-                    if (k === '"type"') {
-                        out += 'retype(@, "' + base + '", ' + valueExpr + ')';
+                    let k = props[0].key;
+                    if (k === `"type"`) {
+                        out += `retype(@, "${base}", ${valueExpr})`;
                     } 
-                    else if (k === '"name"') 
+                    else if (k === `"name"`) 
                     {
-                        out += 'rename(' + base + ', "' + base + '", ' + valueExpr + ')';
+                        out += `rename(${base}, "${base}", ${valueExpr})`;
                     } else {
-                        out += 'set(' + base + ', ' + k + ', ' + valueExpr + ')';
+                        out += `set(${base}, ${k}, ${valueExpr})`;
                     }
                 } 
                 else 
                 {
-                    var lastKey = props[props.length - 1].key;
+                    let lastKey = props[props.length - 1].key;
 
-                    if (lastKey === '"type"') 
+                    if (lastKey === `"type"`) 
                     {
-                        var objExpr = base;
-                        for (var j = 0; j < props.length - 2; j++) 
+                        let objExpr = base;
+                        for (let j = 0; j < props.length - 2; j++) 
                         {
-                            objExpr = 'get(' + objExpr + ', ' + props[j].key + ')';
+                            objExpr = `get(${objExpr}, ${props[j].key})`;
                         }
-                        out += 'retype(' + objExpr + ', ' + props[props.length - 2].key + ', ' + valueExpr + ')';
+                        out += `retype(${objExpr}, ${props[props.length - 2].key}, ${valueExpr})`;
                     } 
-                    else if (lastKey === '"name"') 
+                    else if (lastKey === `"name"`) 
                     {
-                        var objExpr = base;
-                        for (var j = 0; j < props.length - 2; j++) {
-                            objExpr = 'get(' + objExpr + ', ' + props[j].key + ')';
+                        let objExpr = base;
+                        for (let j = 0; j < props.length - 2; j++) {
+                            objExpr = `get(${objExpr}, ${props[j].key})`;
                         }
-                        var prevKey = props[props.length - 2].key;
-                        out += 'rename(' + objExpr + ', ' + prevKey + ', ' + valueExpr + ')';
+                        let prevKey = props[props.length - 2].key;
+                        out += `rename(${objExpr}, ${prevKey}, ${valueExpr})`;
 
                     } else {
-                        var objExpr = base;
-                        for (var j = 0; j < props.length - 1; j++) {
-                            objExpr = 'get(' + objExpr + ', ' + props[j].key + ')';
+                        let objExpr = base;
+                        for (let j = 0; j < props.length - 1; j++) {
+                            objExpr = `get(${objExpr}, ${props[j].key})`;
                         }
-                        out += 'set(' + objExpr + ', ' + lastKey + ', ' + valueExpr + ')';
+                        out += `set(${objExpr}, ${lastKey}, ${valueExpr})`;
                     }
                 }
                 i = lookaheadEnd;
                 continue;
             } else {
                 // ----------- GET MODE -----------
-                var lastKey = props[props.length - 1].key;
+                let lastKey = props[props.length - 1].key;
 
-                if (lastKey === '"name"') 
+                if (lastKey === `"name"`) 
                 {
                     if (props.length === 1) 
                     {
-                        out += 'nameof(@, "' + base + '")';
+                        out += `nameof(@, "${base}")`;
                     } 
                     else 
                     {
-                        var objExpr = base;
-                        for (var j = 0; j < props.length - 2; j++) 
+                        let objExpr = base;
+                        for (let j = 0; j < props.length - 2; j++) 
                         {
-                            objExpr = 'get(' + objExpr + ', ' + props[j].key + ')';
+                            objExpr = `get(${objExpr}, ${props[j].key})`;
                         }
-                        var prevKey = props[props.length - 2].key;
-                        out += 'nameof(' + objExpr + ', ' + prevKey + ')';
+                        let prevKey = props[props.length - 2].key;
+                        out += `nameof(${objExpr}, ${prevKey})`;
                     }
                 }
-                else if (lastKey === '"type"') 
+                else if (lastKey === `"type"`) 
                 {
                     if (props.length === 1) 
                     {
-                        out += 'typeof(@, "' + base + '")';
+                        out += `typeof(@, "${base}")`;
                     } 
                     else 
                     {
-                        var objExpr = base;
-                        for (var j = 0; j < props.length - 2; j++) {
-                            objExpr = 'get(' + objExpr + ', ' + props[j].key + ')';
+                        let objExpr = base;
+                        for (let j = 0; j < props.length - 2; j++) {
+                            objExpr = `get(${objExpr}, ${props[j].key})`;
                         }
-                        var prevKey = props[props.length - 2].key;
-                        out += 'typeof(' + objExpr + ', ' + prevKey + ')';
+                        let prevKey = props[props.length - 2].key;
+                        out += `typeof(${objExpr}, ${prevKey})`;
                     }
-                } else if (lastKey === '"length"') {
+                } else if (lastKey === `"length"`) {
                     if (props.length === 1) {
-                        out += 'length(' + base + ')';
+                        out += `length(${base})`;
                     } else {
-                        var objExpr = base;
-                        for (var j = 0; j < props.length - 1; j++) {
-                            objExpr = 'get(' + objExpr + ', ' + props[j].key + ')';
+                        let objExpr = base;
+                        for (let j = 0; j < props.length - 1; j++) {
+                            objExpr = `get(${objExpr}, ${props[j].key})`;
                         }
-                        out += 'length(' + objExpr + ')';
+                        out += `length(${objExpr})`;
                     }
                 } else {
                     // default: get encadeado
-                    var expr = base;
-                    for (var j = 0; j < props.length; j++) {
-                        expr = 'get(' + expr + ', ' + props[j].key + ')';
+                    let expr = base;
+                    for (let p of props) {
+                        expr = `get(${expr}, ${p.key})`;
                     }
                     out += expr;
                 }
@@ -1259,8 +1084,8 @@ function feraw_expand_props(str) {
 }
 
 function findMatching(str, start, open, close) {
-    var depth = 0;
-    for (var i = start; i < str.length; i++) {
+    let depth = 0;
+    for (let i = start; i < str.length; i++) {
         if (str[i] === open) depth++;
         else if (str[i] === close) {
             depth--;
@@ -1273,8 +1098,8 @@ function findMatching(str, start, open, close) {
 
 function feraw_expand_inline_br(input)
 {
-    var i = 0;
-    var out = '';
+    let i = 0;
+    let out = '';
 
     while (i < input.length) {
         if (/^br\s*\{/.test(input.slice(i))) 
@@ -1289,11 +1114,11 @@ function feraw_expand_inline_br(input)
                 continue;
             }
 
-            var argsStart = i;
-            var argsEnd = findMatching(input, i, '{', '}');
-            var args = input.slice(argsStart + 1, argsEnd);
+            let argsStart = i;
+            let argsEnd = findMatching(input, i, '{', '}');
+            let args = input.slice(argsStart + 1, argsEnd);
 
-            out += 'inline(' + args + ')';
+            out += `inline(${args})`;
             i = argsEnd + 1;
             continue;
         }
@@ -1310,7 +1135,6 @@ function feraw_expand_all(input)
     input = feraw_expand_ifs(input);
     input = feraw_expand_whiles(input);
     input = feraw_expand_fors(input);
-    input = feraw_expand_functions(input);
     input = feraw_expand_inline_br(input);
     return input;
 }
@@ -1318,85 +1142,82 @@ function feraw_expand_all(input)
 function feraw_compile(input) 
 {
     input = feraw_expand_all(input);
-    var commands = splitOutsideStrings(input, ';');
-    var result = [];
-    for (var i = 0; i < commands.length; i++) 
+    let commands = splitOutsideStrings(input, ';');
+    let result = [];
+    for (let command of commands) 
     {
-        if (commands[i]) 
+        if (command) 
         {
-            result.push(tokenize(commands[i]));
+            result.push(tokenize(command));
         }
     }
 
-    var result_string = feraw_labelparser(result);
-    result_string = result_string.replace(/\n\n/g, "\n"); // Remove double newlines
+    let result_string = feraw_labelparser(result);
+    result_string = result_string.replaceAll("\n\n", "\n"); // Remove double newlines
     return result_string;
 }
 
 // only if under node.js
-if (typeof process !== 'undefined')
+if (process)
 {
-    var fs = require('fs');
-    var path = require('path');
+    const fs = require('fs');
+    const path = require('path');
 
-    var expandIncludes = function(filePath, baseDir) {
-        if (baseDir === undefined) baseDir = path.dirname(filePath);
+    function expandIncludes(filePath, baseDir = null) {
+        if (!baseDir) baseDir = path.dirname(filePath);
         
-        var content = [];
+        const content = [];
         try {
-            var data = fs.readFileSync(filePath, 'utf8');
-            var lines = data.split(/\r?\n/);
+            const data = fs.readFileSync(filePath, 'utf8');
+            const lines = data.split(/\r?\n/);
             
-            for (var i = 0; i < lines.length; i++) {
-                var line = lines[i];
-                var match = line.match(/^\s*include\(\"([^\"]+)\"\);\s*$/);
+            for (const line of lines) {
+                const match = line.match(/^\s*include\(\"([^\"]+)\"\);\s*$/);
                 if (match) {
-                    var incFile = match[1];
-                    var incPath = path.join(baseDir, incFile);
-                    var incDir = path.dirname(incPath);
+                    const incFile = match[1];
+                    const incPath = path.join(baseDir, incFile);
+                    const incDir = path.dirname(incPath);
                     
                     try {
                         if (fs.existsSync(incPath) && fs.statSync(incPath).isFile()) {
-                            content.push('/* start include: ' + incFile + ' */');
-                            var includedContent = expandIncludes(incPath, incDir);
-                            content = content.concat(includedContent);
-                            content.push('/* end include: ' + incFile + ' */');
+                            content.push(`/* start include: ${incFile} */`);
+                            content.push(...expandIncludes(incPath, incDir));
+                            content.push(`/* end include: ${incFile} */`);
                             content.push('');
                         } else {
-                            content.push('/* missing include: ' + incFile + ' */');
-                            console.warn('Missing include file: ' + incFile + ' at ' + incPath);
+                            content.push(`/* missing include: ${incFile} */`);
+                            console.warn(`Missing include file: ${incFile} at ${incPath}`);
                         }
                     } catch (err) {
-                        content.push('/* error including ' + incFile + ': ' + err.message + ' */');
-                        console.error('Error including ' + incFile + ':', err.message);
+                        content.push(`/* error including ${incFile}: ${err.message} */`);
+                        console.error(`Error including ${incFile}:`, err.message);
                     }
                 } else {
                     content.push(line);
                 }
             }
         } catch (err) {
-            content.push('/* error processing ' + filePath + ': ' + err.message + ' */');
-            console.error('Error processing ' + filePath + ':', err.message);
+            content.push(`/* error processing ${filePath}: ${err.message} */`);
+            console.error(`Error processing ${filePath}:`, err.message);
         }
         
         return content;
-    };
+    }
 
-    var processContent = function(content) {
-        var ccBlocks = [];
-        var functions = [];
-        var otherLines = [];
-        var insideCC = false;
-        var depth = 0;
-        var ccBuffer = [];
+    function processContent(content) {
+        const ccBlocks = [];
+        const functions = [];
+        let otherLines = [];
+        let insideCC = false;
+        let depth = 0;
+        let ccBuffer = [];
 
-        for (var i = 0; i < content.length; i++) {
-            var line = content[i];
+        for (const line of content) {
             // Detect function declarations
-            var funcMatch = line.match(/function\s*\(\s*([a-zA-Z0-9_]+)\s*\)/);
+            const funcMatch = line.match(/function\s*\(\s*([a-zA-Z0-9_]+)\s*\)/);
             if (funcMatch) {
-                var funcName = funcMatch[1];
-                var cleanName = funcName.indexOf('feraw_') === 0 
+                const funcName = funcMatch[1];
+                const cleanName = funcName.startsWith('feraw_') 
                     ? funcName.slice(6) 
                     : funcName;
                 functions.push([funcName, cleanName]);
@@ -1406,7 +1227,7 @@ if (typeof process !== 'undefined')
                 if (/^\s*cc\s*\{/.test(line)) {
                     insideCC = true;
                     depth = 1;
-                    var cleaned = line.replace(/^\s*cc\s*\{/, '');
+                    const cleaned = line.replace(/^\s*cc\s*\{/, '');
                     if (cleaned.trim()) ccBuffer.push(cleaned);
                 } else if (/^\s*cc\s*$/.test(line)) {
                     insideCC = true;
@@ -1415,8 +1236,7 @@ if (typeof process !== 'undefined')
                     otherLines.push(line);
                 }
             } else {
-                for (var j = 0; j < line.length; j++) {
-                    var char = line[j];
+                for (const char of line) {
                     if (char === '{') depth++;
                     if (char === '}') depth--;
                     
@@ -1427,18 +1247,18 @@ if (typeof process !== 'undefined')
                 }
                 
                 if (!insideCC) {
-                    var endIndex = line.indexOf('}') + 1;
+                    const endIndex = line.indexOf('}') + 1;
                     if (endIndex > 0) {
-                        var before = line.substring(0, endIndex - 1);
+                        const before = line.substring(0, endIndex - 1);
                         if (before.trim()) ccBuffer.push(before);
                         
-                        var after = line.substring(endIndex);
+                        const after = line.substring(endIndex);
                         if (after.trim()) otherLines.push(after);
                     } else if (line.trim()) {
                         ccBuffer.push(line);
                     }
                     
-                    ccBlocks = ccBlocks.concat(ccBuffer);
+                    ccBlocks.push(...ccBuffer);
                     ccBuffer = [];
                 } else if (line.trim()) {
                     ccBuffer.push(line);
@@ -1446,106 +1266,92 @@ if (typeof process !== 'undefined')
             }
         }
         
-        return { ccBlocks: ccBlocks, functions: functions, otherLines: otherLines };
-    };
+        return { ccBlocks, functions, otherLines };
+    }
 
-    var generateOutputC = function(outputPath, data) {
-        var ccBlocks = data.ccBlocks;
-        var functions = data.functions;
-        var otherLines = data.otherLines;
-        
-        var output = '#include "bruter.h"\n';
-        output += '#include <stdlib.h>\n\n';
+    function generateOutputC(outputPath, { ccBlocks, functions, otherLines }) {
+        let output = `#include "bruter.h"\n`;
+        output += `#include <stdlib.h>\n\n`;
         
         if (ccBlocks.length > 0) {
-            output += '/* BEGIN cc blocks */\n';
+            output += `/* BEGIN cc blocks */\n`;
             output += ccBlocks.join('\n') + '\n';
-            output += '/* END cc blocks */\n\n';
+            output += `/* END cc blocks */\n\n`;
         }
         
-        output += 'int main(int argc, char *argv[])\n{\n';
-        output += '    BruterList *context = bruter_new(8, true, true);\n\n';
+        output += `int main(int argc, char *argv[])\n{\n`;
+        output += `    BruterList *context = bruter_new(8, true, true);\n\n`;
         
         if (functions.length > 0) {
-            output += '    /* BEGIN function registrations */\n';
-            for (var i = 0; i < functions.length; i++) {
-                var funcName = functions[i][0];
-                var cleanName = functions[i][1];
-                output += '    bruter_push_pointer(context, ' + funcName + ', "' + cleanName + '", BRUTER_TYPE_FUNCTION);\n';
+            output += `    /* BEGIN function registrations */\n`;
+            for (const [funcName, cleanName] of functions) {
+                output += `    bruter_push_pointer(context, ${funcName}, "${cleanName}", BRUTER_TYPE_FUNCTION);\n`;
             }
-            output += '    /* END function registrations */\n\n';
+            output += `    /* END function registrations */\n\n`;
         }
         
         // lets join the other lines into a single string
         // apply feraw_compile() to it, then split it into lines again
         // then prepare it for embedding
-        var joinedCode = otherLines.join('\n');
+        let joinedCode = otherLines.join('\n');
         joinedCode = feraw_compile(joinedCode);
-        var processedLines = joinedCode.split(/\r?\n/);
-        var filteredLines = [];
-        for (var i = 0; i < processedLines.length; i++) {
-            if (processedLines[i].trim()) {
-                filteredLines.push(processedLines[i]);
-            }
-        }
+        otherLines = joinedCode.split(/\r?\n/).filter(line => line.trim());
 
-        output += '    const char *embedded_code =\n';
-        for (var i = 0; i < filteredLines.length; i++) {
-            var line = filteredLines[i];
+        output += `    const char *embedded_code =\n`;
+        for (const line of otherLines) {
             if (!line.trim()) continue;
-            var escaped = line
+            const escaped = line
                 .replace(/\\/g, '\\\\')
                 .replace(/"/g, '\\"');
-            output += '    "' + escaped + '\\n"\n';
+            output += `    "${escaped}\\n"\n`;
         }
-        output += '    ;\n\n';
+        output += `    ;\n\n`;
         
-        output += '    BruterList *result = bruter_parse(context, embedded_code, NULL);\n';
-        output += '    bruter_free(result);\n';
-        output += '    bruter_free(context);\n';
-        output += '    return EXIT_SUCCESS;\n}\n';
+        output += `    BruterList *result = bruter_parse(context, embedded_code, NULL);\n`;
+        output += `    bruter_free(result);\n`;
+        output += `    bruter_free(context);\n`;
+        output += `    return EXIT_SUCCESS;\n}\n`;
         
         fs.writeFileSync(outputPath, output);
-    };
+    }
 
-    var generateOutputFeraw = function(outputPath, data) {
-        var otherLines = data.otherLines;
-        var joinedCode = otherLines.join('\n');
+    function generateOutputFeraw(outputPath, { otherLines }) {
+        let joinedCode = otherLines.join('\n');
         joinedCode = feraw_compile(joinedCode);
         fs.writeFileSync(outputPath, joinedCode);
-    };
+    }
 
     // Main execution
     if (process.argv.length < 3) {
-        console.error('Usage: ' + path.basename(process.argv[1]) + ' <input.feraw> <output.(c|feraw)>');
+        console.error(`Usage: ${path.basename(process.argv[1])} <input.feraw> <output.(c|feraw)>`);
         process.exit(1);
     }
     else if (process.argv.length == 3) {
         process.stdout.write(feraw_compile(fs.readFileSync(process.argv[2], 'utf8')));
         process.exit(0);
-    }
-    var inputFile = path.resolve(process.argv[2]);
-    var outputFile = path.resolve(process.argv[3]);
+    };
+    const inputFile = path.resolve(process.argv[2]);
+    const outputFile = path.resolve(process.argv[3]);
 
     try {
         // Step 1: Expand includes
-        var expandedContent = expandIncludes(inputFile);
+        const expandedContent = expandIncludes(inputFile);
         
         // Step 2: Process content
-        var processed = processContent(expandedContent);
+        const processed = processContent(expandedContent);
         
         // Step 3: Decide output based on extension
-        if (outputFile.indexOf('.c') === outputFile.length - 2) {
+        if (outputFile.endsWith(".c")) {
             generateOutputC(outputFile, processed);
-        } else if (outputFile.indexOf('.feraw') === outputFile.length - 6) {
+        } else if (outputFile.endsWith(".feraw")) {
             generateOutputFeraw(outputFile, processed);
         } else {
             throw new Error("Unsupported output extension, use .c or .feraw");
         }
         
-        console.log('Successfully generated: ' + outputFile);
+        console.log(`Successfully generated: ${outputFile}`);
     } catch (err) {
-        console.error('Error: ' + err.message);
+        console.error(`Error: ${err.message}`);
         process.exit(1);
     }
 }

@@ -2,10 +2,20 @@ include("../lib/std.feraw");
 
 println("function test");
 
-test = function{
-    print($0);
-    print(`, `);
-    println($1);
+test = list(0);
+push(test, "$0");
+push(test, "print");
+push(test, "!");
+push(test, ",, ");
+push(test, "print");
+push(test, "!");
+push(test, "$1");
+push(test, "println");
+push(test, "!");
+
+for (i = 0; less(i, test.length); i = add(i, 1)) 
+{
+    test[i].type = 0;
 };
 
 test(10, 20);
