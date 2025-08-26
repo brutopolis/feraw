@@ -1328,6 +1328,7 @@ if (process)
     }
     else if (process.argv.length == 3) {
         process.stdout.write(feraw_compile(fs.readFileSync(process.argv[2], 'utf8')));
+        process.stdout.write('\n');
         process.exit(0);
     };
     const inputFile = path.resolve(process.argv[2]);
