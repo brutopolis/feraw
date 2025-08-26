@@ -9,8 +9,6 @@
 - key renamed to nameof;
 - some other minor changes;
 
-BUG: spaces in function calls are not being handled properly;
-
 (21/08/2025) - version 0.2.3
 
 - jus some more raylib examples;
