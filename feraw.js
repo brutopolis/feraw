@@ -324,7 +324,7 @@ function tokenize(input)
         let name = parseRawToken();
         if (!name) throw new Error("parseExpr: invalid or empty token");
 
-        if (["true", "false", "null", "stack", "context", "code"].includes(name))
+        if (["true", "false", "stack", "context", "program"].includes(name))
         {
             switch (name)
             {
@@ -333,9 +333,6 @@ function tokenize(input)
                     return;
                 case "false":
                     tokens.push('0');
-                    return;
-                case "null":
-                    tokens.push('!', 'retype', '@', '0', '0');
                     return;
                 case "stack":
                     tokens.push('&');
@@ -515,13 +512,135 @@ function feraw_labelparser(original_input)
         }
     }
 
-    // lets remove all label: from the input
-    input = input.replaceAll(/(\w+):/g, '');
+    // Remove all label: from the input, but skip inside strings and comments
+    let out = '';
+    let i = 0;
+    let inDoubleQuotes = false;
+    let inSingleQuotes = false;
+    let inBackticks = false;
+    let inLineComment = false;
+    let inBlockComment = false;
+    let escape = false;
 
-    
+    while (i < input.length) {
+        let c = input[i];
+
+        // Handle escapes in strings
+        if (escape) {
+            out += c;
+            escape = false;
+            i++;
+            continue;
+        }
+        if (c === '\\' && (inDoubleQuotes || inSingleQuotes || inBackticks)) {
+            out += c;
+            escape = true;
+            i++;
+            continue;
+        }
+
+        // Handle entering/exiting strings
+        if (!inDoubleQuotes && !inSingleQuotes && !inBackticks && !inLineComment && !inBlockComment) {
+            if (c === '"') { inDoubleQuotes = true; out += c; i++; continue; }
+            if (c === "'") { inSingleQuotes = true; out += c; i++; continue; }
+            if (c === '`') { inBackticks = true; out += c; i++; continue; }
+            if (c === '/' && input[i + 1] === '/') { inLineComment = true; out += c; i++; continue; }
+            if (c === '/' && input[i + 1] === '*') { inBlockComment = true; out += c; i++; continue; }
+        }
+        else {
+            // Handle exiting strings
+            if (inDoubleQuotes && c === '"') { inDoubleQuotes = false; out += c; i++; continue; }
+            if (inSingleQuotes && c === "'") { inSingleQuotes = false; out += c; i++; continue; }
+            if (inBackticks && c === '`') { inBackticks = false; out += c; i++; continue; }
+            if (inLineComment && c === '\n') { inLineComment = false; out += c; i++; continue; }
+            if (inBlockComment && c === '*' && input[i + 1] === '/') { inBlockComment = false; out += c + input[i + 1]; i += 2; continue; }
+        }
+
+        // If inside string or comment, just copy
+        if (inDoubleQuotes || inSingleQuotes || inBackticks || inLineComment || inBlockComment) {
+            out += c;
+            i++;
+            continue;
+        }
+
+        // Remove label: outside strings/comments
+        let labelMatch = input.slice(i).match(/^(\w+):/);
+        if (labelMatch) {
+            i += labelMatch[0].length;
+            continue;
+        }
+
+        out += c;
+        i++;
+    }
+    input = out;
+
+    // Replace label references, but skip inside strings/comments
     for (let label of labels) 
     {
-        input = input.replaceAll(new RegExp(`\\b${label[0]}\\b`, 'g'), `${label[1]}`);
+        let out2 = '';
+        let i2 = 0;
+        let inDoubleQuotes = false;
+        let inSingleQuotes = false;
+        let inBackticks = false;
+        let inLineComment = false;
+        let inBlockComment = false;
+        let escape = false;
+        let labelRegex = new RegExp(`\\b${label[0]}\\b`, 'g');
+
+        while (i2 < input.length) {
+            let c = input[i2];
+
+            // Handle escapes in strings
+            if (escape) {
+                out2 += c;
+                escape = false;
+                i2++;
+                continue;
+            }
+            if (c === '\\' && (inDoubleQuotes || inSingleQuotes || inBackticks)) {
+                out2 += c;
+                escape = true;
+                i2++;
+                continue;
+            }
+
+            // Handle entering/exiting strings/comments
+            if (!inDoubleQuotes && !inSingleQuotes && !inBackticks && !inLineComment && !inBlockComment) {
+                if (c === '"') { inDoubleQuotes = true; out2 += c; i2++; continue; }
+                if (c === "'") { inSingleQuotes = true; out2 += c; i2++; continue; }
+                if (c === '`') { inBackticks = true; out2 += c; i2++; continue; }
+                if (c === '/' && input[i2 + 1] === '/') { inLineComment = true; out2 += c; i2++; continue; }
+                if (c === '/' && input[i2 + 1] === '*') { inBlockComment = true; out2 += c; i2++; continue; }
+            }
+            else {
+                // Handle exiting strings
+                if (inDoubleQuotes && c === '"') { inDoubleQuotes = false; out2 += c; i2++; continue; }
+                if (inSingleQuotes && c === "'") { inSingleQuotes = false; out2 += c; i2++; continue; }
+                if (inBackticks && c === '`') { inBackticks = false; out2 += c; i2++; continue; }
+                if (inLineComment && c === '\n') { inLineComment = false; out2 += c; i2++; continue; }
+                if (inBlockComment && c === '*' && input[i2 + 1] === '/') { inBlockComment = false; out2 += c + input[i2 + 1]; i2 += 2; continue; }
+            }
+
+            // If inside string or comment, just copy
+            if (inDoubleQuotes || inSingleQuotes || inBackticks || inLineComment || inBlockComment) {
+                out2 += c;
+                i2++;
+                continue;
+            }
+
+            // Try to match label at this position
+            let match = input.slice(i2).match(new RegExp(`^\\b${label[0]}\\b`));
+            if (match) {
+                out2 += `${label[1]}`;
+                i2 += label[0].length;
+                continue;
+            }
+
+            out2 += c;
+            i2++;
+        }
+        input = out2;
     }
     return input;
 }
@@ -807,223 +926,6 @@ function feraw_expand_whiles(input) {
         out += input[i++];
     }
 
-    return out;
-}
-function feraw_expand_functions(input) {
-    let i = 0;
-    let out = '';
-    let inDoubleQuotes = false;
-    let inBackticks = false;
-    let escape = false;
-
-    function isIdentChar(ch) {
-        if (!ch) return false;
-        const c = ch.charCodeAt(0);
-        return (c >= 48 && c <= 57) || (c >= 65 && c <= 90) || (c >= 97 && c <= 122) || ch === '_';
-    }
-
-    // Função para restaurar caracteres especiais
-    function restoreSpecialChars(str) {
-        return str
-            .replace(/\x1A/g, '\n')   // 26 -> \n
-            .replace(/\x1C/g, '\r')   // 28 -> \r
-            .replace(/\x1D/g, '\t')   // 29 -> \t
-            .replace(/\x1E/g, ' ');   // 30 -> espaço
-    }
-
-    while (i < input.length) {
-        const c = input[i];
-
-        // --- Strings e escapes (mesma lógica do seu estilo) ---
-        if (escape) {
-            out += c;
-            escape = false;
-            i++;
-            continue;
-        }
-        if (c === '\\') {
-            out += c;
-            escape = true;
-            i++;
-            continue;
-        }
-        if (!inDoubleQuotes && !inBackticks && (c === '"' || c === '`')) {
-            if (c === '"') inDoubleQuotes = true; else inBackticks = true;
-            out += c;
-            i++;
-            continue;
-        }
-        if (inDoubleQuotes && c === '"') {
-            inDoubleQuotes = false;
-            out += c;
-            i++;
-            continue;
-        }
-        if (inBackticks && c === '`') {
-            inBackticks = false;
-            out += c;
-            i++;
-            continue;
-        }
-        if (inDoubleQuotes || inBackticks) {
-            out += c;
-            i++;
-            continue;
-        }
-
-        // Detecta nome = function{ ... };
-        let assignMatch = input.slice(i).match(/^([a-zA-Z_$][a-zA-Z0-9_$]*)\s*=\s*function\{/);
-        if (assignMatch) {
-            let name = assignMatch[1];
-            let assignLen = assignMatch[0].length - 1; // até o '{'
-            let openIdx = i + assignLen;
-            // varre até achar o '}' pareado, com nesting e ignorando strings/escapes
-            let j = openIdx + 1;
-            let depth = 1;
-            let inDQ2 = false;
-            let inBT2 = false;
-            let esc2 = false;
-
-            while (j < input.length) {
-                const ch = input[j];
-                if (esc2) { esc2 = false; j++; continue; }
-                if (ch === '\\') { esc2 = true; j++; continue; }
-                if (!inDQ2 && !inBT2 && (ch === '"' || ch === '`')) {
-                    if (ch === '"') inDQ2 = true; else inBT2 = true;
-                    j++; continue;
-                }
-                if (inDQ2 && ch === '"') { inDQ2 = false; j++; continue; }
-                if (inBT2 && ch === '`') { inBT2 = false; j++; continue; }
-                if (!inDQ2 && !inBT2) {
-                    if (ch === '{') { depth++; j++; continue; }
-                    if (ch === '}') {
-                        depth--;
-                        if (depth === 0) break;
-                        j++; continue;
-                    }
-                }
-                j++;
-            }
-
-            if (depth !== 0) {
-                // não fechou: copia literal e segue (fail-safe)
-                out += input[i];
-                i++;
-                continue;
-            }
-
-            let content = feraw_compile(input.slice(openIdx + 1, j));
-            let tokens = content.split(/[\s\r\n\t]+/).filter(t => t.length > 0);
-
-            out += `${name} = list(0);\n`;
-            while (tokens.length > 0) {
-                let str = tokens.shift();
-
-                if (str[0] === ',') {
-                    // Se começar com vírgula, transforma o conteúdo depois da vírgula em string normal
-                    let restored = restoreSpecialChars(str.slice(1));
-                    out += `push(${name}, "${restored}");\n`;
-                    // NÃO faz retype nesse caso
-                } else if (/^[\$\#\!\?\:\&\@\%]/.test(str)) {
-                    out += `push(${name}, "${str}");\n`;
-                    out += `retype(${name}, sub(length(${name}), 1), 0);\n`;
-                } else {
-                    out += `push(${name}, ${str});\n`;
-                }
-            }
-            // pula até depois do }
-            i = j + 1;
-            // pula o ; se existir
-            if (input[i] === ';') i++;
-            continue;
-        }
-
-        // --- Detecta EXACT "function{" (sem espaços) e não parte de identificador maior ---
-        if (i + 9 <= input.length) {
-            const f = input[i]     === 'f' &&
-                      input[i + 1] === 'u' &&
-                      input[i + 2] === 'n' &&
-                      input[i + 3] === 'c' &&
-                      input[i + 4] === 't' &&
-                      input[i + 5] === 'i' &&
-                      input[i + 6] === 'o' &&
-                      input[i + 7] === 'n' &&
-                      input[i + 8] === '{';
-
-            if (f) {
-                // evita pegar "myfunction{...}"
-                const prev = i > 0 ? input[i - 1] : '';
-                if (!isIdentChar(prev)) {
-                    // índice do '{'
-                    const openIdx = i + 8;
-                    // varre até achar o '}' pareado, com nesting e ignorando strings/escapes
-                    let j = openIdx + 1;
-                    let depth = 1;
-                    let inDQ2 = false;
-                    let inBT2 = false;
-                    let esc2 = false;
-
-                    while (j < input.length) {
-                        const ch = input[j];
-
-                        if (esc2) { esc2 = false; j++; continue; }
-                        if (ch === '\\') { esc2 = true; j++; continue; }
-
-                        if (!inDQ2 && !inBT2 && (ch === '"' || ch === '`')) {
-                            if (ch === '"') inDQ2 = true; else inBT2 = true;
-                            j++; continue;
-                        }
-                        if (inDQ2 && ch === '"') { inDQ2 = false; j++; continue; }
-                        if (inBT2 && ch === '`') { inBT2 = false; j++; continue; }
-
-                        if (!inDQ2 && !inBT2) {
-                            if (ch === '{') { depth++; j++; continue; }
-                            if (ch === '}') {
-                                depth--;
-                                if (depth === 0) break;
-                                j++; continue;
-                            }
-                        }
-
-                        j++;
-                    }
-
-                    if (depth !== 0) {
-                        // não fechou: copia literal e segue (fail-safe)
-                        out += input[i];
-                        i++;
-                        continue;
-                    }
-
-                    let content = feraw_compile(input.slice(openIdx + 1, j));
-                    
-                    out += "function_prototype = list(0);\n";
-                    let tokens = content.split(/[\s\r\n\t]+/).filter(t => t.length > 0);
-
-                    while (tokens.length > 0) {
-                        let str = tokens.shift();
-
-                        if (str[0] === ',') {
-                            let restored = restoreSpecialChars(str.slice(1));
-                            out += `push(function_prototype, "${restored}");\n`;
-                        } else if (/^[\$\#\!\?\:\&\@\%]/.test(str)) {
-                            out += `push(function_prototype, "${str}");\n`;
-                            out += `retype(function_prototype, sub(length(function_prototype), 1), 0);\n`;
-                        } else {
-                            out += `push(function_prototype, ${str});\n`;
-                        }
-                    }
-                    out += `remove(context, function_prototype);\n`;
-                    i = j + 1;
-                    continue;
-                }
-            }
-        }
-
-        // default: copia
-        out += c;
-        i++;
-    }
     return out;
 }
 
@@ -1318,7 +1220,6 @@ function feraw_expand_all(input)
     input = feraw_expand_ifs(input);
     input = feraw_expand_whiles(input);
     input = feraw_expand_fors(input);
-    input = feraw_expand_functions(input);
     return input;
 }
 
@@ -1490,8 +1391,7 @@ if (process)
         }
         output += `    ;\n\n`;
         
-        output += `    BruterList *result = bruter_interpret(context, embedded_code, NULL);\n`;
-        output += `    bruter_free(result);\n`;
+        output += `    bruter_interpret(context, embedded_code, NULL, NULL);\n`;
         output += `    bruter_free(context);\n`;
         output += `    return EXIT_SUCCESS;\n}\n`;
         

@@ -346,8 +346,7 @@ function(feraw_eval)
 {
     BruterList* context = bruter_pop_pointer(stack);
     char* code = bruter_pop_pointer(stack);
-    BruterList* result = bruter_interpret(context, code, NULL);
-    bruter_push_pointer(stack, result, NULL, BRUTER_TYPE_LIST);
+    bruter_interpret(context, code, NULL, stack);
 }
 
 function(feraw_drop)
