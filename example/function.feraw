@@ -2,14 +2,11 @@ include("../lib/std.feraw");
 
 println("function test");
 
-test = list(0);
-push(test, "$0");
-retype(test, 0, 0);
-push(test, "println");
-retype(test, 1, 0);
-push(test, "!");
-retype(test, 2, 0);
-
-test(10, 20);
+test = function{
+    println("$0");
+    println("$1");
+    println("$2");
+};
+test(10, 20, 30);
 
 free(test);
