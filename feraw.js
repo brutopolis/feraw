@@ -6,7 +6,7 @@ let feraw_switch_counter = 0;
 
 function splitOutsideStrings(input, char = ';') 
 {
-    let parts = [];
+    const parts = [];
     let current = '';
     let inDoubleQuotes = false;
     let inSingleQuotes = false;
@@ -181,15 +181,13 @@ function splitOutsideStrings(input, char = ';')
 
 function tokenize(input) 
 {
-    let tokens = [];
+    const tokens = [];
     let i = 0;
 
     function skipWhitespace() 
     {
-        let safety = 0;
         while (i < input.length) 
         {
-
             if (/\s/.test(input[i])) 
             {
                 i++;
@@ -218,7 +216,9 @@ function tokenize(input)
     function parseString() 
     {
         let str = '';
-        i++; // skip opening "
+        const stringChar = input[i]; // Store the opening quote character
+        i++; // skip opening quote
+        
         if (!input.includes('='))
         {
             isAssignment = true; // if there is no =, we assume this is a string assignment
@@ -226,7 +226,7 @@ function tokenize(input)
 
         while (i < input.length)
         {
-            if (input[i] === '"') 
+            if (input[i] === stringChar) // Check for matching closing quote
             {
                 i++;
                 break;
@@ -256,6 +256,11 @@ function tokenize(input)
             i++;
         }
 
+        // Check if string was properly closed
+        if (i >= input.length && input[i-1] !== stringChar) {
+            console.warn(`Unterminated string literal starting with ${stringChar}`);
+        }
+
         tokens.push(',' + str);
     }
     
@@ -266,7 +271,7 @@ function tokenize(input)
 
     function parseRawToken() 
     {
-        let start = i;
+        const start = i;
         while (i < input.length && !/\s/.test(input[i]) && !"()[]{},=;".includes(input[i])) {
             i++;
         }
@@ -279,12 +284,21 @@ function tokenize(input)
         if (i >= input.length) return;
 
         if (input[i] === '"') return parseString();
+        if (input[i] === '`') return parseString(); // Treat backticks like quotes
         if (input[i] === "'") // char as int
         {
             i++; // skip opening '
+            if (i >= input.length) {
+                console.warn('Unterminated character literal');
+                return;
+            }
             let char = input[i++];
             if (char === '\\') 
             {
+                if (i >= input.length) {
+                    console.warn('Incomplete escape sequence');
+                    return;
+                }
                 char = input[i++];
                 if (char === 'n') char = '\n';
                 else if (char === 't') char = '\t';
@@ -292,7 +306,7 @@ function tokenize(input)
                 else if (char === '\'') char = '\'';
                 else if (char === '\\') char = '\\';
             }
-            i++;
+            if (i < input.length && input[i] === "'") i++; // skip closing '
             tokens.push('' + char.charCodeAt(0));
             return;
         }
@@ -321,8 +335,12 @@ function tokenize(input)
             return;
         }
 
-        let name = parseRawToken();
-        if (!name) throw new Error("parseExpr: invalid or empty token");
+        const name = parseRawToken();
+        if (!name) {
+            // Skip empty tokens instead of throwing
+            console.warn('Empty token encountered, skipping');
+            return;
+        }
 
         if (["true", "false", "stack", "context", "program"].includes(name))
         {
@@ -458,13 +476,15 @@ function tokenize(input)
 
 
     let safety = 0;
-    while (i < input.length) 
+    const maxIterations = 10000; // Prevent infinite loops
+    while (i < input.length && safety < maxIterations) 
     {
+        const startPos = i; // Track position to detect infinite loops
         skipWhitespace();
         if (i >= input.length) break;
 
-        let start = i;
-        let name = parseRawToken();
+        const start = i;
+        const name = parseRawToken();
         skipWhitespace();
 
         if (input[i] === '=') 
@@ -480,6 +500,18 @@ function tokenize(input)
             i = start;
             parseExpr();
         }
+        
+        // Safety check: ensure we're making progress
+        if (i === startPos) {
+            console.warn(`Parser stuck at position ${i}, advancing`);
+            i++; // Force advancement to prevent infinite loop
+        }
+        
+        safety++;
+    }
+    
+    if (safety >= maxIterations) {
+        console.warn('Maximum parser iterations reached, stopping to prevent infinite loop');
     }
 
     return tokens;
@@ -1034,7 +1066,7 @@ function feraw_expand_props(str) {
     let escape = false;
 
     while (i < str.length) {
-        let c = str[i];
+        const c = str[i];
 
         // Handle strings
         if (escape) { out += c; escape = false; i++; continue; }
@@ -1048,27 +1080,33 @@ function feraw_expand_props(str) {
         if (inDoubleQuotes || inBackticks) { out += c; i++; continue; }
 
         // Detecta identificador base
-        let nameMatch = /^([a-zA-Z_$][a-zA-Z0-9_$]*)/.exec(str.slice(i));
+        const nameMatch = /^([a-zA-Z_$][a-zA-Z0-9_$]*)/.exec(str.slice(i));
         if (!nameMatch) { out += str[i++]; continue; }
 
-        let base = nameMatch[1];
+        const base = nameMatch[1];
         i += base.length;
 
         // Captura props encadeados (.foo ou [expr])
-        let props = [];
+        const props = [];
         while (i < str.length) {
             if (str[i] === '.') {
                 i++;
-                let propMatch = /^([a-zA-Z_$][a-zA-Z0-9_$]*)/.exec(str.slice(i));
+                const propMatch = /^([a-zA-Z_$][a-zA-Z0-9_$]*)/.exec(str.slice(i));
                 if (!propMatch) break;
                 props.push({ key: `"${propMatch[1]}"` });
                 i += propMatch[1].length;
                 continue;
             }
             if (str[i] === '[') {
-                let end = findMatching(str, i, '[', ']');
-                if (end === -1) break;
-                let inner = str.slice(i + 1, end).trim();
+                const end = findMatching(str, i, '[', ']');
+                if (end === -1) {
+                    // Malformed bracket access, skip it gracefully
+                    console.warn('Malformed bracket access, skipping');
+                    out += str[i];
+                    i++;
+                    break;
+                }
+                const inner = str.slice(i + 1, end).trim();
                 if (/^"(.*?)"$/.test(inner)) {
                     props.push({ key: inner });
                 } else {
@@ -1084,16 +1122,16 @@ function feraw_expand_props(str) {
             // olha até ; pra ver se é atribuição
             let lookaheadEnd = str.indexOf(';', i);
             if (lookaheadEnd === -1) lookaheadEnd = str.length;
-            let rightSide = str.slice(i, lookaheadEnd);
-            let trimmedRight = rightSide.trimStart();
+            const rightSide = str.slice(i, lookaheadEnd);
+            const trimmedRight = rightSide.trimStart();
 
             if (trimmedRight.startsWith('=')) {
-                // assignment (já tá certo da msg anterior)
+                // assignment
                 let valueExpr = trimmedRight.slice(1).trim();
                 valueExpr = feraw_expand_props(valueExpr);
 
                 if (props.length === 1) {
-                    let k = props[0].key;
+                    const k = props[0].key;
                     if (k === `"type"`) {
                         out += `retype(@, "${base}", ${valueExpr})`;
                     } 
@@ -1106,7 +1144,7 @@ function feraw_expand_props(str) {
                 } 
                 else 
                 {
-                    let lastKey = props[props.length - 1].key;
+                    const lastKey = props[props.length - 1].key;
 
                     if (lastKey === `"type"`) 
                     {
@@ -1123,7 +1161,7 @@ function feraw_expand_props(str) {
                         for (let j = 0; j < props.length - 2; j++) {
                             objExpr = `get(${objExpr}, ${props[j].key})`;
                         }
-                        let prevKey = props[props.length - 2].key;
+                        const prevKey = props[props.length - 2].key;
                         out += `rename(${objExpr}, ${prevKey}, ${valueExpr})`;
 
                     } else {
@@ -1138,7 +1176,7 @@ function feraw_expand_props(str) {
                 continue;
             } else {
                 // ----------- GET MODE -----------
-                let lastKey = props[props.length - 1].key;
+                const lastKey = props[props.length - 1].key;
 
                 if (lastKey === `"name"`) 
                 {
@@ -1153,7 +1191,7 @@ function feraw_expand_props(str) {
                         {
                             objExpr = `get(${objExpr}, ${props[j].key})`;
                         }
-                        let prevKey = props[props.length - 2].key;
+                        const prevKey = props[props.length - 2].key;
                         out += `nameof(${objExpr}, ${prevKey})`;
                     }
                 }
@@ -1169,7 +1207,7 @@ function feraw_expand_props(str) {
                         for (let j = 0; j < props.length - 2; j++) {
                             objExpr = `get(${objExpr}, ${props[j].key})`;
                         }
-                        let prevKey = props[props.length - 2].key;
+                        const prevKey = props[props.length - 2].key;
                         out += `typeof(${objExpr}, ${prevKey})`;
                     }
                 } else if (lastKey === `"length"`) {
@@ -1185,7 +1223,7 @@ function feraw_expand_props(str) {
                 } else {
                     // default: get encadeado
                     let expr = base;
-                    for (let p of props) {
+                    for (const p of props) {
                         expr = `get(${expr}, ${p.key})`;
                     }
                     out += expr;
@@ -1201,7 +1239,6 @@ function feraw_expand_props(str) {
 
     return out;
 }
-
 function feraw_expand_functions(input) {
     let i = 0;
     let out = '';
@@ -1215,247 +1252,544 @@ function feraw_expand_functions(input) {
         return (c >= 48 && c <= 57) || (c >= 65 && c <= 90) || (c >= 97 && c <= 122) || ch === '_';
     }
 
-    // Função para restaurar caracteres especiais
     function restoreSpecialChars(str) {
         return str
-            .replace(/\x1A/g, '\n')   // 26 -> \n
-            .replace(/\x1C/g, '\r')   // 28 -> \r
-            .replace(/\x1D/g, '\t')   // 29 -> \t
-            .replace(/\x1E/g, ' ');   // 30 -> espaço
+            .replace(/\x1A/g, '\n')
+            .replace(/\x1C/g, '\r')
+            .replace(/\x1D/g, '\t')
+            .replace(/\x1E/g, ' ');
+    }
+
+    function extractBlock(startIdx) {
+        let j = startIdx;
+        let depth = 1;
+        let inDQ = false, inBT = false, inSQ = false, esc = false;
+        let inLineComment = false, inBlockComment = false;
+        let maxNesting = 50; // Prevent excessive nesting
+        
+        while (j < input.length && depth > 0 && depth <= maxNesting) {
+            const ch = input[j];
+            
+            if (esc) { 
+                esc = false; 
+                j++; 
+                continue; 
+            }
+            
+            if (ch === '\\' && (inDQ || inBT || inSQ)) { 
+                esc = true; 
+                j++; 
+                continue; 
+            }
+            
+            // Handle comments first to avoid confusion with strings
+            if (!inDQ && !inBT && !inSQ && !inLineComment && !inBlockComment) {
+                if (ch === '/' && j + 1 < input.length && input[j + 1] === '/') {
+                    inLineComment = true;
+                    j += 2;
+                    continue;
+                }
+                if (ch === '/' && j + 1 < input.length && input[j + 1] === '*') {
+                    inBlockComment = true;
+                    j += 2;
+                    continue;
+                }
+            }
+            
+            if (inLineComment) {
+                if (ch === '\n') inLineComment = false;
+                j++;
+                continue;
+            }
+            
+            if (inBlockComment) {
+                if (ch === '*' && j + 1 < input.length && input[j + 1] === '/') {
+                    inBlockComment = false;
+                    j += 2;
+                    continue;
+                }
+                j++;
+                continue;
+            }
+            
+            // Handle strings when not in comments
+            if (!inDQ && !inBT && !inSQ && !inLineComment && !inBlockComment) {
+                if (ch === '"') { inDQ = true; j++; continue; }
+                if (ch === '`') { inBT = true; j++; continue; }
+                if (ch === "'") { inSQ = true; j++; continue; }
+            } else {
+                if (inDQ && ch === '"') { inDQ = false; j++; continue; }
+                if (inBT && ch === '`') { inBT = false; j++; continue; }
+                if (inSQ && ch === "'") { inSQ = false; j++; continue; }
+            }
+            
+            // Only count braces outside strings and comments
+            if (!inDQ && !inBT && !inSQ && !inLineComment && !inBlockComment) {
+                if (ch === '{') { 
+                    depth++; 
+                } else if (ch === '}') {
+                    depth--;
+                    if (depth === 0) break;
+                }
+            }
+            
+            j++;
+        }
+        
+        if (depth > maxNesting) {
+            console.warn('Maximum nesting depth exceeded in function block');
+            return -1;
+        }
+        
+        return depth === 0 ? j : -1;
     }
 
     while (i < input.length) {
         const c = input[i];
 
-        // --- Strings e escapes (mesma lógica do seu estilo) ---
-        if (escape) {
-            out += c;
-            escape = false;
-            i++;
-            continue;
-        }
-        if (c === '\\') {
-            out += c;
-            escape = true;
-            i++;
-            continue;
-        }
+        // Handle string literals and escapes more robustly
+        if (escape) { out += c; escape = false; i++; continue; }
+        if (c === '\\') { out += c; escape = true; i++; continue; }
         if (!inDoubleQuotes && !inBackticks && (c === '"' || c === '`')) {
             if (c === '"') inDoubleQuotes = true; else inBackticks = true;
-            out += c;
-            i++;
-            continue;
+            out += c; i++; continue;
         }
-        if (inDoubleQuotes && c === '"') {
-            inDoubleQuotes = false;
-            out += c;
-            i++;
-            continue;
-        }
-        if (inBackticks && c === '`') {
-            inBackticks = false;
-            out += c;
-            i++;
-            continue;
-        }
-        if (inDoubleQuotes || inBackticks) {
-            out += c;
-            i++;
-            continue;
-        }
+        if (inDoubleQuotes && c === '"') { inDoubleQuotes = false; out += c; i++; continue; }
+        if (inBackticks && c === '`') { inBackticks = false; out += c; i++; continue; }
+        if (inDoubleQuotes || inBackticks) { out += c; i++; continue; }
 
-        // Detecta nome = function{ ... };
-        let assignMatch = input.slice(i).match(/^([a-zA-Z_$][a-zA-Z0-9_$]*)\s*=\s*function\{/);
+        // More robust detection: name = function{ ... };
+        const assignMatch = input.slice(i).match(/^([a-zA-Z_$][a-zA-Z0-9_$]*)\s*=\s*function\s*\{/);
         if (assignMatch) {
-            let name = assignMatch[1];
-            let assignLen = assignMatch[0].length - 1; // até o '{'
-            let openIdx = i + assignLen;
-            // varre até achar o '}' pareado, com nesting e ignorando strings/escapes
-            let j = openIdx + 1;
-            let depth = 1;
-            let inDQ2 = false;
-            let inBT2 = false;
-            let esc2 = false;
+            const name = assignMatch[1];
+            const assignStart = i + assignMatch[0].length - 1; // position of '{'
+            const blockEnd = extractBlock(assignStart + 1);
+            
+            if (blockEnd === -1) { 
+                // More graceful fallback for malformed assignment
+                console.warn(`Malformed function assignment for ${name}, skipping`);
+                out += assignMatch[0].slice(0, -1); // output everything except '{'
+                i += assignMatch[0].length - 1;
+                continue; 
+            }
+            
+            try {
+                const content = feraw_compile(input.slice(assignStart + 1, blockEnd));
+                const tokens = content.split(/[\s\r\n\t]+/).filter(Boolean);
 
-            while (j < input.length) {
-                const ch = input[j];
-                if (esc2) { esc2 = false; j++; continue; }
-                if (ch === '\\') { esc2 = true; j++; continue; }
-                if (!inDQ2 && !inBT2 && (ch === '"' || ch === '`')) {
-                    if (ch === '"') inDQ2 = true; else inBT2 = true;
-                    j++; continue;
-                }
-                if (inDQ2 && ch === '"') { inDQ2 = false; j++; continue; }
-                if (inBT2 && ch === '`') { inBT2 = false; j++; continue; }
-                if (!inDQ2 && !inBT2) {
-                    if (ch === '{') { depth++; j++; continue; }
-                    if (ch === '}') {
-                        depth--;
-                        if (depth === 0) break;
-                        j++; continue;
+                out += `${name} = list(0);\n`;
+                for (const str of tokens) {
+                    if (str[0] === ',') {
+                        const restored = restoreSpecialChars(str.slice(1));
+                        // Escape quotes properly
+                        const escaped = restored.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+                        out += `push(${name}, "${escaped}");\n`;
+                    } else {
+                        // Validate token before adding
+                        if (str.trim()) {
+                            out += `push(${name}, "${str}");\n`;
+                        }
                     }
                 }
-                j++;
-            }
-
-            if (depth !== 0) {
-                // não fechou: copia literal e segue (fail-safe)
-                out += input[i];
-                i++;
+                out += `for(i = 0; less(i, length(${name})); i = add(i, 1)) {retype(${name}, i, 0);}\n`;
+                i = blockEnd + 1;
+                // Skip optional semicolon
+                if (i < input.length && input[i] === ';') i++;
+                continue;
+            } catch (err) {
+                console.warn(`Error compiling function ${name}: ${err.message}`);
+                out += assignMatch[0];
+                i += assignMatch[0].length;
                 continue;
             }
-
-            let content = feraw_compile(input.slice(openIdx + 1, j));
-            let tokens = content.split(/[\s\r\n\t]+/).filter(t => t.length > 0);
-
-            out += `${name} = list(0);\n`;
-            while (tokens.length > 0) {
-                let str = tokens.shift();
-
-                if (str[0] === ',') {
-                    // Se começar com vírgula, transforma o conteúdo depois da vírgula em string normal
-                    let restored = restoreSpecialChars(str.slice(1));
-                    out += `push(${name}, "${restored}");\n`;
-                    // NÃO faz retype nesse caso
-                } else {
-                    out += `push(${name}, "${str}");\n`;
-                }
-            }
-
-            out += `for(i = 0; less(i, length(${name})); i = add(i, 1)) {retype(${name}, i, 0);}\n`;
-            // pula até depois do }
-            i = j + 1;
-            // pula o ; se existir
-            if (input[i] === ';') i++;
-            continue;
         }
 
-        // --- Detecta EXACT "function{" (sem espaços) e não parte de identificador maior ---
-        if (i + 9 <= input.length) {
-            const f = input[i]     === 'f' &&
-                      input[i + 1] === 'u' &&
-                      input[i + 2] === 'n' &&
-                      input[i + 3] === 'c' &&
-                      input[i + 4] === 't' &&
-                      input[i + 5] === 'i' &&
-                      input[i + 6] === 'o' &&
-                      input[i + 7] === 'n' &&
-                      input[i + 8] === '{';
+        // More robust detection: function{ ... } (not part of identifier)
+        if (input.slice(i, i + 9) === 'function{' && (i === 0 || !isIdentChar(input[i - 1]))) {
+            const openIdx = i + 8;
+            const blockEnd = extractBlock(openIdx + 1);
+            
+            if (blockEnd === -1) { 
+                console.warn('Malformed standalone function block, skipping');
+                out += 'function';
+                i += 8;
+                continue; 
+            }
+            
+            try {
+                const content = feraw_compile(input.slice(openIdx + 1, blockEnd));
+                const tokens = content.split(/[\s\r\n\t]+/).filter(Boolean);
 
-            if (f) {
-                // evita pegar "myfunction{...}"
-                const prev = i > 0 ? input[i - 1] : '';
-                if (!isIdentChar(prev)) {
-                    // índice do '{'
-                    const openIdx = i + 8;
-                    // varre até achar o '}' pareado, com nesting e ignorando strings/escapes
-                    let j = openIdx + 1;
-                    let depth = 1;
-                    let inDQ2 = false;
-                    let inBT2 = false;
-                    let esc2 = false;
-
-                    while (j < input.length) {
-                        const ch = input[j];
-
-                        if (esc2) { esc2 = false; j++; continue; }
-                        if (ch === '\\') { esc2 = true; j++; continue; }
-
-                        if (!inDQ2 && !inBT2 && (ch === '"' || ch === '`')) {
-                            if (ch === '"') inDQ2 = true; else inBT2 = true;
-                            j++; continue;
-                        }
-                        if (inDQ2 && ch === '"') { inDQ2 = false; j++; continue; }
-                        if (inBT2 && ch === '`') { inBT2 = false; j++; continue; }
-
-                        if (!inDQ2 && !inBT2) {
-                            if (ch === '{') { depth++; j++; continue; }
-                            if (ch === '}') {
-                                depth--;
-                                if (depth === 0) break;
-                                j++; continue;
-                            }
-                        }
-
-                        j++;
+                out += "function_prototype = list(0);\n";
+                for (const str of tokens) {
+                    if (str[0] === ',') {
+                        const restored = restoreSpecialChars(str.slice(1));
+                        const escaped = restored.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+                        out += `push(function_prototype, "${escaped}");\n`;
+                    } else if (/^[\$\#\!\?\:\&\@\%]/.test(str)) {
+                        out += `push(function_prototype, "${str}");\n`;
+                    } else if (str.trim()) {
+                        out += `push(function_prototype, ${str});\n`;
                     }
-
-                    if (depth !== 0) {
-                        // não fechou: copia literal e segue (fail-safe)
-                        out += input[i];
-                        i++;
-                        continue;
-                    }
-
-                    let content = feraw_compile(input.slice(openIdx + 1, j));
-                    
-                    out += "function_prototype = list(0);\n";
-                    let tokens = content.split(/[\s\r\n\t]+/).filter(t => t.length > 0);
-
-                    while (tokens.length > 0) {
-                        let str = tokens.shift();
-
-                        if (str[0] === ',') {
-                            let restored = restoreSpecialChars(str.slice(1));
-                            out += `push(function_prototype, "${restored}");\n`;
-                        } else if (/^[\$\#\!\?\:\&\@\%]/.test(str)) {
-                            out += `push(function_prototype, "${str}");\n`;
-                        } else {
-                            out += `push(function_prototype, ${str});\n`;
-                        }
-                    }
-                    out += `remove(context, function_prototype);\n`;
-                    i = j + 1;
-                    continue;
                 }
+                out += `remove(context, function_prototype);\n`;
+                i = blockEnd + 1;
+                continue;
+            } catch (err) {
+                console.warn(`Error compiling standalone function: ${err.message}`);
+                out += 'function{';
+                i += 9;
+                continue;
             }
         }
 
-        // default: copia
+        // Default: copy character
         out += c;
         i++;
     }
     return out;
 }
 
-function findMatching(str, start, open, close) {
+function parseArgs(argStr) {
+    const args = [];
+    let cur = "";
     let depth = 0;
-    for (let i = start; i < str.length; i++) {
-        if (str[i] === open) depth++;
-        else if (str[i] === close) {
-            depth--;
-            if (depth === 0) return i;
+    let inSingle = false, inDouble = false, inBacktick = false, escape = false;
+    const maxDepth = 50; // Prevent stack overflow
+
+    for (let i = 0; i < argStr.length; i++) {
+        const c = argStr[i];
+
+        if (escape) {
+            cur += c;
+            escape = false;
+            continue;
         }
+        if (c === "\\" && (inSingle || inDouble || inBacktick)) {
+            cur += c;
+            escape = true;
+            continue;
+        }
+        if (c === "'" && !inDouble && !inBacktick) {
+            inSingle = !inSingle;
+            cur += c;
+            continue;
+        }
+        if (c === '"' && !inSingle && !inBacktick) {
+            inDouble = !inDouble;
+            cur += c;
+            continue;
+        }
+        if (c === "`" && !inSingle && !inDouble) {
+            inBacktick = !inBacktick;
+            cur += c;
+            continue;
+        }
+
+        if (!inSingle && !inDouble && !inBacktick) {
+            if (c === "(" || c === "[" || c === "{") {
+                depth++;
+                if (depth > maxDepth) {
+                    console.warn('Maximum nesting depth reached in parseArgs');
+                    break;
+                }
+            }
+            if (c === ")" || c === "]" || c === "}") depth--;
+            if (c === "," && depth === 0) {
+                if (cur.trim() !== "") args.push(cur.trim());
+                cur = "";
+                continue;
+            }
+        }
+        cur += c;
     }
-    return -1;
+    if (cur.trim() !== "") args.push(cur.trim());
+    return args;
 }
 
-function feraw_expand_all(input)
+function feraw_expand_macros(src) {
+    const macros = {};
+
+    // Helper function to extract macro body with proper brace matching
+    function extractMacroBody(src, startIndex) {
+        let i = startIndex;
+        let depth = 1;
+        let inString = false;
+        let stringChar = '';
+        let escape = false;
+        let inLineComment = false;
+        let inBlockComment = false;
+        
+        while (i < src.length && depth > 0) {
+            const char = src[i];
+            
+            if (escape) {
+                escape = false;
+                i++;
+                continue;
+            }
+            
+            if (char === '\\' && inString) {
+                escape = true;
+                i++;
+                continue;
+            }
+            
+            // Handle comments
+            if (!inString && !inLineComment && !inBlockComment) {
+                if (char === '/' && i + 1 < src.length && src[i + 1] === '/') {
+                    inLineComment = true;
+                    i += 2;
+                    continue;
+                }
+                if (char === '/' && i + 1 < src.length && src[i + 1] === '*') {
+                    inBlockComment = true;
+                    i += 2;
+                    continue;
+                }
+            }
+            
+            if (inLineComment) {
+                if (char === '\n') inLineComment = false;
+                i++;
+                continue;
+            }
+            
+            if (inBlockComment) {
+                if (char === '*' && i + 1 < src.length && src[i + 1] === '/') {
+                    inBlockComment = false;
+                    i += 2;
+                    continue;
+                }
+                i++;
+                continue;
+            }
+            
+            // Handle strings
+            if (!inString && !inLineComment && !inBlockComment && (char === '"' || char === "'" || char === '`')) {
+                inString = true;
+                stringChar = char;
+            } else if (inString && char === stringChar) {
+                inString = false;
+                stringChar = '';
+            }
+            
+            // Only count braces outside strings and comments
+            if (!inString && !inLineComment && !inBlockComment) {
+                if (char === '{') {
+                    depth++;
+                } else if (char === '}') {
+                    depth--;
+                }
+            }
+            
+            i++;
+        }
+        
+        return depth === 0 ? i - 1 : -1; // Return index of closing brace
+    }
+
+    // Improved macro capture with proper brace matching
+    let i = 0;
+    while (i < src.length) {
+        const macroMatch = src.slice(i).match(/^(\w+)\s*=\s*macro\s*\{/);
+        if (macroMatch) {
+            const name = macroMatch[1];
+            const macroStart = i + macroMatch[0].length - 1; // position of '{'
+            const macroEnd = extractMacroBody(src, macroStart + 1);
+            
+            if (macroEnd === -1) {
+                console.warn(`Malformed macro ${name}, skipping`);
+                i += macroMatch[0].length;
+                continue;
+            }
+            
+            const body = src.slice(macroStart + 1, macroEnd).trim();
+            macros[name] = body;
+            
+            // Remove macro declaration from source
+            const beforeMacro = src.slice(0, i);
+            const afterMacro = src.slice(macroEnd + 1);
+            // Skip optional semicolon
+            const afterMatch = afterMacro.match(/^\s*;?\s*/);
+            src = beforeMacro + afterMacro.slice(afterMatch ? afterMatch[0].length : 0);
+            continue;
+        }
+        i++;
+    }
+
+    // Function to expand macros with safer recursion detection
+    function expandMacroSafely(content, expansionStack = []) {
+        let result = content;
+        let changed = true;
+        let passes = 0;
+        const maxPasses = 10;
+        
+        while (changed && passes < maxPasses) {
+            changed = false;
+            passes++;
+            
+            for (const name in macros) {
+                // Check for circular dependency - completely skip if found
+                if (expansionStack.includes(name)) {
+                    continue; // Skip this macro entirely
+                }
+                
+                // Function macro: nome(...)
+                let pos = 0;
+                while (pos < result.length) {
+                    const nameRegex = new RegExp("\\b" + name + "\\s*\\(", "g");
+                    nameRegex.lastIndex = pos;
+                    const match = nameRegex.exec(result);
+                    
+                    if (!match) break;
+                    
+                    const callStart = match.index;
+                    const parenStart = match.index + match[0].length - 1; // position of '('
+                    
+                    // Find matching closing parenthesis
+                    let parenEnd = -1;
+                    let depth = 1;
+                    let inString = false;
+                    let stringChar = '';
+                    let escape = false;
+                    
+                    for (let j = parenStart + 1; j < result.length && depth > 0; j++) {
+                        const char = result[j];
+                        
+                        if (escape) {
+                            escape = false;
+                            continue;
+                        }
+                        
+                        if (char === '\\' && inString) {
+                            escape = true;
+                            continue;
+                        }
+                        
+                        if (!inString && (char === '"' || char === "'" || char === '`')) {
+                            inString = true;
+                            stringChar = char;
+                        } else if (inString && char === stringChar) {
+                            inString = false;
+                            stringChar = '';
+                        }
+                        
+                        if (!inString) {
+                            if (char === '(') depth++;
+                            else if (char === ')') {
+                                depth--;
+                                if (depth === 0) {
+                                    parenEnd = j;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                    
+                    if (parenEnd === -1) {
+                        console.warn(`Malformed macro call ${name}, skipping`);
+                        pos = match.index + match[0].length;
+                        continue;
+                    }
+                    
+                    const argsStr = result.slice(parenStart + 1, parenEnd);
+                    const args = parseArgs(argsStr);
+                    let expanded = macros[name];
+
+                    // substituições $n
+                    args.forEach((arg, i) => {
+                        const re = new RegExp("\\$" + i + "(?!\\d)", "g");
+                        expanded = expanded.replace(re, arg);
+                    });
+
+                    // extras
+                    expanded = expanded.replace(/\$count\b/g, args.length.toString());
+                    expanded = expanded.replace(/\$all\b/g, args.join(", "));
+
+                    // Recursively expand any nested macros in the expanded content
+                    expanded = expandMacroSafely(expanded, [...expansionStack, name]);
+
+                    // Replace the macro call with expanded content
+                    result = result.slice(0, callStart) + expanded + result.slice(parenEnd + 1);
+                    changed = true;
+                    pos = callStart + expanded.length;
+                }
+
+                // Value macro: nome (not followed by '(')
+                const valRegex = new RegExp("\\b" + name + "\\b(?!\\s*\\()", "g");
+                if (valRegex.test(result)) {
+                    result = result.replace(valRegex, () => {
+                        const expanded = expandMacroSafely(macros[name], [...expansionStack, name]);
+                        changed = true;
+                        return expanded;
+                    });
+                }
+            }
+        }
+        
+        if (passes >= maxPasses) {
+            console.warn('Maximum macro expansion passes reached');
+        }
+        
+        return result;
+    }
+
+    // Start the expansion process
+    return expandMacroSafely(src);
+}
+
+function feraw_expand_all(input, depth = 0)
 {
+    // Prevent infinite recursion
+    if (depth > 10) {
+        console.warn('Maximum expansion depth reached, stopping to prevent infinite recursion');
+        return input;
+    }
+    
+    let previousInput = input;
+    input = feraw_expand_macros(input);
     input = feraw_expand_functions(input);
     input = feraw_expand_props(input);
     input = feraw_expand_ifs(input);
     input = feraw_expand_whiles(input);
     input = feraw_expand_fors(input);
-    return input;
+    
+    // If nothing changed, we're done
+    if (input === previousInput) {
+        return input;
+    }
+    
+    // Otherwise, try one more pass (but limit depth)
+    return feraw_expand_all(input, depth + 1);
 }
 
 function feraw_compile(input) 
 {
-    input = feraw_expand_all(input);
-    let commands = splitOutsideStrings(input, ';');
-    let result = [];
-    for (let command of commands) 
-    {
-        if (command) 
+    try {
+        input = feraw_expand_all(input);
+        const commands = splitOutsideStrings(input, ';');
+        const result = [];
+        for (const command of commands) 
         {
-            result.push(tokenize(command));
+            if (command && command.trim()) 
+            {
+                try {
+                    result.push(tokenize(command));
+                } catch (err) {
+                    console.warn(`Error tokenizing command "${command}": ${err.message}`);
+                    // Skip malformed commands
+                }
+            }
         }
-    }
 
-    let result_string = feraw_labelparser(result);
-    result_string = result_string.replaceAll("\n\n", "\n"); // Remove double newlines
-    return result_string;
+        let result_string = feraw_labelparser(result);
+        result_string = result_string.replaceAll("\n\n", "\n"); // Remove double newlines
+        return result_string;
+    } catch (err) {
+        console.error(`Compilation error: ${err.message}`);
+        return `/* Compilation failed: ${err.message} */`;
+    }
 }
 
 // only if under node.js

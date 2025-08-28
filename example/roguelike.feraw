@@ -1,13 +1,13 @@
 include("../lib/std.feraw");
 
-fill_buffer = function{
+fill_buffer = macro{
     for (i = 0; less(i, mul(get($0, "x"), get($0, "y"))); i = add(i, 1)) 
     {
         $0["buffer"][i] = $1;
     }
 };
 
-print_map = function{
+print_map = macro{
     for (i = 0; less(i, $0["y"]); i = add(i, 1))
     {
         for (j = 0; less(j, $0["x"]); j = add(j, 1)) 
@@ -18,24 +18,31 @@ print_map = function{
     };
 };
 
-new_creature = function{
+new_creature = macro{
+    c = list(0);
     c["x"] = $1;
     c["y"] = $2;
     c["hp"] = $3;
-    c["name"] = $4;
 
+    if (greater($count, 4)) 
+    {
+        c["name"] = $4;
+    }
+    else 
+    {
+        c["name"] = "unamed";
+    };
     push($0, c);
     c;
 };
 
-println
 
 start:
     map = list(0);
     map.x = 64;
     map.y = 64;
     creatures = list(0);
-    c = list(0);
+
     player = new_creature(creatures, 4, 4, 100, "player");
 
     println(player["name"]);

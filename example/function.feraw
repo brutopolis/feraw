@@ -1,12 +1,11 @@
 include("../lib/std.feraw");
 
 println("function test");
-
+PI = macro{3.141592653589793};
 test = function{
-    println("$0");
-    println("$1");
-    println("$2");
+    println($0);
+    println($1);
+    println($2);
 };
-test(10, 20, 30);
-
+test(PI, 20, 30);
 free(test);
