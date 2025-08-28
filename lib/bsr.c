@@ -704,7 +704,7 @@ void __bsr_at_exit(void)
 function(init_bsr)
 {
     BruterList *context = bruter_pop_pointer(stack);
-    bsr_windows = bruter_new(8, true, false);
+    bsr_windows = bruter_new(BRUTER_DEFAULT_SIZE, true, false);
     
     // add bsr_windows to context
     bruter_push_pointer(context, bsr_windows, "bsr_windows", BRUTER_TYPE_LIST);

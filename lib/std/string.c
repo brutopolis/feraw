@@ -131,7 +131,7 @@ function(feraw_strsplit)
     char* original_str = (char*)bruter_pop_pointer(stack);
     char* delimiters = (char*)bruter_pop_pointer(stack);
 
-    BruterList* result = bruter_new(0, false, true);
+    BruterList* result = bruter_new(BRUTER_DEFAULT_SIZE, false, true);
     for (char* token = strtok(original_str, delimiters); token != NULL; token = strtok(NULL, delimiters))
     {
         bruter_push_pointer(result, strdup(token), NULL, BRUTER_TYPE_BUFFER);

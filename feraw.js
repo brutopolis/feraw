@@ -1915,7 +1915,7 @@ if (process)
         }
         
         output += `int main(int argc, char *argv[])\n{\n`;
-        output += `    BruterList *context = bruter_new(8, true, true);\n\n`;
+        output += `    BruterList *context = bruter_new(BRUTER_DEFAULT_SIZE, true, true);\n\n`;
         
         if (functions.length > 0) {
             output += `    /* BEGIN function registrations */\n`;

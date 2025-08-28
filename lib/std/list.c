@@ -8,7 +8,7 @@
 function(feraw_list)
 {
     BruterInt size = bruter_pop_int(stack);
-    BruterList *list = bruter_new(8, true, true);
+    BruterList *list = bruter_new(BRUTER_DEFAULT_SIZE, true, true);
     for (BruterInt i = 0; i < size; i++)
     {
         BruterMeta value = bruter_pop_meta(stack);
@@ -244,14 +244,6 @@ function(feraw_copy)
 {
     BruterList* list = bruter_pop_pointer(stack);
     BruterList* new_list = bruter_copy(list);
-}
-
-function(feraw_concat)
-{
-    BruterList* list1 = bruter_pop_pointer(stack);
-    BruterList* list2 = bruter_pop_pointer(stack);
-    bruter_concat(list1, list2);
-    bruter_push_pointer(stack, list1, NULL, BRUTER_TYPE_LIST);
 }
 
 function(feraw_swap)

@@ -931,7 +931,7 @@ VrStereoConfig vr_stereo_config_constructor(BruterList *vrStereoConfig)
 // need revision!!!!!!
 BruterList *vr_stereo_config_to_list(VrStereoConfig config)
 {
-    BruterList *list = bruter_new(8, true, true);
+    BruterList *list = bruter_new(BRUTER_DEFAULT_SIZE, true, true);
 
     BruterList *projection_list = bruter_new(2, true, true);
     for (int i = 0; i < 2; i++)
