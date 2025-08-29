@@ -232,26 +232,7 @@ function tokenize(input)
                 break;
             }
 
-            if (input[i] === '\n')
-            {
-                str += String.fromCharCode(26); // newline
-            }
-            else if (input[i] === '\r')
-            {
-                str += String.fromCharCode(28); // carriage return
-            }
-            else if (input[i] === '\t')
-            {
-                str += String.fromCharCode(29); // tab
-            }
-            else if (input[i] === ' ')
-            {
-                str += String.fromCharCode(30); // space
-            }
-            else 
-            {
-                str += input[i];
-            }
+            str += input[i];
 
             i++;
         }
@@ -520,12 +501,12 @@ function tokenize(input)
 function feraw_labelparser(original_input) 
 {
     // we need this to know exactly where the labels were positioned originally
-    let unreversed_input = original_input.map(tokens => tokens.join(' ')).join(' ');
+    let unreversed_input = original_input.map(tokens => tokens.join('\t')).join('\t');
     
-    // split by any kind of whitespace
-    let splited = unreversed_input.toString().split(/\s+/);
+    // split by tab only
+    let splited = unreversed_input.toString().split(/\t+/);
     
-    let input = original_input.map(tokens => tokens.reverse().join(' '))
+    let input = original_input.map(tokens => tokens.reverse().join('\t'))
         .join('\n').toString();
 
     // remove empty strings
@@ -1252,14 +1233,6 @@ function feraw_expand_functions(input) {
         return (c >= 48 && c <= 57) || (c >= 65 && c <= 90) || (c >= 97 && c <= 122) || ch === '_';
     }
 
-    function restoreSpecialChars(str) {
-        return str
-            .replace(/\x1A/g, '\n')
-            .replace(/\x1C/g, '\r')
-            .replace(/\x1D/g, '\t')
-            .replace(/\x1E/g, ' ');
-    }
-
     function extractBlock(startIdx) {
         let j = startIdx;
         let depth = 1;
@@ -1375,14 +1348,13 @@ function feraw_expand_functions(input) {
             
             try {
                 const content = feraw_compile(input.slice(assignStart + 1, blockEnd));
-                const tokens = content.split(/[\s\r\n\t]+/).filter(Boolean);
+                const tokens = content.split(/[\t\n]+/).filter(Boolean);
 
                 out += `${name} = list(0);\n`;
                 for (const str of tokens) {
                     if (str[0] === ',') {
-                        const restored = restoreSpecialChars(str.slice(1));
                         // Escape quotes properly
-                        const escaped = restored.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+                        const escaped = (str.slice(1)).replace(/\\/g, '\\\\').replace(/"/g, '\\"');
                         out += `push(${name}, "${escaped}");\n`;
                     } else {
                         // Validate token before adding
@@ -1418,13 +1390,12 @@ function feraw_expand_functions(input) {
             
             try {
                 const content = feraw_compile(input.slice(openIdx + 1, blockEnd));
-                const tokens = content.split(/[\s\r\n\t]+/).filter(Boolean);
+                const tokens = content.split(/[\t\n]+/).filter(Boolean);
 
                 out += "function_prototype = list(0);\n";
                 for (const str of tokens) {
                     if (str[0] === ',') {
-                        const restored = restoreSpecialChars(str.slice(1));
-                        const escaped = restored.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+                        const escaped = (str.slice(1)).replace(/\\/g, '\\\\').replace(/"/g, '\\"');
                         out += `push(function_prototype, "${escaped}");\n`;
                     } else if (/^[\$\#\!\?\:\&\@\%]/.test(str)) {
                         out += `push(function_prototype, "${str}");\n`;
@@ -1804,7 +1775,7 @@ if (process)
         const content = [];
         try {
             const data = fs.readFileSync(filePath, 'utf8');
-            const lines = data.split(/\r?\n/);
+            const lines = data.split(/\n/);
             
             for (const line of lines) {
                 const match = line.match(/^\s*include\(\"([^\"]+)\"\);\s*$/);
@@ -1930,7 +1901,7 @@ if (process)
         // then prepare it for embedding
         let joinedCode = otherLines.join('\n');
         joinedCode = feraw_compile(joinedCode);
-        otherLines = joinedCode.split(/\r?\n/).filter(line => line.trim());
+        otherLines = joinedCode.split(/\n/).filter(line => line.trim());
 
         output += `    const char *embedded_code =\n`;
         for (const line of otherLines) {

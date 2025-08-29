@@ -8,6 +8,7 @@ cc {
     include("./std/types.c");
     include("./std/os.c");
     include("./std/time.c");
+    include("./std/std.c");
 };
 
 /// just the types definition

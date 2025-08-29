@@ -8,7 +8,7 @@ i = -1;
 
 while(less(i, sub(number, 1)))
 {
-    i = add(i, 1)
+    i = add(i, 1);
     println(n1);
     nextTerm = add(n1, n2);
     n1 = n2;

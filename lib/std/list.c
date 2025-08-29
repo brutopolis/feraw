@@ -267,7 +267,7 @@ function(feraw_reverse)
     bruter_reverse(list);
 }
 
-function(feraw_pointer_to)
+function(feraw_point)
 {
     BruterList* list = bruter_pop_pointer(stack);
     BruterMeta value = bruter_pop_meta(stack);
@@ -311,15 +311,6 @@ function(feraw_dup)
     bruter_push_meta(stack, value); // Duplicate it
 }
 
-function(feraw_clear)
-{
-    BruterList *list = bruter_pop_pointer(stack);
-    while (list->size > 0)
-    {
-        bruter_pop_int(list); // Pop each item from the list
-    }
-}
-
 function(feraw_free)
 {
     BruterMeta value = bruter_pop_meta(stack);
@@ -332,26 +323,6 @@ function(feraw_free)
         bruter_free((BruterList*)value.value.p); // Free the list if it was allocated
     }
     // No action needed for other types, as they are not dynamically allocated
-}
-
-function(feraw_eval)
-{
-    BruterList* context = bruter_pop_pointer(stack);
-    char* code = bruter_pop_pointer(stack);
-    bruter_interpret(context, code, NULL, stack);
-}
-
-function(feraw_drop)
-{
-    bruter_pop_pointer(stack);
-}
-
-function(feraw_drop_all)
-{
-    while(stack->size > 0)
-    {
-        bruter_pop_pointer(stack);
-    }
 }
 
 function(feraw_nameof)
