@@ -497,7 +497,6 @@ function tokenize(input)
 
     return tokens;
 }
-
 function feraw_labelparser(original_input) 
 {
     // we need this to know exactly where the labels were positioned originally
@@ -576,11 +575,16 @@ function feraw_labelparser(original_input)
             continue;
         }
 
-        // Remove label: outside strings/comments
+        // Remove label: outside strings/comments, only if not part of a larger word
         let labelMatch = input.slice(i).match(/^(\w+):/);
         if (labelMatch) {
-            i += labelMatch[0].length;
-            continue;
+            // Only remove if not preceded or followed by a word character
+            let before = i > 0 ? input[i - 1] : '';
+            let after = input[i + labelMatch[0].length] || '';
+            if (!/\w/.test(before) && !/\w/.test(after)) {
+                i += labelMatch[0].length;
+                continue;
+            }
         }
 
         out += c;
@@ -588,7 +592,7 @@ function feraw_labelparser(original_input)
     }
     input = out;
 
-    // Replace label references, but skip inside strings/comments
+    // Replace label references, but skip inside strings/comments and only whole words
     for (let label of labels) 
     {
         let out2 = '';
@@ -599,7 +603,8 @@ function feraw_labelparser(original_input)
         let inLineComment = false;
         let inBlockComment = false;
         let escape = false;
-        let labelRegex = new RegExp(`\\b${label[0]}\\b`, 'g');
+        const labelName = label[0];
+        const labelValue = label[1];
 
         while (i2 < input.length) {
             let c = input[i2];
@@ -642,11 +647,14 @@ function feraw_labelparser(original_input)
                 continue;
             }
 
-            // Try to match label at this position
-            let match = input.slice(i2).match(new RegExp(`^\\b${label[0]}\\b`));
-            if (match) {
-                out2 += `${label[1]}`;
-                i2 += label[0].length;
+            // Only replace if it's a whole word (not part of a larger word)
+            if (
+                input.slice(i2, i2 + labelName.length) === labelName &&
+                (i2 === 0 || !/\w/.test(input[i2 - 1])) &&
+                (i2 + labelName.length === input.length || !/\w/.test(input[i2 + labelName.length]))
+            ) {
+                out2 += `${labelValue}`;
+                i2 += labelName.length;
                 continue;
             }
 
@@ -709,7 +717,6 @@ function findMatching(input, start, openChar, closeChar)
     }
     return -1;
 }
-
 function feraw_expand_ifs(input) {
     let i = 0;
     let out = '';
@@ -784,62 +791,15 @@ function feraw_expand_ifs(input) {
             i = ifBlockEnd + 1;
             while (/\s/.test(input[i])) i++;
 
-            let chain = [{ cond, block: ifBlock }];
-            let elseBlock = '';
+            ifBlock = feraw_expand_all(ifBlock);
 
-            while (/^else\b/.test(input.slice(i))) {
-                i += 4;
-                while (/\s/.test(input[i])) i++;
-                if (/^if\s*\(/.test(input.slice(i))) {
-                    i += 2;
-                    while (/\s/.test(input[i])) i++;
-                    if (input[i] !== '(') break;
-                    let condStart = i;
-                    let condEnd = findMatching(input, i, '(', ')');
-                    let cond = input.slice(condStart + 1, condEnd);
-                    i = condEnd + 1;
-                    while (/\s/.test(input[i])) i++;
-                    if (input[i] !== '{') break;
-                    let blockEnd = findMatching(input, i, '{', '}');
-                    let block = input.slice(i + 1, blockEnd);
-                    i = blockEnd + 1;
-                    chain.push({ cond, block });
-                } else if (input[i] === '{') {
-                    let elseEnd = findMatching(input, i, '{', '}');
-                    elseBlock = input.slice(i + 1, elseEnd);
-                    i = elseEnd + 1;
-                    break;
-                } else {
-                    break;
-                }
-                while (/\s/.test(input[i])) i++;
-            }
-
-            for (let j = 0; j < chain.length; j++) {
-                chain[j].block = feraw_expand_all(chain[j].block);
-            }
-            if (elseBlock) {
-                elseBlock = feraw_expand_all(elseBlock);
-            }
-
-            let trueLabels = chain.map((_, idx) => `if${id}_true_${idx}`);
+            let trueLabel = `if${id}_true`;
             let afterLabel = `if${id}_after`;
 
-            out += `?(${chain[0].cond}, ${trueLabels[0]});\n`;
-            if (elseBlock) {
-                out += elseBlock + '\n';
-                out += `?(1, ${afterLabel});\n`;
-            } else {
-                out += `?(1, ${afterLabel});\n`;
-            }
-            for (let j = 0; j < chain.length; j++) {
-                out += `${trueLabels[j]}:\n`;
-                out += chain[j].block + '\n';
-                if (j + 1 < chain.length) {
-                    out += `?(${chain[j + 1].cond}, ${trueLabels[j + 1]});\n`;
-                    out += `?(1, ${afterLabel});\n`;
-                }
-            }
+            out += `?(${cond}, ${trueLabel});\n`;
+            out += `?(1, ${afterLabel});\n`;
+            out += `${trueLabel}:\n`;
+            out += ifBlock + '\n';
             out += `${afterLabel}:\n`;
             continue;
         }
@@ -1713,7 +1673,7 @@ function feraw_expand_macros(src) {
 function feraw_expand_all(input, depth = 0)
 {
     // Prevent infinite recursion
-    if (depth > 10) {
+    if (depth > 128) {
         console.warn('Maximum expansion depth reached, stopping to prevent infinite recursion');
         return input;
     }
