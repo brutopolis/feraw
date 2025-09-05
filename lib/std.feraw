@@ -20,5 +20,3 @@ List = 4;
 Function = 5;
 null = 0;
 retype(@, "null", Null);
-
-split_tokens = "\n \t\r";

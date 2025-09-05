@@ -126,3 +126,22 @@ function(feraw_ls)
         }
     }
 }
+
+function(feraw_scan)
+{
+    char buffer[1024];
+    if (fgets(buffer, sizeof(buffer), stdin) != NULL)
+    {
+        // Remove newline character if present
+        size_t len = strlen(buffer);
+        if (len > 0 && buffer[len - 1] == '\n')
+        {
+            buffer[len - 1] = '\0';
+        }
+        bruter_push_pointer(stack, strdup(buffer), NULL, BRUTER_TYPE_BUFFER);
+    }
+    else
+    {
+        bruter_push_pointer(stack, NULL, NULL, BRUTER_TYPE_BUFFER);
+    }
+}

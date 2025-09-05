@@ -1,0 +1,12 @@
+include("../lib/std.feraw");
+
+while (true) {
+    print("feraw> ");
+    line = scan();
+    if (equals(strcmp(line, "exit"), 0))
+    {
+        ?(1, outside);
+    };
+    eval(@, line);
+};
+outside:

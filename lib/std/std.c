@@ -20,7 +20,7 @@ function(feraw_eval)
             code = (char*)value.value.p;
             break;
         default:
-            fprintf(stderr, "ERROR: cannot eval, expected buffer or any type, got %d\n", value.type);
+            fprintf(stderr, "ERROR: cannot eval, expected buffer or list type, but got %d\n", value.type);
             exit(EXIT_FAILURE);
     }
     bruter_interpret(context, code, splited, stack);

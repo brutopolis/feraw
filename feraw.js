@@ -242,7 +242,8 @@ function tokenize(input)
             console.warn(`Unterminated string literal starting with ${stringChar}`);
         }
 
-        tokens.push(',' + str);
+        // replace spaces in strings by \s as requested
+        tokens.push(',' + str.replace(/ /g, '\\s'));
     }
     
     function parseBlock(depth = 0)
@@ -500,12 +501,12 @@ function tokenize(input)
 function feraw_labelparser(original_input) 
 {
     // we need this to know exactly where the labels were positioned originally
-    let unreversed_input = original_input.map(tokens => tokens.join('\t')).join('\t');
+    let unreversed_input = original_input.map(tokens => tokens.join(' ')).join(' ');
     
     // split by tab only
-    let splited = unreversed_input.toString().split(/\t+/);
+    let splited = unreversed_input.toString().split(/\s+/);
     
-    let input = original_input.map(tokens => tokens.reverse().join('\t'))
+    let input = original_input.map(tokens => tokens.reverse().join(' '))
         .join('\n').toString();
 
     // remove empty strings
@@ -1313,13 +1314,15 @@ function feraw_expand_functions(input) {
                 out += `${name} = list(0);\n`;
                 for (const str of tokens) {
                     if (str[0] === ',') {
-                        // Escape quotes properly
+                        // Escape quotes and backslashes, then replace spaces
                         const escaped = (str.slice(1)).replace(/\\/g, '\\\\').replace(/"/g, '\\"');
-                        out += `push(${name}, "${escaped}");\n`;
+                        const spaced = replaceSpacesForStrings(escaped);
+                        out += `push(${name}, "${spaced}");\n`;
                     } else {
-                        // Validate token before adding
+                        // Validate token before adding - if we're adding a literal string, replace spaces
                         if (str.trim()) {
-                            out += `push(${name}, "${str}");\n`;
+                            const spaced = replaceSpacesForStrings(str);
+                            out += `push(${name}, "${spaced}");\n`;
                         }
                     }
                 }
@@ -1356,9 +1359,11 @@ function feraw_expand_functions(input) {
                 for (const str of tokens) {
                     if (str[0] === ',') {
                         const escaped = (str.slice(1)).replace(/\\/g, '\\\\').replace(/"/g, '\\"');
-                        out += `push(function_prototype, "${escaped}");\n`;
+                        const spaced = replaceSpacesForStrings(escaped);
+                        out += `push(function_prototype, "${spaced}");\n`;
                     } else if (/^[\$\#\!\?\:\&\@\%]/.test(str)) {
-                        out += `push(function_prototype, "${str}");\n`;
+                        const spaced = replaceSpacesForStrings(str);
+                        out += `push(function_prototype, "${spaced}");\n`;
                     } else if (str.trim()) {
                         out += `push(function_prototype, ${str});\n`;
                     }
@@ -1379,6 +1384,11 @@ function feraw_expand_functions(input) {
         i++;
     }
     return out;
+}
+
+// add helper to consistently replace spaces when emitting strings
+function replaceSpacesForStrings(s) {
+    return s.replace(/ /g, '\\s');
 }
 
 function parseArgs(argStr) {
