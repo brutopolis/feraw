@@ -8,20 +8,8 @@ function(feraw_drop)
 function(feraw_eval)
 {
     BruterList* context = bruter_pop_pointer(stack);
-    BruterMeta value = bruter_pop_meta(stack);
-    char* code = NULL;
-    BruterList* splited = NULL;
-    switch (value.type)
-    {
-        case BRUTER_TYPE_LIST:
-            splited = (BruterList*)value.value.p;
-            break;
-        case BRUTER_TYPE_BUFFER:
-            code = (char*)value.value.p;
-            break;
-        default:
-            fprintf(stderr, "ERROR: cannot eval, expected buffer or list type, but got %d\n", value.type);
-            exit(EXIT_FAILURE);
-    }
-    bruter_interpret(context, code, splited, stack);
+    char* code = (char*)bruter_pop_pointer(stack);
+    BruterList* splited = bruter_pop_pointer(stack);
+    BruterList* prog_stack = bruter_pop_pointer(stack);
+    bruter_interpret(context, code, splited, prog_stack);
 }

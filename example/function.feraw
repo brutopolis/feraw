@@ -1,11 +1,8 @@
 include("../lib/std.feraw");
 
-println("function test");
-PI = macro{3.141592653589793};
-test = function{
-    println($0);
-    println($1);
-    println($2);
-};
-test(PI, 20, 30);
-free(test);
+
+code = "0 println ! 1 println ! 2 println !";
+println("Code before eval");
+println(5.123);
+code();
+//test(PI, 20, 30);
