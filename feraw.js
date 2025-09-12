@@ -1856,8 +1856,14 @@ if (process)
         }
         
         output += `int main(int argc, char *argv[])\n{\n`;
+        
         output += `    BruterList *context = bruter_new(BRUTER_DEFAULT_SIZE, true, true);\n\n`;
         
+        // lets add the args to a list called "args"
+        output += `    BruterList *args = bruter_new(BRUTER_DEFAULT_SIZE, false, true);\n`;
+        output += `    for(int i = 0; i < argc; i++) { bruter_push_pointer(args, argv[i], NULL, BRUTER_TYPE_BUFFER); }\n`;
+        output += `    bruter_push_pointer(context, args, "args", BRUTER_TYPE_LIST);\n\n`;
+
         if (functions.length > 0) {
             output += `    /* BEGIN function registrations */\n`;
             for (const [funcName, cleanName] of functions) {
@@ -1884,28 +1890,25 @@ if (process)
         output += `    ;\n\n`;
         
         output += `    bruter_interpret(context, embedded_code, NULL, NULL);\n`;
+        output += `\n`;
+        output += `    bruter_free(args);\n`;
         output += `    bruter_free(context);\n`;
         output += `    return EXIT_SUCCESS;\n}\n`;
         
         fs.writeFileSync(outputPath, output);
     }
 
-    function generateOutputFeraw(outputPath, { otherLines }) {
+    function generateOutputBruter(outputPath, { otherLines }) {
         let joinedCode = otherLines.join('\n');
         joinedCode = feraw_compile(joinedCode);
         fs.writeFileSync(outputPath, joinedCode);
     }
 
     // Main execution
-    if (process.argv.length < 3) {
-        console.error(`Usage: ${path.basename(process.argv[1])} <input.feraw> <output.(c|feraw)>`);
+    if (process.argv.length < 4) {
+        console.error(`Usage: ${path.basename(process.argv[1])} <input.br> <output.(c|br)>`);
         process.exit(1);
     }
-    else if (process.argv.length == 3) {
-        process.stdout.write(feraw_compile(fs.readFileSync(process.argv[2], 'utf8')));
-        process.stdout.write('\n');
-        process.exit(0);
-    };
     const inputFile = path.resolve(process.argv[2]);
     const outputFile = path.resolve(process.argv[3]);
 
@@ -1915,14 +1918,13 @@ if (process)
         
         // Step 2: Process content
         const processed = processContent(expandedContent);
-        
         // Step 3: Decide output based on extension
         if (outputFile.endsWith(".c")) {
             generateOutputC(outputFile, processed);
-        } else if (outputFile.endsWith(".feraw")) {
-            generateOutputFeraw(outputFile, processed);
+        } else if (outputFile.endsWith(".br")) {
+            generateOutputBruter(outputFile, processed);
         } else {
-            throw new Error("Unsupported output extension, use .c or .feraw");
+            throw new Error("Unsupported output extension, use .c or .br");
         }
         
         console.log(`Successfully generated: ${outputFile}`);

@@ -1,0 +1,7 @@
+include("../lib/std.feraw");
+
+filecontent = read_file(args[1]);
+
+eval(@, filecontent, null, &);
+
+outside:
