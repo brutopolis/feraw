@@ -164,6 +164,10 @@ void feraw_set(BruterList* stack)
                     index.value.i += list->size; // Adjust negative index to positive
                 }
                 list->data[index.value.i] = value.value; // Directly set the value
+                if (list->types != NULL)
+                {
+                    list->types[index.value.i] = value.type; // Set the type   
+                }
                 break;
             case BRUTER_TYPE_BUFFER:
             {
@@ -195,6 +199,7 @@ void feraw_set(BruterList* stack)
             }
             break;
         }
+        
     }
 }
 

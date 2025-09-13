@@ -16,16 +16,9 @@ fn.b = 0;
 fn.b.type = Any;
 
 fn[2] = add;
-fn[2].type = Function;
-
 fn[3] = "!";
-fn[3].type = Buffer;
-
 fn[4] = println;
-fn[4].type = Function;
-
 fn[5] = "!";
-fn[5].type = Buffer;
 
 // function usage
 
@@ -37,9 +30,13 @@ fn.b = 20;
 fn()
 
 // we can also create a macro for this 
+// this way we can cleanup the parameters easily too
+println("teste:");
 fn_macro = macro{
     fn.a = $0;
     fn.b = $1;
     fn();
+    fn.a = 0;
+    fn.b = 0;
 };
 fn_macro(30, 40);
