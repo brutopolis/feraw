@@ -1,8 +1,45 @@
 include("../lib/std.feraw");
 
-
 code = "0 println ! 1 println ! 2 println !";
 println("Code before eval");
 println(5.123);
 code();
-//test(PI, 20, 30);
+
+// function definition
+
+fn = list(0);
+
+fn.a = 0;
+fn.a.type = Any;
+
+fn.b = 0;
+fn.b.type = Any;
+
+fn[2] = add;
+fn[2].type = Function;
+
+fn[3] = "!";
+fn[3].type = Buffer;
+
+fn[4] = println;
+fn[4].type = Function;
+
+fn[5] = "!";
+fn[5].type = Buffer;
+
+// function usage
+
+// first we define the function parameters
+fn.a = 10;
+fn.b = 20;
+
+// then we call the function
+fn()
+
+// we can also create a macro for this 
+fn_macro = macro{
+    fn.a = $0;
+    fn.b = $1;
+    fn();
+};
+fn_macro(30, 40);

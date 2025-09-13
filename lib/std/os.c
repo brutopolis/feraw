@@ -66,7 +66,7 @@ bool file_exists(char* filename)
     return true;
 }
 
-function(feraw_read_bin)
+void feraw_read_bin(BruterList* stack)
 {
     char *filename = bruter_pop_pointer(stack);
     FILE *file = fopen(filename, "rb");
@@ -90,7 +90,7 @@ function(feraw_read_bin)
     bruter_push_pointer(stack, buffer, NULL, BRUTER_TYPE_BUFFER);
 }
 
-function(feraw_write_bin)
+void feraw_write_bin(BruterList* stack)
 {
     char *filename = bruter_pop_pointer(stack);
     uint8_t *buffer = bruter_pop_pointer(stack);
@@ -105,21 +105,21 @@ function(feraw_write_bin)
     fclose(file);
 }
 
-function(feraw_read_file)
+void feraw_read_file(BruterList* stack)
 {
     char *filename = bruter_pop_pointer(stack);
     char *content = file_read(filename);
     bruter_push_pointer(stack, content, NULL, BRUTER_TYPE_BUFFER);
 }
 
-function(feraw_write_file)
+void feraw_write_file(BruterList* stack)
 {
     char *filename = bruter_pop_pointer(stack);
     char *content = bruter_pop_pointer(stack);
     file_write(filename, content);
 }
 
-function(feraw_file_exists)
+void feraw_file_exists(BruterList* stack)
 {
     char *filename = bruter_pop_pointer(stack);
     bool exists = file_exists(filename);

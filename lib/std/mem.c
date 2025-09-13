@@ -1,6 +1,6 @@
 #include "bruter.h"
 
-function(feraw_malloc)
+void feraw_malloc(BruterList* stack)
 {
     BruterInt size = bruter_pop_int(stack);
     void *ptr = malloc(size);
@@ -12,7 +12,7 @@ function(feraw_malloc)
     bruter_push_pointer(stack, ptr, NULL, BRUTER_TYPE_BUFFER);
 }
 
-function(feraw_calloc)
+void feraw_calloc(BruterList* stack)
 {
     BruterInt count = bruter_pop_int(stack);
     BruterInt size = bruter_pop_int(stack);
@@ -25,7 +25,7 @@ function(feraw_calloc)
     bruter_push_pointer(stack, ptr, NULL, BRUTER_TYPE_BUFFER);
 }
 
-function(feraw_realloc)
+void feraw_realloc(BruterList* stack)
 {
     void *ptr = bruter_pop_pointer(stack);
     BruterInt new_size = bruter_pop_int(stack);
@@ -38,7 +38,7 @@ function(feraw_realloc)
     bruter_push_pointer(stack, new_ptr, NULL, BRUTER_TYPE_BUFFER);
 }
 
-function(feraw_memset)
+void feraw_memset(BruterList* stack)
 {
     void *ptr = bruter_pop_pointer(stack);
     BruterInt value = bruter_pop_int(stack);
@@ -53,7 +53,7 @@ function(feraw_memset)
     memset(ptr, value, size);
 }
 
-function(feraw_memcpy)
+void feraw_memcpy(BruterList* stack)
 {
     void *dest = bruter_pop_pointer(stack);
     void *src = bruter_pop_pointer(stack);
@@ -68,7 +68,7 @@ function(feraw_memcpy)
     memcpy(dest, src, size);
 }
 
-function(feraw_memcmp)
+void feraw_memcmp(BruterList* stack)
 {
     void *ptr1 = bruter_pop_pointer(stack);
     void *ptr2 = bruter_pop_pointer(stack);
@@ -84,7 +84,7 @@ function(feraw_memcmp)
     bruter_push_int(stack, result, NULL, BRUTER_TYPE_ANY);
 }
 
-function(feraw_memmove)
+void feraw_memmove(BruterList* stack)
 {
     void *dest = bruter_pop_pointer(stack);
     void *src = bruter_pop_pointer(stack);

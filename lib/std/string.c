@@ -1,6 +1,6 @@
 #include "bruter.h"
 
-function(feraw_strdup)
+void feraw_strdup(BruterList* stack)
 {
     char* str = bruter_pop_pointer(stack);
     if (str == NULL)
@@ -19,7 +19,7 @@ function(feraw_strdup)
     bruter_push_pointer(stack, new_str, NULL, BRUTER_TYPE_BUFFER);
 }
 
-function(feraw_strcat)
+void feraw_strcat(BruterList* stack)
 {
     char* str1 = bruter_pop_pointer(stack);
     char* str2 = bruter_pop_pointer(stack);
@@ -46,7 +46,7 @@ function(feraw_strcat)
     bruter_push_pointer(stack, new_str, NULL, BRUTER_TYPE_BUFFER);
 }
 
-function(feraw_strcpy)
+void feraw_strcpy(BruterList* stack)
 {
     char* dest = bruter_pop_pointer(stack);
     char* src = bruter_pop_pointer(stack);
@@ -61,7 +61,7 @@ function(feraw_strcpy)
     bruter_push_pointer(stack, dest, NULL, BRUTER_TYPE_BUFFER);
 }
 
-function(feraw_strncpy)
+void feraw_strncpy(BruterList* stack)
 {
     char* dest = bruter_pop_pointer(stack);
     char* src = bruter_pop_pointer(stack);
@@ -79,7 +79,7 @@ function(feraw_strncpy)
     bruter_push_pointer(stack, dest, NULL, BRUTER_TYPE_BUFFER);
 }
 
-function (feraw_strcmp)
+void feraw_strcmp(BruterList* stack)
 {
     char* str1 = bruter_pop_pointer(stack);
     char* str2 = bruter_pop_pointer(stack);
@@ -94,7 +94,7 @@ function (feraw_strcmp)
     bruter_push_int(stack, result, NULL, BRUTER_TYPE_ANY);
 }
 
-function(feraw_strlen)
+void feraw_strlen(BruterList* stack)
 {
     char* str = bruter_pop_pointer(stack);
     
@@ -108,7 +108,7 @@ function(feraw_strlen)
     bruter_push_int(stack, length, NULL, BRUTER_TYPE_ANY);
 }
 
-function(feraw_strchr)
+void feraw_strchr(BruterList* stack)
 {
     char* str = bruter_pop_pointer(stack);
     char c = (char)bruter_pop_int(stack);
@@ -117,7 +117,7 @@ function(feraw_strchr)
     bruter_push_pointer(stack, result, NULL, BRUTER_TYPE_BUFFER);
 }
 
-function(feraw_strstr)
+void feraw_strstr(BruterList* stack)
 {
     char* str1 = bruter_pop_pointer(stack);
     char* str2 = (char*)bruter_pop_int(stack);
@@ -126,7 +126,7 @@ function(feraw_strstr)
     bruter_push_pointer(stack, result, NULL, BRUTER_TYPE_BUFFER);
 }
 
-function(feraw_strsplit)
+void feraw_strsplit(BruterList* stack)
 {
     char* original_str = (char*)bruter_pop_pointer(stack);
     char* delimiters = (char*)bruter_pop_pointer(stack);

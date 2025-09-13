@@ -1,62 +1,62 @@
 #include "bruter.h"
 
-function(feraw_equals)
+void feraw_equals(BruterList* stack)
 {
     BruterInt a = bruter_pop_int(stack);
     BruterInt b = bruter_pop_int(stack);
     bruter_push_int(stack, a == b ? 1 : 0, NULL, BRUTER_TYPE_ANY);
 }
 
-function(feraw_not_equals)
+void feraw_not_equals(BruterList* stack)
 {
     BruterInt a = bruter_pop_int(stack);
     BruterInt b = bruter_pop_int(stack);
     bruter_push_int(stack, a != b ? 1 : 0, NULL, BRUTER_TYPE_ANY);
 }
 
-function(feraw_greater)
+void feraw_greater(BruterList* stack)
 {
     BruterInt a = bruter_pop_int(stack);
     BruterInt b = bruter_pop_int(stack);
     bruter_push_int(stack, a > b ? 1 : 0, NULL, BRUTER_TYPE_ANY);
 }
 
-function(feraw_greater_equal)
+void feraw_greater_equal(BruterList* stack)
 {
     BruterInt a = bruter_pop_int(stack);
     BruterInt b = bruter_pop_int(stack);
     bruter_push_int(stack, a >= b ? 1 : 0, NULL, BRUTER_TYPE_ANY);
 }
 
-function(feraw_less)
+void feraw_less(BruterList* stack)
 {
     BruterInt a = bruter_pop_int(stack);
     BruterInt b = bruter_pop_int(stack);
     bruter_push_int(stack, a < b ? 1 : 0, NULL, BRUTER_TYPE_ANY);
 }
 
-function(feraw_less_equal)
+void feraw_less_equal(BruterList* stack)
 {
     BruterInt a = bruter_pop_int(stack);
     BruterInt b = bruter_pop_int(stack);
     bruter_push_int(stack, a <= b ? 1 : 0, NULL, BRUTER_TYPE_ANY);
 }
 
-function(feraw_and)
+void feraw_and(BruterList* stack)
 {
     BruterInt a = bruter_pop_int(stack);
     BruterInt b = bruter_pop_int(stack);
     bruter_push_int(stack, a && b ? 1 : 0, NULL, BRUTER_TYPE_ANY);
 }
 
-function(feraw_or)
+void feraw_or(BruterList* stack)
 {
     BruterInt a = bruter_pop_int(stack);
     BruterInt b = bruter_pop_int(stack);
     bruter_push_int(stack, a || b ? 1 : 0, NULL, BRUTER_TYPE_ANY);
 }
 
-function(feraw_includes)
+void feraw_includes(BruterList* stack)
 {
     BruterInt a = bruter_pop_int(stack);
     BruterInt b = bruter_pop_int(stack);

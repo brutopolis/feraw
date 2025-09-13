@@ -74,7 +74,7 @@ static int read_u32_le(FILE *f, uint32_t *out) {
     }
 
 
-    function(feraw_load_argb)
+    void feraw_load_argb(BruterList* stack)
     {
         const char *filename = bruter_pop_pointer(stack);
         uint32_t *pixels = load_argb_as_header_layout(filename);

@@ -2,7 +2,7 @@
 #include <math.h>
 #include <time.h>
 
-function(feraw_add)
+void feraw_add(BruterList* stack)
 {
     BruterMeta a = bruter_pop_meta(stack);
     BruterMeta b = bruter_pop_meta(stack);
@@ -33,7 +33,7 @@ function(feraw_add)
     }
 }
 
-function(feraw_sub)
+void feraw_sub(BruterList* stack)
 {
     BruterMeta a = bruter_pop_meta(stack);
     BruterMeta b = bruter_pop_meta(stack);
@@ -64,7 +64,7 @@ function(feraw_sub)
     }
 }
 
-function(feraw_mul)
+void feraw_mul(BruterList* stack)
 {
     BruterMeta a = bruter_pop_meta(stack);
     BruterMeta b = bruter_pop_meta(stack);
@@ -95,7 +95,7 @@ function(feraw_mul)
     }
 }
 
-function(feraw_div)
+void feraw_div(BruterList* stack)
 {
     BruterMeta a = bruter_pop_meta(stack);
     BruterMeta b = bruter_pop_meta(stack);
@@ -146,7 +146,7 @@ function(feraw_div)
     }
 }
 
-function(feraw_mod)
+void feraw_mod(BruterList* stack)
 {
     BruterMeta a = bruter_pop_meta(stack);
     BruterMeta b = bruter_pop_meta(stack);
@@ -163,7 +163,7 @@ function(feraw_mod)
     bruter_push_int(stack, a.value.i % b.value.i, NULL, BRUTER_TYPE_ANY);
 }
 
-function(feraw_pow)
+void feraw_pow(BruterList* stack)
 {
     BruterMeta a = bruter_pop_meta(stack);
     BruterMeta b = bruter_pop_meta(stack);
@@ -177,7 +177,7 @@ function(feraw_pow)
     }
 }
 
-function(feraw_sqrt)
+void feraw_sqrt(BruterList* stack)
 {
     BruterMeta a = bruter_pop_meta(stack);
     if (a.type != BRUTER_TYPE_FLOAT)
@@ -193,7 +193,7 @@ function(feraw_sqrt)
     bruter_push_float(stack, sqrt(a.value.f), NULL, BRUTER_TYPE_FLOAT);
 }
 
-function(feraw_abs)
+void feraw_abs(BruterList* stack)
 {
     BruterMeta a = bruter_pop_meta(stack);
     if (a.type == BRUTER_TYPE_FLOAT)
@@ -206,7 +206,7 @@ function(feraw_abs)
     }
 }
 
-function(feraw_min)
+void feraw_min(BruterList* stack)
 {
     BruterMeta a = bruter_pop_meta(stack);
     BruterMeta b = bruter_pop_meta(stack);
@@ -222,7 +222,7 @@ function(feraw_min)
     }
 }
 
-function(feraw_max)
+void feraw_max(BruterList* stack)
 {
     BruterMeta a = bruter_pop_meta(stack);
     BruterMeta b = bruter_pop_meta(stack);
@@ -238,7 +238,7 @@ function(feraw_max)
     }
 }
 
-function(feraw_sin)
+void feraw_sin(BruterList* stack)
 {
     BruterMeta a = bruter_pop_meta(stack);
     if (a.type != BRUTER_TYPE_FLOAT)
@@ -249,7 +249,7 @@ function(feraw_sin)
     bruter_push_float(stack, sin(a.value.f), NULL, BRUTER_TYPE_FLOAT);
 }
 
-function(feraw_cos)
+void feraw_cos(BruterList* stack)
 {
     BruterMeta a = bruter_pop_meta(stack);
     if (a.type != BRUTER_TYPE_FLOAT)
@@ -260,7 +260,7 @@ function(feraw_cos)
     bruter_push_float(stack, cos(a.value.f), NULL, BRUTER_TYPE_FLOAT);
 }
 
-function(feraw_tan)
+void feraw_tan(BruterList* stack)
 {
     BruterMeta a = bruter_pop_meta(stack);
     if (a.type != BRUTER_TYPE_FLOAT)
@@ -271,7 +271,7 @@ function(feraw_tan)
     bruter_push_float(stack, tan(a.value.f), NULL, BRUTER_TYPE_FLOAT);
 }
 
-function(feraw_inc)
+void feraw_inc(BruterList* stack)
 {
     BruterMeta a = bruter_pop_meta(stack);
     if (a.type == BRUTER_TYPE_FLOAT)
@@ -286,7 +286,7 @@ function(feraw_inc)
     }
 }
 
-function(feraw_dec)
+void feraw_dec(BruterList* stack)
 {
     BruterMeta a = bruter_pop_meta(stack);
     if (a.type == BRUTER_TYPE_FLOAT)
@@ -303,7 +303,7 @@ function(feraw_dec)
 
 // random functions
 
-function(feraw_seed)
+void feraw_seed(BruterList* stack)
 {
     BruterMeta seed_meta = bruter_pop_meta(stack);
     unsigned int seed;
@@ -318,13 +318,13 @@ function(feraw_seed)
     srand(seed);
 }
 
-function(feraw_rand)
+void feraw_rand(BruterList* stack)
 {
     BruterFloat result = rand();
     bruter_push_float(stack, result, NULL, BRUTER_TYPE_FLOAT);
 }
 
-function(feraw_random)
+void feraw_random(BruterList* stack)
 {
     BruterMeta min_meta = bruter_pop_meta(stack);
     BruterMeta max_meta = bruter_pop_meta(stack);
@@ -366,32 +366,32 @@ function(feraw_random)
 
 // rouding functions
 
-function(feraw_floor)
+void feraw_floor(BruterList* stack)
 {
     BruterFloat value = bruter_pop_float(stack);
     bruter_push_int(stack, (BruterInt)floor(value), NULL, BRUTER_TYPE_ANY);
 }
 
-function(feraw_ceil)
+void feraw_ceil(BruterList* stack)
 {
     BruterFloat value = bruter_pop_float(stack);
     bruter_push_int(stack, (BruterInt)ceil(value), NULL, BRUTER_TYPE_ANY);
 }
 
-function(feraw_round)
+void feraw_round(BruterList* stack)
 {
     BruterFloat value = bruter_pop_float(stack);
     bruter_push_int(stack, (BruterInt)round(value), NULL, BRUTER_TYPE_ANY);
 }
 
-function(feraw_trunc)
+void feraw_trunc(BruterList* stack)
 {
     BruterFloat value = bruter_pop_float(stack);
     bruter_push_int(stack, (BruterInt)trunc(value), NULL, BRUTER_TYPE_ANY);
 }
 
 // bitwise operations
-function(feraw_bit_and)
+void feraw_bit_and(BruterList* stack)
 {
     BruterMeta a = bruter_pop_meta(stack);
     BruterMeta b = bruter_pop_meta(stack);
@@ -403,7 +403,7 @@ function(feraw_bit_and)
     bruter_push_int(stack, a.value.i & b.value.i, NULL, BRUTER_TYPE_ANY);
 }
 
-function(feraw_bit_or)
+void feraw_bit_or(BruterList* stack)
 {
     BruterMeta a = bruter_pop_meta(stack);
     BruterMeta b = bruter_pop_meta(stack);
@@ -415,7 +415,7 @@ function(feraw_bit_or)
     bruter_push_int(stack, a.value.i | b.value.i, NULL, BRUTER_TYPE_ANY);
 }
 
-function(feraw_bit_xor)
+void feraw_bit_xor(BruterList* stack)
 {
     BruterMeta a = bruter_pop_meta(stack);
     BruterMeta b = bruter_pop_meta(stack);
@@ -427,7 +427,7 @@ function(feraw_bit_xor)
     bruter_push_int(stack, a.value.i ^ b.value.i, NULL, BRUTER_TYPE_ANY);
 }
 
-function(feraw_bit_not)
+void feraw_bit_not(BruterList* stack)
 {
     BruterMeta a = bruter_pop_meta(stack);
     if (a.type == BRUTER_TYPE_FLOAT)
@@ -438,7 +438,7 @@ function(feraw_bit_not)
     bruter_push_int(stack, ~a.value.i, NULL, BRUTER_TYPE_ANY);
 }
 
-function(feraw_lshift)
+void feraw_lshift(BruterList* stack)
 {
     BruterMeta a = bruter_pop_meta(stack);
     BruterMeta b = bruter_pop_meta(stack);
@@ -450,7 +450,7 @@ function(feraw_lshift)
     bruter_push_int(stack, a.value.i << b.value.i, NULL, BRUTER_TYPE_ANY);
 }
 
-function(feraw_rshift)
+void feraw_rshift(BruterList* stack)
 {
     BruterMeta a = bruter_pop_meta(stack);
     BruterMeta b = bruter_pop_meta(stack);
@@ -462,12 +462,12 @@ function(feraw_rshift)
     bruter_push_int(stack, a.value.i >> b.value.i, NULL, BRUTER_TYPE_ANY);
 }
 
-function(feraw_time)
+void feraw_time(BruterList* stack)
 {
     bruter_push_int(stack, (BruterInt)time(NULL), NULL, BRUTER_TYPE_ANY);
 }
 
-function(feraw_clock)
+void feraw_clock(BruterList* stack)
 {
     bruter_push_int(stack, (BruterInt)clock(), NULL, BRUTER_TYPE_ANY);
 }

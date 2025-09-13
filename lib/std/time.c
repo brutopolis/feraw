@@ -22,7 +22,7 @@
     }
 #endif
 
-function(feraw_ms)
+void feraw_ms(BruterList* stack)
 {
     bruter_push_int(stack, time_ms(), NULL, BRUTER_TYPE_ANY);
 }

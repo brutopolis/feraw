@@ -131,7 +131,7 @@ static void mouse_scroll(struct mfb_window *window, mfb_key_mod mod, float delta
 }
 // functions
 
-function(new_window) 
+void new_window(BruterList* stack) 
 {
     char *title = bruter_pop_pointer(stack);
     int width = bruter_pop_int(stack);
@@ -177,7 +177,7 @@ function(new_window)
     bruter_push_pointer(stack, bsr_window, NULL, BRUTER_TYPE_BUFFER);
 }
 
-function(close_window)
+void close_window(BruterList* stack)
 {
     BSRWindow *current_window = (BSRWindow*)(bruter_pop_pointer(stack));
     struct mfb_window *window = (struct mfb_window*)(current_window)->window;
@@ -204,7 +204,7 @@ function(close_window)
     mfb_close(window);
 }
 
-function(update_window) 
+void update_window(BruterList* stack) 
 {
     BSRWindow *current_window = (BSRWindow*)(bruter_pop_pointer(stack));
     struct mfb_window *window = (struct mfb_window*)(current_window)->window;
@@ -222,7 +222,7 @@ function(update_window)
     return;
 }
 
-function(update_window_events) 
+void update_window_events(BruterList* stack) 
 {
     BSRWindow *current_window = (BSRWindow*)(bruter_pop_pointer(stack));
     struct mfb_window *window = (struct mfb_window*)(current_window)->window;
@@ -234,12 +234,12 @@ function(update_window_events)
     mfb_update_events(window);
 }
 
-function(is_window_active)
+void is_window_active(BruterList* stack)
 {
     bruter_push_int(stack, mfb_is_window_active((struct mfb_window*)((BSRWindow*)(bruter_pop_pointer(stack)))->window), NULL, BRUTER_TYPE_ANY);
 }
 
-function(get_window_width)
+void get_window_width(BruterList* stack)
 {
     BSRWindow *current_window = (BSRWindow*)(bruter_pop_pointer(stack));
     struct mfb_window *window = (struct mfb_window*)(current_window)->window;
@@ -252,7 +252,7 @@ function(get_window_width)
     bruter_push_int(stack, mfb_get_window_width(window), NULL, BRUTER_TYPE_ANY);
 }
 
-function(get_window_height)
+void get_window_height(BruterList* stack)
 {
     BSRWindow *current_window = (BSRWindow*)(bruter_pop_pointer(stack));
     struct mfb_window *window = (struct mfb_window*)(current_window)->window;
@@ -265,7 +265,7 @@ function(get_window_height)
     bruter_push_int(stack, mfb_get_window_height(window), NULL, BRUTER_TYPE_ANY);
 }
 
-function(get_mouse_x)
+void get_mouse_x(BruterList* stack)
 {
     BSRWindow *current_window = (BSRWindow*)(bruter_pop_pointer(stack));
     struct mfb_window *window = (struct mfb_window*)(current_window)->window;
@@ -278,7 +278,7 @@ function(get_mouse_x)
     bruter_push_int(stack, mfb_get_mouse_x(window), NULL, BRUTER_TYPE_ANY);
 }
 
-function(get_mouse_y)
+void get_mouse_y(BruterList* stack)
 {
     BSRWindow *current_window = (BSRWindow*)(bruter_pop_pointer(stack));
     struct mfb_window *window = (struct mfb_window*)(current_window)->window;
@@ -291,7 +291,7 @@ function(get_mouse_y)
     bruter_push_int(stack, mfb_get_mouse_y(window), NULL, BRUTER_TYPE_ANY);
 }
 
-function(get_mouse_scroll_x)
+void get_mouse_scroll_x(BruterList* stack)
 {
     BSRWindow *current_window = (BSRWindow*)(bruter_pop_pointer(stack));
     struct mfb_window *window = (struct mfb_window*)(current_window)->window;
@@ -304,7 +304,7 @@ function(get_mouse_scroll_x)
     bruter_push_int(stack, mfb_get_mouse_scroll_x(window), NULL, BRUTER_TYPE_ANY);
 }
 
-function(get_mouse_scroll_y)
+void get_mouse_scroll_y(BruterList* stack)
 {
     BSRWindow *current_window = (BSRWindow*)(bruter_pop_pointer(stack));
     struct mfb_window *window = (struct mfb_window*)(current_window)->window;
@@ -317,7 +317,7 @@ function(get_mouse_scroll_y)
     bruter_push_int(stack, mfb_get_mouse_scroll_y(window), NULL, BRUTER_TYPE_ANY);
 }
 
-function(wait_sync)
+void wait_sync(BruterList* stack)
 {
     BSRWindow *current_window = (BSRWindow*)(bruter_pop_pointer(stack));
     struct mfb_window *window = (struct mfb_window*)(current_window)->window;
@@ -331,7 +331,7 @@ function(wait_sync)
 
 // io functions
 
-function(is_key_pressed)
+void is_key_pressed(BruterList* stack)
 {
     BSRWindow *current_window = (BSRWindow*)(bruter_pop_pointer(stack));
     struct mfb_window *window = (struct mfb_window*)(current_window)->window;
@@ -344,7 +344,7 @@ function(is_key_pressed)
     bruter_push_int(stack, current_window->keys[key], NULL, BRUTER_TYPE_ANY);
 }
 
-function(get_framebuffer)
+void get_framebuffer(BruterList* stack)
 {
     BSRWindow *current_window = (BSRWindow*)(bruter_pop_pointer(stack));
     struct mfb_window *window = (struct mfb_window*)(current_window)->window;
@@ -365,7 +365,7 @@ function(get_framebuffer)
 
 
 // drawing functions
-function(fill)
+void fill(BruterList* stack)
 {
     Olivec_Canvas* canvas = (Olivec_Canvas*)bruter_pop_pointer(stack);
     
@@ -374,7 +374,7 @@ function(fill)
     olivec_fill(*canvas, color);    
 }
 
-function(draw_rect)
+void draw_rect(BruterList* stack)
 {
     Olivec_Canvas* canvas = (Olivec_Canvas*)bruter_pop_pointer(stack);
     
@@ -387,7 +387,7 @@ function(draw_rect)
     olivec_rect(*canvas, x, y, width, height, color);
 }
 
-function(draw_frame)
+void draw_frame(BruterList* stack)
 {
     Olivec_Canvas* canvas = (Olivec_Canvas*)bruter_pop_pointer(stack);
     
@@ -401,7 +401,7 @@ function(draw_frame)
     olivec_frame(*canvas, x, y, width, height, thickness, color);
 }
 
-function(draw_circle)
+void draw_circle(BruterList* stack)
 {
     Olivec_Canvas* canvas = (Olivec_Canvas*)bruter_pop_pointer(stack);
     
@@ -413,7 +413,7 @@ function(draw_circle)
     olivec_circle(*canvas, x, y, radius, color);
 }
 
-function(draw_ellipse)
+void draw_ellipse(BruterList* stack)
 {
     Olivec_Canvas* canvas = (Olivec_Canvas*)bruter_pop_pointer(stack);
     
@@ -426,7 +426,7 @@ function(draw_ellipse)
     olivec_ellipse(*canvas, x, y, radius_x, radius_y, color);
 }
 
-function(draw_line)
+void draw_line(BruterList* stack)
 {
     Olivec_Canvas* canvas = (Olivec_Canvas*)bruter_pop_pointer(stack);
     
@@ -440,7 +440,7 @@ function(draw_line)
 }
 
 
-function(draw_triangle)
+void draw_triangle(BruterList* stack)
 {
     Olivec_Canvas* canvas = (Olivec_Canvas*)bruter_pop_pointer(stack);
     
@@ -455,7 +455,7 @@ function(draw_triangle)
     olivec_triangle(*canvas, x1, y1, x2, y2, x3, y3, color);
 }
 
-function(draw_triangle3c)
+void draw_triangle3c(BruterList* stack)
 {
     Olivec_Canvas* canvas = (Olivec_Canvas*)bruter_pop_pointer(stack);
     
@@ -472,7 +472,7 @@ function(draw_triangle3c)
     olivec_triangle3c(*canvas, x1, y1, x2, y2, x3, y3, c1, c2, c3);
 }
 
-function(draw_triangle3z)
+void draw_triangle3z(BruterList* stack)
 {
     Olivec_Canvas* canvas = (Olivec_Canvas*)bruter_pop_pointer(stack);
     
@@ -489,7 +489,7 @@ function(draw_triangle3z)
     olivec_triangle3z(*canvas, x1, y1, x2, y2, x3, y3, z1, z2, z3);
 }
 
-function(draw_triangle3uv)
+void draw_triangle3uv(BruterList* stack)
 {
     Olivec_Canvas* canvas = (Olivec_Canvas*)bruter_pop_pointer(stack);
     int x1 = bruter_pop_int(stack);
@@ -516,7 +516,7 @@ function(draw_triangle3uv)
     olivec_triangle3uv(*canvas, x1, y1, x2, y2, x3, y3, tx1, ty1, tx2, ty2, tx3, ty3, z1, z2, z3, *texture);
 }
 
-function(draw_triangle3uv_bilinear)
+void draw_triangle3uv_bilinear(BruterList* stack)
 {
     Olivec_Canvas* canvas = (Olivec_Canvas*)bruter_pop_pointer(stack);
     int x1 = bruter_pop_int(stack);
@@ -550,7 +550,7 @@ OLIVECDEF void olivec_sprite_copy_bilinear(Olivec_Canvas oc, int x, int y, int w
 
 */
 
-function(draw_sprite_blend)
+void draw_sprite_blend(BruterList* stack)
 {
     Olivec_Canvas* canvas = (Olivec_Canvas*)bruter_pop_pointer(stack);
     
@@ -563,7 +563,7 @@ function(draw_sprite_blend)
     olivec_sprite_blend(*canvas, x, y, w, h, *sprite);
 }
 
-function(draw_sprite_copy)
+void draw_sprite_copy(BruterList* stack)
 {
     Olivec_Canvas* canvas = (Olivec_Canvas*)bruter_pop_pointer(stack);
     int x = bruter_pop_int(stack);
@@ -575,7 +575,7 @@ function(draw_sprite_copy)
     olivec_sprite_copy(*canvas, x, y, w, h, *sprite);
 }
 
-function(draw_sprite_copy_bilinear)
+void draw_sprite_copy_bilinear(BruterList* stack)
 {
     Olivec_Canvas* canvas = (Olivec_Canvas*)bruter_pop_pointer(stack);
     
@@ -588,7 +588,7 @@ function(draw_sprite_copy_bilinear)
     olivec_sprite_copy_bilinear(*canvas, x, y, w, h, *sprite);
 }
 
-function(argb_to_canvas)
+void argb_to_canvas(BruterList* stack)
 {
     uint32_t *data = (uint32_t*)bruter_pop_pointer(stack);
     uint32_t width = data[0];
@@ -608,7 +608,7 @@ function(argb_to_canvas)
     bruter_push_pointer(stack, canvas, NULL, BRUTER_TYPE_BUFFER);
 }
 
-function(new_canvas)
+void new_canvas(BruterList* stack)
 {
     uint32_t width = bruter_pop_int(stack);
     uint32_t height = bruter_pop_int(stack);
@@ -631,7 +631,7 @@ function(new_canvas)
     bruter_push_pointer(stack, canvas, NULL, BRUTER_TYPE_BUFFER);
 }
 
-function(get_window_canvas)
+void get_window_canvas(BruterList* stack)
 {
     BSRWindow *current_window = (BSRWindow*)(bruter_pop_pointer(stack));
     struct mfb_window *window = (struct mfb_window*)(current_window)->window;
@@ -645,7 +645,7 @@ function(get_window_canvas)
     bruter_push_pointer(stack, canvas, NULL, BRUTER_TYPE_BUFFER);
 }
 
-function(canvas_get_width)
+void canvas_get_width(BruterList* stack)
 {
     Olivec_Canvas* canvas = (Olivec_Canvas*)bruter_pop_pointer(stack);
     if (canvas == NULL)
@@ -657,7 +657,7 @@ function(canvas_get_width)
     bruter_push_int(stack, canvas->width, NULL, BRUTER_TYPE_ANY);
 }
 
-function(canvas_get_height)
+void canvas_get_height(BruterList* stack)
 {
     Olivec_Canvas* canvas = (Olivec_Canvas*)bruter_pop_pointer(stack);
     if (canvas == NULL)
@@ -669,7 +669,7 @@ function(canvas_get_height)
     bruter_push_int(stack, canvas->height, NULL, BRUTER_TYPE_ANY);
 }
 
-function(free_canvas)
+void free_canvas(BruterList* stack)
 {
     Olivec_Canvas* canvas = (Olivec_Canvas*)bruter_pop_pointer(stack);
     if (canvas == NULL)
@@ -701,7 +701,7 @@ void __bsr_at_exit(void)
     }
 }
 
-function(init_bsr)
+void init_bsr(BruterList* stack)
 {
     BruterList *context = bruter_pop_pointer(stack);
     bsr_windows = bruter_new(BRUTER_DEFAULT_SIZE, true, false);

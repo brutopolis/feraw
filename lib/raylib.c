@@ -1045,7 +1045,7 @@ BruterList *automation_event_list_to_list(AutomationEventList list)
 }
 
 // raylib functions
-function(feraw_InitWindow)
+void feraw_InitWindow(BruterList* stack)
 {
     int width = bruter_pop_int(stack);
     int height = bruter_pop_int(stack);
@@ -1053,380 +1053,380 @@ function(feraw_InitWindow)
     InitWindow(width, height, title);
 }
 
-function(feraw_CloseWindow)
+void feraw_CloseWindow(BruterList* stack)
 {
     CloseWindow();
 }
 
-function(feraw_WindowShouldClose)
+void feraw_WindowShouldClose(BruterList* stack)
 {
     bool shouldClose = WindowShouldClose();
     bruter_push_int(stack, shouldClose, NULL, BRUTER_TYPE_ANY);
 }
 
-function(feraw_IsWindowReady)
+void feraw_IsWindowReady(BruterList* stack)
 {
     bool isReady = IsWindowReady();
     bruter_push_int(stack, isReady, NULL, BRUTER_TYPE_ANY);
 }
 
-function(feraw_IsWindowFullscreen)
+void feraw_IsWindowFullscreen(BruterList* stack)
 {
     bool isFullscreen = IsWindowFullscreen();
     bruter_push_int(stack, isFullscreen, NULL, BRUTER_TYPE_ANY);
 }
 
-function(feraw_IsWindowHidden)
+void feraw_IsWindowHidden(BruterList* stack)
 {
     bool isHidden = IsWindowHidden();
     bruter_push_int(stack, isHidden, NULL, BRUTER_TYPE_ANY);
 }
 
-function(feraw_IsWindowMinimized)
+void feraw_IsWindowMinimized(BruterList* stack)
 {
     bool isMinimized = IsWindowMinimized();
     bruter_push_int(stack, isMinimized, NULL, BRUTER_TYPE_ANY);
 }
 
-function(feraw_IsWindowMaximized)
+void feraw_IsWindowMaximized(BruterList* stack)
 {
     bool isMaximized = IsWindowMaximized();
     bruter_push_int(stack, isMaximized, NULL, BRUTER_TYPE_ANY);
 }
 
-function(feraw_IsWindowFocused)
+void feraw_IsWindowFocused(BruterList* stack)
 {
     bool isFocused = IsWindowFocused();
     bruter_push_int(stack, isFocused, NULL, BRUTER_TYPE_ANY);
 }
 
-function(feraw_IsWindowResized)
+void feraw_IsWindowResized(BruterList* stack)
 {
     bool isResized = IsWindowResized();
     bruter_push_int(stack, isResized, NULL, BRUTER_TYPE_ANY);
 }
 
-function(feraw_IsWindowState)
+void feraw_IsWindowState(BruterList* stack)
 {
     int flags = bruter_pop_int(stack);
     bool isState = IsWindowState(flags);
     bruter_push_int(stack, isState, NULL, BRUTER_TYPE_ANY);
 }
 
-function(feraw_SetWindowState)
+void feraw_SetWindowState(BruterList* stack)
 {
     int flags = bruter_pop_int(stack);
     SetWindowState(flags);
 }
 
-function(feraw_ClearWindowState)
+void feraw_ClearWindowState(BruterList* stack)
 {
     int flags = bruter_pop_int(stack);
     ClearWindowState(flags);
 }
 
-function(feraw_ToggleFullscreen)
+void feraw_ToggleFullscreen(BruterList* stack)
 {
     ToggleFullscreen();
 }
 
-function(feraw_ToggleBorderlessWindowed)
+void feraw_ToggleBorderlessWindowed(BruterList* stack)
 {
     ToggleBorderlessWindowed();
 }
 
-function(feraw_MaximizeWindow)
+void feraw_MaximizeWindow(BruterList* stack)
 {
     MaximizeWindow();
 }
 
-function(feraw_MinimizeWindow)
+void feraw_MinimizeWindow(BruterList* stack)
 {
     MinimizeWindow();
 }
 
-function(feraw_RestoreWindow)
+void feraw_RestoreWindow(BruterList* stack)
 {
     RestoreWindow();
 }
 
-function(feraw_SetWindowIcon)
+void feraw_SetWindowIcon(BruterList* stack)
 {
     Image icon = image_constructor(bruter_pop_pointer(stack));
     SetWindowIcon(icon);
 }
 
-function(feraw_SetWindowIcons)
+void feraw_SetWindowIcons(BruterList* stack)
 {
     Image *icons = (Image*)bruter_pop_pointer(stack);
     int count = bruter_pop_int(stack);
     SetWindowIcons(icons, count);
 }
 
-function(feraw_SetWindowTitle)
+void feraw_SetWindowTitle(BruterList* stack)
 {
     char *title = (char*)bruter_pop_pointer(stack);
     SetWindowTitle(title);
 }
 
-function(feraw_SetWindowPosition)
+void feraw_SetWindowPosition(BruterList* stack)
 {
     int x = bruter_pop_int(stack);
     int y = bruter_pop_int(stack);
     SetWindowPosition(x, y);
 }
 
-function(feraw_SetWindowMonitor)
+void feraw_SetWindowMonitor(BruterList* stack)
 {
     int monitor = bruter_pop_int(stack);
     SetWindowMonitor(monitor);
 }
 
-function(feraw_SetWindowMinSize)
+void feraw_SetWindowMinSize(BruterList* stack)
 {
     int width = bruter_pop_int(stack);
     int height = bruter_pop_int(stack);
     SetWindowMinSize(width, height);
 }
 
-function(feraw_SetWindowMaxSize)
+void feraw_SetWindowMaxSize(BruterList* stack)
 {
     int width = bruter_pop_int(stack);
     int height = bruter_pop_int(stack);
     SetWindowMaxSize(width, height);
 }
 
-function(feraw_SetWindowSize)
+void feraw_SetWindowSize(BruterList* stack)
 {
     int width = bruter_pop_int(stack);
     int height = bruter_pop_int(stack);
     SetWindowSize(width, height);
 }
 
-function(feraw_SetWindowOpacity)
+void feraw_SetWindowOpacity(BruterList* stack)
 {
     float opacity = bruter_pop_float(stack);
     SetWindowOpacity(opacity);
 }
 
-function(feraw_SetWindowFocused)
+void feraw_SetWindowFocused(BruterList* stack)
 {
     SetWindowFocused();
 }
 
-function(feraw_GetWindowHandle)
+void feraw_GetWindowHandle(BruterList* stack)
 {
     bruter_push_pointer(stack, GetWindowHandle(), NULL, BRUTER_TYPE_ANY);
 }
 
-function(feraw_GetScreenWidth)
+void feraw_GetScreenWidth(BruterList* stack)
 {
     int width = GetScreenWidth();
     bruter_push_int(stack, width, NULL, BRUTER_TYPE_ANY);
 }
 
-function(feraw_GetScreenHeight)
+void feraw_GetScreenHeight(BruterList* stack)
 {
     int height = GetScreenHeight();
     bruter_push_int(stack, height, NULL, BRUTER_TYPE_ANY);
 }
 
-function(feraw_GetMonitorCount)
+void feraw_GetMonitorCount(BruterList* stack)
 {
     int count = GetMonitorCount();
     bruter_push_int(stack, count, NULL, BRUTER_TYPE_ANY);
 }
 
-function(feraw_GetCurrentMonitor)
+void feraw_GetCurrentMonitor(BruterList* stack)
 {
     int monitor = GetCurrentMonitor();
     bruter_push_int(stack, monitor, NULL, BRUTER_TYPE_ANY);
 }
 
-function(feraw_GetMonitorPosition)
+void feraw_GetMonitorPosition(BruterList* stack)
 {
     int monitor = bruter_pop_int(stack);
     Vector2 position = GetMonitorPosition(monitor);
     bruter_push_pointer(stack, vector2_to_list(position), NULL, BRUTER_TYPE_LIST);
 }
 
-function(feraw_GetMonitorWidth)
+void feraw_GetMonitorWidth(BruterList* stack)
 {
     int monitor = bruter_pop_int(stack);
     int width = GetMonitorWidth(monitor);
     bruter_push_int(stack, width, NULL, BRUTER_TYPE_ANY);
 }
 
-function(feraw_GetMonitorHeight)
+void feraw_GetMonitorHeight(BruterList* stack)
 {
     int monitor = bruter_pop_int(stack);
     int height = GetMonitorHeight(monitor);
     bruter_push_int(stack, height, NULL, BRUTER_TYPE_ANY);
 }
 
-function(feraw_GetMonitorPhysicalWidth)
+void feraw_GetMonitorPhysicalWidth(BruterList* stack)
 {
     int monitor = bruter_pop_int(stack);
     int width = GetMonitorPhysicalWidth(monitor);
     bruter_push_int(stack, width, NULL, BRUTER_TYPE_ANY);
 }
 
-function(feraw_GetMonitorPhysicalHeight)
+void feraw_GetMonitorPhysicalHeight(BruterList* stack)
 {
     int monitor = bruter_pop_int(stack);
     int height = GetMonitorPhysicalHeight(monitor);
     bruter_push_int(stack, height, NULL, BRUTER_TYPE_ANY);
 }
 
-function(feraw_GetMonitorRefreshRate)
+void feraw_GetMonitorRefreshRate(BruterList* stack)
 {
     int monitor = bruter_pop_int(stack);
     int refreshRate = GetMonitorRefreshRate(monitor);
     bruter_push_int(stack, refreshRate, NULL, BRUTER_TYPE_ANY);
 }
 
-function(feraw_GetWindowPosition)
+void feraw_GetWindowPosition(BruterList* stack)
 {
     Vector2 position = GetWindowPosition();
     bruter_push_pointer(stack, vector2_to_list(position), NULL, BRUTER_TYPE_LIST);
 }
 
-function(feraw_GetWindowScaleDpi)
+void feraw_GetWindowScaleDpi(BruterList* stack)
 {
     Vector2 scale = GetWindowScaleDPI();
     bruter_push_pointer(stack, vector2_to_list(scale), NULL, BRUTER_TYPE_LIST);
 }
 
-function(feraw_GetMonitorName)
+void feraw_GetMonitorName(BruterList* stack)
 {
     int monitor = bruter_pop_int(stack);
     const char *name = GetMonitorName(monitor);
     bruter_push_pointer(stack, strdup(name), NULL, BRUTER_TYPE_BUFFER);
 }
 
-function(feraw_SetClipboardText)
+void feraw_SetClipboardText(BruterList* stack)
 {
     char *text = (char*)bruter_pop_pointer(stack);
     SetClipboardText(text);
 }
 
-function(feraw_GetClipboardText)
+void feraw_GetClipboardText(BruterList* stack)
 {
     const char *text = GetClipboardText();
     bruter_push_pointer(stack, strdup(text), NULL, BRUTER_TYPE_BUFFER);
 }
 
-function(feraw_GetClipboardImage)
+void feraw_GetClipboardImage(BruterList* stack)
 {
     Image image = GetClipboardImage();
     bruter_push_pointer(stack, image_to_list(image), NULL, BRUTER_TYPE_LIST);
 }
 
-function(feraw_EnableEventWaiting)
+void feraw_EnableEventWaiting(BruterList* stack)
 {
     EnableEventWaiting();
 }
 
-function(feraw_DisableEventWaiting)
+void feraw_DisableEventWaiting(BruterList* stack)
 {
     DisableEventWaiting();
 }
 
 // Cursor-related functions
-function(feraw_ShowCursor)
+void feraw_ShowCursor(BruterList* stack)
 {
     ShowCursor();
 }
 
-function(feraw_HideCursor)
+void feraw_HideCursor(BruterList* stack)
 {
     HideCursor();
 }
 
-function(feraw_IsCursorHidden)
+void feraw_IsCursorHidden(BruterList* stack)
 {
     bool isHidden = IsCursorHidden();
     bruter_push_int(stack, isHidden, NULL, BRUTER_TYPE_ANY);
 }
 
-function(feraw_EnableCursor)
+void feraw_EnableCursor(BruterList* stack)
 {
     EnableCursor();
 }
 
-function(feraw_DisableCursor)
+void feraw_DisableCursor(BruterList* stack)
 {
     DisableCursor();
 }
 
-function(feraw_IsCursorOnScreen)
+void feraw_IsCursorOnScreen(BruterList* stack)
 {
     bool isOnScreen = IsCursorOnScreen();
     bruter_push_int(stack, isOnScreen, NULL, BRUTER_TYPE_ANY);
 }
 
 // Drawing-related functions
-function(feraw_ClearBackground)
+void feraw_ClearBackground(BruterList* stack)
 {
     Color color = color_from_int(bruter_pop_int(stack));
     ClearBackground(color);
 }
 
-function(feraw_BeginDrawing)
+void feraw_BeginDrawing(BruterList* stack)
 {
     BeginDrawing();
 }
 
-function(feraw_EndDrawing)
+void feraw_EndDrawing(BruterList* stack)
 {
     EndDrawing();
 }
 
-function(feraw_BeginMode2D)
+void feraw_BeginMode2D(BruterList* stack)
 {
     Camera2D camera = camera2d_constructor(bruter_pop_pointer(stack));
     BeginMode2D(camera);
 }
 
-function(feraw_EndMode2D)
+void feraw_EndMode2D(BruterList* stack)
 {
     EndMode2D();
 }
 
-function(feraw_BeginMode3D)
+void feraw_BeginMode3D(BruterList* stack)
 {
     Camera3D camera = camera3d_constructor(bruter_pop_pointer(stack));
     BeginMode3D(camera);
 }
 
-function(feraw_EndMode3D)
+void feraw_EndMode3D(BruterList* stack)
 {
     EndMode3D();
 }
 
-function(feraw_BeginShaderMode)
+void feraw_BeginShaderMode(BruterList* stack)
 {
     Shader shader = shader_constructor(bruter_pop_pointer(stack));
     BeginShaderMode(shader);
 }
 
-function(feraw_EndShaderMode)
+void feraw_EndShaderMode(BruterList* stack)
 {
     EndShaderMode();
 }
 
-function(feraw_BeginBlendMode)
+void feraw_BeginBlendMode(BruterList* stack)
 {
     int mode = bruter_pop_int(stack);
     BeginBlendMode(mode);
 }
 
-function(feraw_EndBlendMode)
+void feraw_EndBlendMode(BruterList* stack)
 {
     EndBlendMode();
 }
 
-function(feraw_BeginScissorMode)
+void feraw_BeginScissorMode(BruterList* stack)
 {
     int x = bruter_pop_int(stack);
     int y = bruter_pop_int(stack);
@@ -1435,36 +1435,36 @@ function(feraw_BeginScissorMode)
     BeginScissorMode(x, y, width, height);
 }
 
-function(feraw_EndScissorMode)
+void feraw_EndScissorMode(BruterList* stack)
 {
     EndScissorMode();
 }
 
-function(feraw_BeginVrStereoMode)
+void feraw_BeginVrStereoMode(BruterList* stack)
 {
     VrStereoConfig config = vr_stereo_config_constructor(bruter_pop_pointer(stack));
     BeginVrStereoMode(config);
 }
 
-function(feraw_EndVrStereoMode)
+void feraw_EndVrStereoMode(BruterList* stack)
 {
     EndVrStereoMode();
 }
 
-function(feraw_LoadVrStereoConfig)
+void feraw_LoadVrStereoConfig(BruterList* stack)
 {
     VrDeviceInfo info = vr_device_info_constructor(bruter_pop_pointer(stack));
     VrStereoConfig config = LoadVrStereoConfig(info);
     bruter_push_pointer(stack, vr_stereo_config_to_list(config), NULL, BRUTER_TYPE_LIST);
 }
 
-function(feraw_UnloadVrStereoConfig)
+void feraw_UnloadVrStereoConfig(BruterList* stack)
 {
     VrStereoConfig config = vr_stereo_config_constructor(bruter_pop_pointer(stack));
     UnloadVrStereoConfig(config);
 }
 
-function(feraw_LoadShader)
+void feraw_LoadShader(BruterList* stack)
 {
     char *vsFileName = (char*)bruter_pop_pointer(stack);
     char *fsFileName = (char*)bruter_pop_pointer(stack);
@@ -1472,7 +1472,7 @@ function(feraw_LoadShader)
     bruter_push_pointer(stack, shader_to_list(shader), NULL, BRUTER_TYPE_LIST);
 }
 
-function(feraw_LoadShaderFromMemory)
+void feraw_LoadShaderFromMemory(BruterList* stack)
 {
     char *vsCode = (char*)bruter_pop_pointer(stack);
     char *fsCode = (char*)bruter_pop_pointer(stack);
@@ -1480,14 +1480,14 @@ function(feraw_LoadShaderFromMemory)
     bruter_push_pointer(stack, shader_to_list(shader), NULL, BRUTER_TYPE_LIST);
 }
 
-function(feraw_IsShaderValid)
+void feraw_IsShaderValid(BruterList* stack)
 {
     Shader shader = shader_constructor(bruter_pop_pointer(stack));
     bool isValid = IsShaderValid(shader);
     bruter_push_int(stack, isValid, NULL, BRUTER_TYPE_ANY);
 }
 
-function(feraw_GetShaderLocation)
+void feraw_GetShaderLocation(BruterList* stack)
 {
     Shader shader = shader_constructor(bruter_pop_pointer(stack));
     char *uniformName = (char*)bruter_pop_pointer(stack);
@@ -1495,7 +1495,7 @@ function(feraw_GetShaderLocation)
     bruter_push_int(stack, location, NULL, BRUTER_TYPE_ANY);
 }
 
-function(feraw_GetShaderLocationAttrib)
+void feraw_GetShaderLocationAttrib(BruterList* stack)
 {
     Shader shader = shader_constructor(bruter_pop_pointer(stack));
     char *attribName = (char*)bruter_pop_pointer(stack);
@@ -1503,7 +1503,7 @@ function(feraw_GetShaderLocationAttrib)
     bruter_push_int(stack, location, NULL, BRUTER_TYPE_ANY);
 }
 
-function(feraw_SetShaderValue)
+void feraw_SetShaderValue(BruterList* stack)
 {
     Shader shader = shader_constructor(bruter_pop_pointer(stack));
     int locIndex = bruter_pop_int(stack);
@@ -1513,7 +1513,7 @@ function(feraw_SetShaderValue)
     SetShaderValue(shader, locIndex, value, uniformType);
 }
 
-function(feraw_SetShaderValueMatrix)
+void feraw_SetShaderValueMatrix(BruterList* stack)
 {
     Shader shader = shader_constructor(bruter_pop_pointer(stack));
     int locIndex = bruter_pop_int(stack);
@@ -1522,7 +1522,7 @@ function(feraw_SetShaderValueMatrix)
     SetShaderValueMatrix(shader, locIndex, mat);
 }
 
-function(feraw_SetShaderValueTexture)
+void feraw_SetShaderValueTexture(BruterList* stack)
 {
     Shader shader = shader_constructor(bruter_pop_pointer(stack));
     int locIndex = bruter_pop_int(stack);
@@ -1531,13 +1531,13 @@ function(feraw_SetShaderValueTexture)
     SetShaderValueTexture(shader, locIndex, texture);
 }
 
-function(feraw_UnloadShader)
+void feraw_UnloadShader(BruterList* stack)
 {
     Shader shader = shader_constructor(bruter_pop_pointer(stack));
     UnloadShader(shader);
 }
 
-function(feraw_GetScreenToWorldRay)
+void feraw_GetScreenToWorldRay(BruterList* stack)
 {
     Vector2 position = vector2_constructor(bruter_pop_pointer(stack));
     Camera3D camera = camera3d_constructor(bruter_pop_pointer(stack));
@@ -1545,7 +1545,7 @@ function(feraw_GetScreenToWorldRay)
     bruter_push_pointer(stack, ray_to_list(ray), NULL, BRUTER_TYPE_LIST);
 }
 
-function(feraw_GetScreenToWorldRayEx)
+void feraw_GetScreenToWorldRayEx(BruterList* stack)
 {
     Vector2 position = vector2_constructor(bruter_pop_pointer(stack));
     Camera3D camera = camera3d_constructor(bruter_pop_pointer(stack));
@@ -1555,7 +1555,7 @@ function(feraw_GetScreenToWorldRayEx)
     bruter_push_pointer(stack, ray_to_list(ray), NULL, BRUTER_TYPE_LIST);
 }
 
-function(feraw_GetWorldToScreen)
+void feraw_GetWorldToScreen(BruterList* stack)
 {
     Vector3 position = vector3_constructor(bruter_pop_pointer(stack));
     Camera3D camera = camera3d_constructor(bruter_pop_pointer(stack));
@@ -1563,7 +1563,7 @@ function(feraw_GetWorldToScreen)
     bruter_push_pointer(stack, vector2_to_list(screenPos), NULL, BRUTER_TYPE_LIST);
 }
 
-function(feraw_GetWorldToScreenEx)
+void feraw_GetWorldToScreenEx(BruterList* stack)
 {
     Vector3 position = vector3_constructor(bruter_pop_pointer(stack));
     Camera3D camera = camera3d_constructor(bruter_pop_pointer(stack));
@@ -1573,7 +1573,7 @@ function(feraw_GetWorldToScreenEx)
     bruter_push_pointer(stack, vector2_to_list(screenPos), NULL, BRUTER_TYPE_LIST);
 }
 
-function(feraw_GetWorldToScreen2D)
+void feraw_GetWorldToScreen2D(BruterList* stack)
 {
     Vector2 position = vector2_constructor(bruter_pop_pointer(stack));
     Camera2D camera = camera2d_constructor(bruter_pop_pointer(stack));
@@ -1581,7 +1581,7 @@ function(feraw_GetWorldToScreen2D)
     bruter_push_pointer(stack, vector2_to_list(screenPos), NULL, BRUTER_TYPE_LIST);
 }
 
-function(feraw_GetScreenToWorld2D)
+void feraw_GetScreenToWorld2D(BruterList* stack)
 {
     Vector2 position = vector2_constructor(bruter_pop_pointer(stack));
     Camera2D camera = camera2d_constructor(bruter_pop_pointer(stack));
@@ -1589,14 +1589,14 @@ function(feraw_GetScreenToWorld2D)
     bruter_push_pointer(stack, vector2_to_list(worldPos), NULL, BRUTER_TYPE_LIST);
 }
 
-function(feraw_GetCameraMatrix)
+void feraw_GetCameraMatrix(BruterList* stack)
 {
     Camera3D camera = camera3d_constructor(bruter_pop_pointer(stack));
     Matrix matrix = GetCameraMatrix(camera);
     bruter_push_pointer(stack, matrix_to_list(matrix), NULL, BRUTER_TYPE_LIST);
 }
 
-function(feraw_GetCameraMatrix2D)
+void feraw_GetCameraMatrix2D(BruterList* stack)
 {
     Camera2D camera = camera2d_constructor(bruter_pop_pointer(stack));
     Matrix matrix = GetCameraMatrix2D(camera);
@@ -1604,55 +1604,55 @@ function(feraw_GetCameraMatrix2D)
 }
 
 // Timing-related functions
-function(feraw_SetTargetFPS)
+void feraw_SetTargetFPS(BruterList* stack)
 {
     int fps = bruter_pop_int(stack);
     SetTargetFPS(fps);
 }
 
-function(feraw_GetFrameTime)
+void feraw_GetFrameTime(BruterList* stack)
 {
     float frameTime = GetFrameTime();
     bruter_push_float(stack, frameTime, NULL, BRUTER_TYPE_FLOAT);
 }
 
-function(feraw_GetTime)
+void feraw_GetTime(BruterList* stack)
 {
     double time = GetTime();
     bruter_push_float(stack, (float)time, NULL, BRUTER_TYPE_FLOAT);
 }
 
-function(feraw_GetFPS)
+void feraw_GetFPS(BruterList* stack)
 {
     int fps = GetFPS();
     bruter_push_int(stack, fps, NULL, BRUTER_TYPE_ANY);
 }
 
 // Custom frame control functions
-function(feraw_SwapScreenBuffer)
+void feraw_SwapScreenBuffer(BruterList* stack)
 {
     SwapScreenBuffer();
 }
 
-function(feraw_PollInputEvents)
+void feraw_PollInputEvents(BruterList* stack)
 {
     PollInputEvents();
 }
 
-function(feraw_WaitTime)
+void feraw_WaitTime(BruterList* stack)
 {
     float seconds = bruter_pop_float(stack);
     WaitTime(seconds);
 }
 
 // Random values generation functions
-function(feraw_SetRandomSeed)
+void feraw_SetRandomSeed(BruterList* stack)
 {
     unsigned int seed = bruter_pop_int(stack);
     SetRandomSeed(seed);
 }
 
-function(feraw_GetRandomValue)
+void feraw_GetRandomValue(BruterList* stack)
 {
     int min = bruter_pop_int(stack);
     int max = bruter_pop_int(stack);
@@ -1660,7 +1660,7 @@ function(feraw_GetRandomValue)
     bruter_push_int(stack, value, NULL, BRUTER_TYPE_ANY);
 }
 
-function(feraw_LoadRandomSequence)
+void feraw_LoadRandomSequence(BruterList* stack)
 {
     unsigned int count = bruter_pop_int(stack);
     int min = bruter_pop_int(stack);
@@ -1669,51 +1669,51 @@ function(feraw_LoadRandomSequence)
     bruter_push_pointer(stack, sequence, NULL, BRUTER_TYPE_BUFFER);
 }
 
-function(feraw_UnloadRandomSequence)
+void feraw_UnloadRandomSequence(BruterList* stack)
 {
     int *sequence = (int*)bruter_pop_pointer(stack);
     UnloadRandomSequence(sequence);
 }
 
 // Misc. functions
-function(feraw_TakeScreenshot)
+void feraw_TakeScreenshot(BruterList* stack)
 {
     char *fileName = (char*)bruter_pop_pointer(stack);
     TakeScreenshot(fileName);
 }
 
-function(feraw_SetConfigFlags)
+void feraw_SetConfigFlags(BruterList* stack)
 {
     unsigned int flags = bruter_pop_int(stack);
     SetConfigFlags(flags);
 }
 
-function(feraw_OpenUrl)
+void feraw_OpenUrl(BruterList* stack)
 {
     char *url = (char*)bruter_pop_pointer(stack);
     OpenURL(url);
 }
 
 // utils functions
-function(feraw_TraceLog)
+void feraw_TraceLog(BruterList* stack)
 {
     printf("feraw_TraceLog is not implemented in bruter yet\n");
 }
 
-function(feraw_SetTraceLogLevel)
+void feraw_SetTraceLogLevel(BruterList* stack)
 {
     int logLevel = bruter_pop_int(stack);
     SetTraceLogLevel(logLevel);
 }
 
-function(feraw_MemAlloc)
+void feraw_MemAlloc(BruterList* stack)
 {
     unsigned int size = bruter_pop_int(stack);
     void *ptr = MemAlloc(size);
     bruter_push_pointer(stack, ptr, NULL, BRUTER_TYPE_BUFFER);
 }
 
-function(feraw_MemRealloc)
+void feraw_MemRealloc(BruterList* stack)
 {
     void *ptr = bruter_pop_pointer(stack);
     unsigned int size = bruter_pop_int(stack);
@@ -1721,45 +1721,45 @@ function(feraw_MemRealloc)
     bruter_push_pointer(stack, newPtr, NULL, BRUTER_TYPE_BUFFER);
 }
 
-function(feraw_MemFree)
+void feraw_MemFree(BruterList* stack)
 {
     void *ptr = bruter_pop_pointer(stack);
     MemFree(ptr);
 }
 
 // custom callbacks, probably not working
-function(feraw_SetTracelogCallback)
+void feraw_SetTracelogCallback(BruterList* stack)
 {
     TraceLogCallback callback = (TraceLogCallback)bruter_pop_pointer(stack);
     SetTraceLogCallback(callback);
 }
 
-function(feraw_SetLoadFileDataCallback)
+void feraw_SetLoadFileDataCallback(BruterList* stack)
 {
     LoadFileDataCallback callback = (LoadFileDataCallback)bruter_pop_pointer(stack);
     SetLoadFileDataCallback(callback);
 }
 
-function(feraw_SetSaveFileDataCallback)
+void feraw_SetSaveFileDataCallback(BruterList* stack)
 {
     SaveFileDataCallback callback = (SaveFileDataCallback)bruter_pop_pointer(stack);
     SetSaveFileDataCallback(callback);
 }
 
-function(feraw_SetLoadFileTextCallback)
+void feraw_SetLoadFileTextCallback(BruterList* stack)
 {
     LoadFileTextCallback callback = (LoadFileTextCallback)bruter_pop_pointer(stack);
     SetLoadFileTextCallback(callback);
 }
 
-function(feraw_SetSaveFileTextCallback)
+void feraw_SetSaveFileTextCallback(BruterList* stack)
 {
     SaveFileTextCallback callback = (SaveFileTextCallback)bruter_pop_pointer(stack);
     SetSaveFileTextCallback(callback);
 }
 
 // Files management functions
-function(feraw_LoadFileData)
+void feraw_LoadFileData(BruterList* stack)
 {
     char *fileName = (char*)bruter_pop_pointer(stack);
     int bytesRead = 0;
@@ -1770,13 +1770,13 @@ function(feraw_LoadFileData)
     bruter_push_pointer(stack, list, NULL, BRUTER_TYPE_LIST);
 }
 
-function(feraw_UnloadFileData)
+void feraw_UnloadFileData(BruterList* stack)
 {
     void *data = bruter_pop_pointer(stack);
     UnloadFileData(data);
 }
 
-function(feraw_SaveFileData)
+void feraw_SaveFileData(BruterList* stack)
 {
     char *fileName = (char*)bruter_pop_pointer(stack);
     void *data = bruter_pop_pointer(stack);
@@ -1785,7 +1785,7 @@ function(feraw_SaveFileData)
     bruter_push_int(stack, success, NULL, BRUTER_TYPE_ANY);
 }
 
-function(feraw_ExportDataAsCode)
+void feraw_ExportDataAsCode(BruterList* stack)
 {
     unsigned char *data = (unsigned char*)bruter_pop_pointer(stack);
     int dataSize = bruter_pop_int(stack);
@@ -1794,20 +1794,20 @@ function(feraw_ExportDataAsCode)
     bruter_push_int(stack, success, NULL, BRUTER_TYPE_ANY);
 }
 
-function(feraw_LoadFileText)
+void feraw_LoadFileText(BruterList* stack)
 {
     char *fileName = (char*)bruter_pop_pointer(stack);
     char *text = LoadFileText(fileName);
     bruter_push_pointer(stack, text, NULL, BRUTER_TYPE_BUFFER);
 }
 
-function(feraw_UnloadFileText)
+void feraw_UnloadFileText(BruterList* stack)
 {
     char *text = (char*)bruter_pop_pointer(stack);
     UnloadFileText(text);
 }
 
-function(feraw_SaveFileText)
+void feraw_SaveFileText(BruterList* stack)
 {
     char *fileName = (char*)bruter_pop_pointer(stack);
     char *text = (char*)bruter_pop_pointer(stack);
@@ -1816,21 +1816,21 @@ function(feraw_SaveFileText)
 }
 
 // File system functions
-function(feraw_FileExists)
+void feraw_FileExists(BruterList* stack)
 {
     char *fileName = (char*)bruter_pop_pointer(stack);
     bool exists = FileExists(fileName);
     bruter_push_int(stack, exists, NULL, BRUTER_TYPE_ANY);
 }
 
-function(feraw_DirectoryExists)
+void feraw_DirectoryExists(BruterList* stack)
 {
     char *dirPath = (char*)bruter_pop_pointer(stack);
     bool exists = DirectoryExists(dirPath);
     bruter_push_int(stack, exists, NULL, BRUTER_TYPE_ANY);
 }
 
-function(feraw_IsFileExtension)
+void feraw_IsFileExtension(BruterList* stack)
 {
     char *fileName = (char*)bruter_pop_pointer(stack);
     char *ext = (char*)bruter_pop_pointer(stack);
@@ -1838,96 +1838,96 @@ function(feraw_IsFileExtension)
     bruter_push_int(stack, isExt, NULL, BRUTER_TYPE_ANY);
 }
 
-function(feraw_GetFileLength)
+void feraw_GetFileLength(BruterList* stack)
 {
     char *fileName = (char*)bruter_pop_pointer(stack);
     unsigned int length = GetFileLength(fileName);
     bruter_push_int(stack, length, NULL, BRUTER_TYPE_ANY);
 }
 
-function(feraw_GetFileExtension)
+void feraw_GetFileExtension(BruterList* stack)
 {
     char *fileName = (char*)bruter_pop_pointer(stack);
     const char *ext = GetFileExtension(fileName);
     bruter_push_pointer(stack, strdup(ext), NULL, BRUTER_TYPE_BUFFER);
 }
 
-function(feraw_GetFileName)
+void feraw_GetFileName(BruterList* stack)
 {
     char *filePath = (char*)bruter_pop_pointer(stack);
     const char *fileName = GetFileName(filePath);
     bruter_push_pointer(stack, strdup(fileName), NULL, BRUTER_TYPE_BUFFER);
 }
 
-function(feraw_GetFileNameWithoutExt)
+void feraw_GetFileNameWithoutExt(BruterList* stack)
 {
     char *filePath = (char*)bruter_pop_pointer(stack);
     const char *fileNameWithoutExt = GetFileNameWithoutExt(filePath);
     bruter_push_pointer(stack, strdup(fileNameWithoutExt), NULL, BRUTER_TYPE_BUFFER);
 }
 
-function(feraw_GetDirectoryPath)
+void feraw_GetDirectoryPath(BruterList* stack)
 {
     char *filePath = (char*)bruter_pop_pointer(stack);
     const char *dirPath = GetDirectoryPath(filePath);
     bruter_push_pointer(stack, strdup(dirPath), NULL, BRUTER_TYPE_BUFFER);
 }
 
-function(feraw_GetPrevDirectoryPath)
+void feraw_GetPrevDirectoryPath(BruterList* stack)
 {
     char *filePath = (char*)bruter_pop_pointer(stack);
     const char *prevDirPath = GetPrevDirectoryPath(filePath);
     bruter_push_pointer(stack, strdup(prevDirPath), NULL, BRUTER_TYPE_BUFFER);
 }
 
-function(feraw_GetWorkingDirectory)
+void feraw_GetWorkingDirectory(BruterList* stack)
 {
     const char *workingDir = GetWorkingDirectory();
     bruter_push_pointer(stack, strdup(workingDir), NULL, BRUTER_TYPE_BUFFER);
 }
 
-function(feraw_GetApplicationDirectory)
+void feraw_GetApplicationDirectory(BruterList* stack)
 {
     const char *appDir = GetApplicationDirectory();
     bruter_push_pointer(stack, strdup(appDir), NULL, BRUTER_TYPE_BUFFER);
 }
 
-function(feraw_MakeDirectory)
+void feraw_MakeDirectory(BruterList* stack)
 {
     char *dirPath = (char*)bruter_pop_pointer(stack);
     bool success = MakeDirectory(dirPath);
     bruter_push_int(stack, success, NULL, BRUTER_TYPE_ANY);
 }
 
-function(feraw_ChangeDirectory)
+void feraw_ChangeDirectory(BruterList* stack)
 {
     char *dirPath = (char*)bruter_pop_pointer(stack);
     bool success = ChangeDirectory(dirPath);
     bruter_push_int(stack, success, NULL, BRUTER_TYPE_ANY);
 }
 
-function(feraw_IsPathFile)
+void feraw_IsPathFile(BruterList* stack)
 {
     char *path = (char*)bruter_pop_pointer(stack);
     bool isFile = IsPathFile(path);
     bruter_push_int(stack, isFile, NULL, BRUTER_TYPE_ANY);
 }
 
-function(feraw_IsFilenameValid)
+void feraw_IsFilenameValid(BruterList* stack)
 {
     char *fileName = (char*)bruter_pop_pointer(stack);
     bool isValid = IsFileNameValid(fileName);
     bruter_push_int(stack, isValid, NULL, BRUTER_TYPE_ANY);
 }
 
-function(feraw_LoadDirectoryFiles)
+void feraw_LoadDirectoryFiles(BruterList* stack)
 {
     char *dirPath = (char*)bruter_pop_pointer(stack);
     FilePathList filePathList = LoadDirectoryFiles(dirPath);
     bruter_push_pointer(stack, file_path_list_to_list(filePathList), NULL, BRUTER_TYPE_LIST);
 }
 
-function(feraw_LoadDirectoryFilesEx)
+void feraw_LoadDirectoryFilesEx(BruterList* stack)
 {
     char *dirPath = (char*)bruter_pop_pointer(stack);
     const char* filter = (const char*)bruter_pop_pointer(stack);
@@ -1936,31 +1936,31 @@ function(feraw_LoadDirectoryFilesEx)
     bruter_push_pointer(stack, file_path_list_to_list(filePathList), NULL, BRUTER_TYPE_LIST);
 }
 
-function(feraw_UnloadDirectoryFiles)
+void feraw_UnloadDirectoryFiles(BruterList* stack)
 {
     FilePathList filePathList = file_path_list_constructor(bruter_pop_pointer(stack));
     UnloadDirectoryFiles(filePathList);
 }
 
-function(feraw_IsFileDropped)
+void feraw_IsFileDropped(BruterList* stack)
 {
     bool isDropped = IsFileDropped();
     bruter_push_int(stack, isDropped, NULL, BRUTER_TYPE_ANY);
 }
 
-function(feraw_LoadDroppedFiles)
+void feraw_LoadDroppedFiles(BruterList* stack)
 {
     FilePathList filePathList = LoadDroppedFiles();
     bruter_push_pointer(stack, file_path_list_to_list(filePathList), NULL, BRUTER_TYPE_LIST);
 }
 
-function(feraw_UnloadDroppedFiles)
+void feraw_UnloadDroppedFiles(BruterList* stack)
 {
     FilePathList filePathList = file_path_list_constructor(bruter_pop_pointer(stack));
     UnloadDroppedFiles(filePathList);
 }
 
-function(feraw_GetFileModTime)
+void feraw_GetFileModTime(BruterList* stack)
 {
     char *fileName = (char*)bruter_pop_pointer(stack);
     long modTime = GetFileModTime(fileName);
@@ -1968,7 +1968,7 @@ function(feraw_GetFileModTime)
 }
 
 // Compression/Encoding functionality
-function(feraw_CompressData)
+void feraw_CompressData(BruterList* stack)
 {
     void *data = bruter_pop_pointer(stack);
     int dataSize = bruter_pop_int(stack);
@@ -1977,7 +1977,7 @@ function(feraw_CompressData)
     bruter_push_pointer(stack, compressedData, NULL, BRUTER_TYPE_BUFFER);
 }
 
-function(feraw_DecompressData)
+void feraw_DecompressData(BruterList* stack)
 {
     void *data = bruter_pop_pointer(stack);
     int dataSize = bruter_pop_int(stack);
@@ -1986,7 +1986,7 @@ function(feraw_DecompressData)
     bruter_push_pointer(stack, decompressedData, NULL, BRUTER_TYPE_BUFFER);
 }
 
-function(feraw_EncodeDataBase64)
+void feraw_EncodeDataBase64(BruterList* stack)
 {
     void *data = bruter_pop_pointer(stack);
     int dataSize = bruter_pop_int(stack);
@@ -1995,7 +1995,7 @@ function(feraw_EncodeDataBase64)
     bruter_push_pointer(stack, encodedData, NULL, BRUTER_TYPE_BUFFER);
 }
 
-function(feraw_DecodeDataBase64)
+void feraw_DecodeDataBase64(BruterList* stack)
 {
     const unsigned char *encodedData = (const unsigned char*)bruter_pop_pointer(stack);
     int *decodedDataSize = (int*)bruter_pop_pointer(stack);
@@ -2003,7 +2003,7 @@ function(feraw_DecodeDataBase64)
     bruter_push_pointer(stack, decodedData, NULL, BRUTER_TYPE_BUFFER);
 }
 
-function(feraw_ComputeCrc32)
+void feraw_ComputeCrc32(BruterList* stack)
 {
     void *data = bruter_pop_pointer(stack);
     int dataSize = bruter_pop_int(stack);
@@ -2011,7 +2011,7 @@ function(feraw_ComputeCrc32)
     bruter_push_int(stack, crc, NULL, BRUTER_TYPE_ANY);
 }
 
-function(feraw_ComputeMd5)
+void feraw_ComputeMd5(BruterList* stack)
 {
     void *data = bruter_pop_pointer(stack);
     int dataSize = bruter_pop_int(stack);
@@ -2019,7 +2019,7 @@ function(feraw_ComputeMd5)
     bruter_push_pointer(stack, data, NULL, BRUTER_TYPE_BUFFER);
 }
 
-function(feraw_ComputeSha1)
+void feraw_ComputeSha1(BruterList* stack)
 {
     void *data = bruter_pop_pointer(stack);
     int dataSize = bruter_pop_int(stack);
@@ -2028,20 +2028,20 @@ function(feraw_ComputeSha1)
 }
 
 // Automation events functionality
-function(feraw_LoadAutomationEventList)
+void feraw_LoadAutomationEventList(BruterList* stack)
 {
     BruterList *automation_event_list = bruter_pop_pointer(stack);
     AutomationEventList eventList = automation_event_list_constructor(automation_event_list);
     bruter_push_pointer(stack, automation_event_list_to_list(eventList), NULL, BRUTER_TYPE_LIST);
 }
 
-function(feraw_UnloadAutomationEventList)
+void feraw_UnloadAutomationEventList(BruterList* stack)
 {
     AutomationEventList eventList = automation_event_list_constructor(bruter_pop_pointer(stack));
     UnloadAutomationEventList(eventList);
 }
 
-function(feraw_ExportAutomationEventList)
+void feraw_ExportAutomationEventList(BruterList* stack)
 {
     AutomationEventList eventList = automation_event_list_constructor(bruter_pop_pointer(stack));
     char *fileName = (char*)bruter_pop_pointer(stack);
@@ -2050,104 +2050,104 @@ function(feraw_ExportAutomationEventList)
 }
 
 // needs revision!!!!!
-function(feraw_SetAutomationEventList)
+void feraw_SetAutomationEventList(BruterList* stack)
 {
     AutomationEventList eventList = automation_event_list_constructor(bruter_pop_pointer(stack));
     SetAutomationEventList(&eventList);
 }
 
-function(feraw_SetAutomationEventBaseFrame)
+void feraw_SetAutomationEventBaseFrame(BruterList* stack)
 {
     int baseFrame = bruter_pop_int(stack);
     SetAutomationEventBaseFrame(baseFrame);
 }
 
-function(feraw_StartAutomationEventRecording)
+void feraw_StartAutomationEventRecording(BruterList* stack)
 {
     StartAutomationEventRecording();
 }
 
-function(feraw_StopAutomationEventRecording)
+void feraw_StopAutomationEventRecording(BruterList* stack)
 {
     StopAutomationEventRecording();
 }
 
-function(feraw_PlayAutomationEvent)
+void feraw_PlayAutomationEvent(BruterList* stack)
 {
     AutomationEvent eventList = automation_event_constructor(bruter_pop_pointer(stack));
     PlayAutomationEvent(eventList);
 }
 
 // input-related functions: keyboard
-function(feraw_IsKeyPressed)
+void feraw_IsKeyPressed(BruterList* stack)
 {
     int key = bruter_pop_int(stack);
     bool isPressed = IsKeyPressed(key);
     bruter_push_int(stack, isPressed, NULL, BRUTER_TYPE_ANY);
 }
 
-function(feraw_IsKeyPressedRepeat)
+void feraw_IsKeyPressedRepeat(BruterList* stack)
 {
     int key = bruter_pop_int(stack);
     bool isPressedRepeat = IsKeyPressedRepeat(key);
     bruter_push_int(stack, isPressedRepeat, NULL, BRUTER_TYPE_ANY);
 }
 
-function(feraw_IsKeyDown)
+void feraw_IsKeyDown(BruterList* stack)
 {
     int key = bruter_pop_int(stack);
     bool isDown = IsKeyDown(key);
     bruter_push_int(stack, isDown, NULL, BRUTER_TYPE_ANY);
 }
 
-function(feraw_IsKeyReleased)
+void feraw_IsKeyReleased(BruterList* stack)
 {
     int key = bruter_pop_int(stack);
     bool isReleased = IsKeyReleased(key);
     bruter_push_int(stack, isReleased, NULL, BRUTER_TYPE_ANY);
 }
 
-function(feraw_IsKeyUp)
+void feraw_IsKeyUp(BruterList* stack)
 {
     int key = bruter_pop_int(stack);
     bool isUp = IsKeyUp(key);
     bruter_push_int(stack, isUp, NULL, BRUTER_TYPE_ANY);
 }
 
-function(feraw_GetKeyPressed)
+void feraw_GetKeyPressed(BruterList* stack)
 {
     int key = GetKeyPressed();
     bruter_push_int(stack, key, NULL, BRUTER_TYPE_ANY);
 }
 
-function(feraw_GetCharPressed)
+void feraw_GetCharPressed(BruterList* stack)
 {
     int charCode = GetCharPressed();
     bruter_push_int(stack, charCode, NULL, BRUTER_TYPE_ANY);
 }
 
-function(feraw_SetExitKey)
+void feraw_SetExitKey(BruterList* stack)
 {
     int key = bruter_pop_int(stack);
     SetExitKey(key);
 }
 
 // input-related functions: gamepads
-function(feraw_IsGamepadAvailable)
+void feraw_IsGamepadAvailable(BruterList* stack)
 {
     int gamepad = bruter_pop_int(stack);
     bool isAvailable = IsGamepadAvailable(gamepad);
     bruter_push_int(stack, isAvailable, NULL, BRUTER_TYPE_ANY);
 }
 
-function(feraw_GetGamepadName)
+void feraw_GetGamepadName(BruterList* stack)
 {
     int gamepad = bruter_pop_int(stack);
     const char *name = GetGamepadName(gamepad);
     bruter_push_pointer(stack, strdup(name), NULL, BRUTER_TYPE_BUFFER);
 }
 
-function(feraw_IsGamepadButtonPressed)
+void feraw_IsGamepadButtonPressed(BruterList* stack)
 {
     int gamepad = bruter_pop_int(stack);
     int button = bruter_pop_int(stack);
@@ -2155,7 +2155,7 @@ function(feraw_IsGamepadButtonPressed)
     bruter_push_int(stack, isPressed, NULL, BRUTER_TYPE_ANY);
 }
 
-function(feraw_IsGamepadButtonDown)
+void feraw_IsGamepadButtonDown(BruterList* stack)
 {
     int gamepad = bruter_pop_int(stack);
     int button = bruter_pop_int(stack);
@@ -2163,7 +2163,7 @@ function(feraw_IsGamepadButtonDown)
     bruter_push_int(stack, isDown, NULL, BRUTER_TYPE_ANY);
 }
 
-function(feraw_IsGamepadButtonReleased)
+void feraw_IsGamepadButtonReleased(BruterList* stack)
 {
     int gamepad = bruter_pop_int(stack);
     int button = bruter_pop_int(stack);
@@ -2171,7 +2171,7 @@ function(feraw_IsGamepadButtonReleased)
     bruter_push_int(stack, isReleased, NULL, BRUTER_TYPE_ANY);
 }
 
-function(feraw_IsGamepadButtonUp)
+void feraw_IsGamepadButtonUp(BruterList* stack)
 {
     int gamepad = bruter_pop_int(stack);
     int button = bruter_pop_int(stack);
@@ -2179,21 +2179,21 @@ function(feraw_IsGamepadButtonUp)
     bruter_push_int(stack, isUp, NULL, BRUTER_TYPE_ANY);
 }
 
-function(feraw_GetGamepadButtonPressed)
+void feraw_GetGamepadButtonPressed(BruterList* stack)
 {
     int gamepad = bruter_pop_int(stack);
     int button = GetGamepadButtonPressed();
     bruter_push_int(stack, button, NULL, BRUTER_TYPE_ANY);
 }
 
-function(feraw_GetGamepadAxisCount)
+void feraw_GetGamepadAxisCount(BruterList* stack)
 {
     int gamepad = bruter_pop_int(stack);
     int axisCount = GetGamepadAxisCount(gamepad);
     bruter_push_int(stack, axisCount, NULL, BRUTER_TYPE_ANY);
 }
 
-function(feraw_GetGamepadAxisMovement)
+void feraw_GetGamepadAxisMovement(BruterList* stack)
 {
     int gamepad = bruter_pop_int(stack);
     int axis = bruter_pop_int(stack);
@@ -2201,14 +2201,14 @@ function(feraw_GetGamepadAxisMovement)
     bruter_push_float(stack, movement, NULL, BRUTER_TYPE_FLOAT);
 }
 
-function(feraw_SetGamepadMappings)
+void feraw_SetGamepadMappings(BruterList* stack)
 {
     char *mapping = (char*)bruter_pop_pointer(stack);
     bool success = SetGamepadMappings(mapping);
     bruter_push_int(stack, success, NULL, BRUTER_TYPE_ANY);
 }
 
-function(feraw_SetGamepadVibration)
+void feraw_SetGamepadVibration(BruterList* stack)
 {
     int gamepad = bruter_pop_int(stack);
     float leftVibration = bruter_pop_float(stack);
@@ -2218,86 +2218,86 @@ function(feraw_SetGamepadVibration)
 }
 
 // input-related functions: mouse
-function(feraw_IsMouseButtonPressed)
+void feraw_IsMouseButtonPressed(BruterList* stack)
 {
     int button = bruter_pop_int(stack);
     bool isPressed = IsMouseButtonPressed(button);
     bruter_push_int(stack, isPressed, NULL, BRUTER_TYPE_ANY);
 }
 
-function(feraw_IsMouseButtonDown)
+void feraw_IsMouseButtonDown(BruterList* stack)
 {
     int button = bruter_pop_int(stack);
     bool isDown = IsMouseButtonDown(button);
     bruter_push_int(stack, isDown, NULL, BRUTER_TYPE_ANY);
 }
 
-function(feraw_IsMouseButtonReleased)
+void feraw_IsMouseButtonReleased(BruterList* stack)
 {
     int button = bruter_pop_int(stack);
     bool isReleased = IsMouseButtonReleased(button);
     bruter_push_int(stack, isReleased, NULL, BRUTER_TYPE_ANY);
 }
 
-function(feraw_IsMouseButtonUp)
+void feraw_IsMouseButtonUp(BruterList* stack)
 {
     int button = bruter_pop_int(stack);
     bool isUp = IsMouseButtonUp(button);
     bruter_push_int(stack, isUp, NULL, BRUTER_TYPE_ANY);
 }
 
-function(feraw_GetMouseX)
+void feraw_GetMouseX(BruterList* stack)
 {
     int x = GetMouseX();
     bruter_push_int(stack, x, NULL, BRUTER_TYPE_ANY);
 }
 
-function(feraw_GetMouseY)
+void feraw_GetMouseY(BruterList* stack)
 {
     int y = GetMouseY();
     bruter_push_int(stack, y, NULL, BRUTER_TYPE_ANY);
 }
 
-function(feraw_GetMousePosition)
+void feraw_GetMousePosition(BruterList* stack)
 {
     Vector2 position = GetMousePosition();
     bruter_push_pointer(stack, vector2_to_list(position), NULL, BRUTER_TYPE_LIST);
 }
 
-function(feraw_GetMouseDelta)
+void feraw_GetMouseDelta(BruterList* stack)
 {
     Vector2 delta = GetMouseDelta();
     bruter_push_pointer(stack, vector2_to_list(delta), NULL, BRUTER_TYPE_LIST);
 }
 
-function(feraw_SetMousePosition)
+void feraw_SetMousePosition(BruterList* stack)
 {
     int x = bruter_pop_int(stack);
     int y = bruter_pop_int(stack);
     SetMousePosition(x, y);
 }
 
-function(feraw_SetMouseOffset)
+void feraw_SetMouseOffset(BruterList* stack)
 {
     int offsetX = bruter_pop_int(stack);
     int offsetY = bruter_pop_int(stack);
     SetMouseOffset(offsetX, offsetY);
 }
 
-function(feraw_SetMouseScale)
+void feraw_SetMouseScale(BruterList* stack)
 {
     float scaleX = bruter_pop_float(stack);
     float scaleY = bruter_pop_float(stack);
     SetMouseScale(scaleX, scaleY);
 }
 
-function(feraw_GetMouseWheelMove)
+void feraw_GetMouseWheelMove(BruterList* stack)
 {
     float wheelMove = GetMouseWheelMove();
     bruter_push_float(stack, wheelMove, NULL, BRUTER_TYPE_FLOAT);
 }
 
-function(feraw_SetMouseCursor)
+void feraw_SetMouseCursor(BruterList* stack)
 {
     int cursor = bruter_pop_int(stack);
     SetMouseCursor(cursor);
@@ -2305,97 +2305,97 @@ function(feraw_SetMouseCursor)
 
 // input-related functions: touch
 
-function(feraw_GetTouchX)
+void feraw_GetTouchX(BruterList* stack)
 {
     int touchX = GetTouchX();
     bruter_push_int(stack, touchX, NULL, BRUTER_TYPE_ANY);
 }
 
-function(feraw_GetTouchY)
+void feraw_GetTouchY(BruterList* stack)
 {
     int touchY = GetTouchY();
     bruter_push_int(stack, touchY, NULL, BRUTER_TYPE_ANY);
 }
 
-function(feraw_GetTouchPosition)
+void feraw_GetTouchPosition(BruterList* stack)
 {
     int index = bruter_pop_int(stack);
     Vector2 position = GetTouchPosition(index);
     bruter_push_pointer(stack, vector2_to_list(position), NULL, BRUTER_TYPE_LIST);
 }
 
-function(feraw_GetTouchPointId)
+void feraw_GetTouchPointId(BruterList* stack)
 {
     int index = bruter_pop_int(stack);
     int id = GetTouchPointId(index);
     bruter_push_int(stack, id, NULL, BRUTER_TYPE_ANY);
 }
 
-function(feraw_GetTouchPointCount)
+void feraw_GetTouchPointCount(BruterList* stack)
 {
     int count = GetTouchPointCount();
     bruter_push_int(stack, count, NULL, BRUTER_TYPE_ANY);
 }
 
 // Gestures and Touch Handling functions
-function(feraw_SetGesturesEnabled)
+void feraw_SetGesturesEnabled(BruterList* stack)
 {
     unsigned int gestureFlags = bruter_pop_int(stack);
     SetGesturesEnabled(gestureFlags);
 }
 
-function(feraw_IsGestureDetected)
+void feraw_IsGestureDetected(BruterList* stack)
 {
     int gesture = bruter_pop_int(stack);
     bool detected = IsGestureDetected(gesture);
     bruter_push_int(stack, detected, NULL, BRUTER_TYPE_ANY);
 }
 
-function(feraw_GetGestureDetected)
+void feraw_GetGestureDetected(BruterList* stack)
 {
     int gesture = GetGestureDetected();
     bruter_push_int(stack, gesture, NULL, BRUTER_TYPE_ANY);
 }
 
-function(feraw_GetGestureHoldDuration)
+void feraw_GetGestureHoldDuration(BruterList* stack)
 {
     float duration = GetGestureHoldDuration();
     bruter_push_float(stack, duration, NULL, BRUTER_TYPE_FLOAT);
 }
 
-function(feraw_GetGestureDragVector)
+void feraw_GetGestureDragVector(BruterList* stack)
 {
     Vector2 dragVector = GetGestureDragVector();
     bruter_push_pointer(stack, vector2_to_list(dragVector), NULL, BRUTER_TYPE_LIST);
 }
 
-function(feraw_GetGestureDragAngle)
+void feraw_GetGestureDragAngle(BruterList* stack)
 {
     float angle = GetGestureDragAngle();
     bruter_push_float(stack, angle, NULL, BRUTER_TYPE_FLOAT);
 }
 
-function(feraw_GetGesturePinchVector)
+void feraw_GetGesturePinchVector(BruterList* stack)
 {
     Vector2 pinchVector = GetGesturePinchVector();
     bruter_push_pointer(stack, vector2_to_list(pinchVector), NULL, BRUTER_TYPE_LIST);
 }
 
-function(feraw_GetGesturePinchAngle)
+void feraw_GetGesturePinchAngle(BruterList* stack)
 {
     float angle = GetGesturePinchAngle();
     bruter_push_float(stack, angle, NULL, BRUTER_TYPE_FLOAT);
 }
 
 // Camera system functions
-function(feraw_UpdateCamera)
+void feraw_UpdateCamera(BruterList* stack)
 {
     Camera3D *camera = (Camera3D*)bruter_pop_pointer(stack);
     int mode = bruter_pop_int(stack);
     UpdateCamera(camera, mode);
 }
 
-function(feraw_UpdateCameraPro)
+void feraw_UpdateCameraPro(BruterList* stack)
 {
     Camera3D *camera = (Camera3D*)bruter_pop_pointer(stack);
     Vector3 move = vector3_constructor(bruter_pop_pointer(stack));
@@ -2405,27 +2405,27 @@ function(feraw_UpdateCameraPro)
 }
 
 // basic shapes drawing functions
-function(feraw_SetShapesTexture)
+void feraw_SetShapesTexture(BruterList* stack)
 {
     Texture2D texture = texture_constructor(bruter_pop_pointer(stack));
     Rectangle source = rectangle_constructor(bruter_pop_pointer(stack));
     SetShapesTexture(texture, source);
 }
 
-function(feraw_GetShapesTexture)
+void feraw_GetShapesTexture(BruterList* stack)
 {
     Texture2D texture = GetShapesTexture();
     bruter_push_pointer(stack, texture_to_list(texture), NULL, BRUTER_TYPE_LIST);
 }
 
-function(feraw_GetShapesTextureRectangle)
+void feraw_GetShapesTextureRectangle(BruterList* stack)
 {
     Rectangle source = GetShapesTextureRectangle();
     bruter_push_pointer(stack, rectangle_to_list(source), NULL, BRUTER_TYPE_LIST);
 }
 
 // basic shapes drawing functions
-function(feraw_DrawPixel)
+void feraw_DrawPixel(BruterList* stack)
 {
     int posX = bruter_pop_int(stack);
     int posY = bruter_pop_int(stack);
@@ -2433,7 +2433,7 @@ function(feraw_DrawPixel)
     DrawPixel(posX, posY, color);
 }
 
-function(feraw_DrawLine)
+void feraw_DrawLine(BruterList* stack)
 {
     int startX = bruter_pop_int(stack);
     int startY = bruter_pop_int(stack);
@@ -2443,7 +2443,7 @@ function(feraw_DrawLine)
     DrawLine(startX, startY, endX, endY, color);
 }
 
-function(feraw_DrawLineEx)
+void feraw_DrawLineEx(BruterList* stack)
 {
     Vector2 start = vector2_constructor(bruter_pop_pointer(stack));
     Vector2 end = vector2_constructor(bruter_pop_pointer(stack));
@@ -2452,7 +2452,7 @@ function(feraw_DrawLineEx)
     DrawLineEx(start, end, thick, color);
 }
 
-function(feraw_DrawLineStrip)
+void feraw_DrawLineStrip(BruterList* stack)
 {
     Vector2 *points = bruter_pop_pointer(stack);
     int pointCount = bruter_pop_int(stack);
@@ -2460,7 +2460,7 @@ function(feraw_DrawLineStrip)
     DrawLineStrip(points, pointCount, color);
 }
 
-function(feraw_DrawLineBezier)
+void feraw_DrawLineBezier(BruterList* stack)
 {
     Vector2 start = vector2_constructor(bruter_pop_pointer(stack));
     Vector2 end = vector2_constructor(bruter_pop_pointer(stack));
@@ -2469,7 +2469,7 @@ function(feraw_DrawLineBezier)
     DrawLineBezier(start, end, thick, color);
 }
 
-function(feraw_DrawCircle)
+void feraw_DrawCircle(BruterList* stack)
 {
     int centerX = bruter_pop_int(stack);
     int centerY = bruter_pop_int(stack);
@@ -2478,7 +2478,7 @@ function(feraw_DrawCircle)
     DrawCircle(centerX, centerY, radius, color);
 }
 
-function(feraw_DrawCircleSector)
+void feraw_DrawCircleSector(BruterList* stack)
 {
     Vector2 center = vector2_constructor(bruter_pop_pointer(stack));
     float radius = bruter_pop_float(stack);
@@ -2489,7 +2489,7 @@ function(feraw_DrawCircleSector)
     DrawCircleSector(center, radius, startAngle, endAngle, segments, color);
 }
 
-function(feraw_DrawCircleSectorLines)
+void feraw_DrawCircleSectorLines(BruterList* stack)
 {
     Vector2 center = vector2_constructor(bruter_pop_pointer(stack));
     float radius = bruter_pop_float(stack);
@@ -2500,7 +2500,7 @@ function(feraw_DrawCircleSectorLines)
     DrawCircleSectorLines(center, radius, startAngle, endAngle, segments, color);
 }
 
-function(feraw_DrawCircleGradient)
+void feraw_DrawCircleGradient(BruterList* stack)
 {
     int centerX = bruter_pop_int(stack);
     int centerY = bruter_pop_int(stack);
@@ -2510,7 +2510,7 @@ function(feraw_DrawCircleGradient)
     DrawCircleGradient(centerX, centerY, radius, innerColor, outerColor);
 }
 
-function(feraw_DrawCircleLines)
+void feraw_DrawCircleLines(BruterList* stack)
 {
     int centerX = bruter_pop_int(stack);
     int centerY = bruter_pop_int(stack);
@@ -2519,7 +2519,7 @@ function(feraw_DrawCircleLines)
     DrawCircleLines(centerX, centerY, radius, color);
 }
 
-function(feraw_DrawRectangle)
+void feraw_DrawRectangle(BruterList* stack)
 {
     int posX = bruter_pop_int(stack);
     int posY = bruter_pop_int(stack);
@@ -2528,14 +2528,14 @@ function(feraw_DrawRectangle)
     Color color = color_from_int(bruter_pop_int(stack));
     DrawRectangle(posX, posY, width, height, color);
 }
-function(feraw_DrawRectangleRec)
+void feraw_DrawRectangleRec(BruterList* stack)
 {
     Rectangle rec = rectangle_constructor(bruter_pop_pointer(stack));
     Color color = color_from_int(bruter_pop_int(stack));
     DrawRectangleRec(rec, color);
 }
 
-function(feraw_DrawRectanglePro)
+void feraw_DrawRectanglePro(BruterList* stack)
 {
     Rectangle rec = rectangle_constructor(bruter_pop_pointer(stack));
     Vector2 origin = vector2_constructor(bruter_pop_pointer(stack));
@@ -2544,7 +2544,7 @@ function(feraw_DrawRectanglePro)
     DrawRectanglePro(rec, origin, rotation, color);
 }
 
-function(feraw_DrawRectangleGradientH)
+void feraw_DrawRectangleGradientH(BruterList* stack)
 {
     int posx = bruter_pop_int(stack);
     int posy = bruter_pop_int(stack);
@@ -2555,7 +2555,7 @@ function(feraw_DrawRectangleGradientH)
     DrawRectangleGradientH(posx, posy, width, height, left, right);
 }
 
-function(feraw_DrawRectangleGradientEx)
+void feraw_DrawRectangleGradientEx(BruterList* stack)
 {
     Rectangle rec = rectangle_constructor(bruter_pop_pointer(stack));
     Color color1 = color_from_int(bruter_pop_int(stack));
@@ -2565,7 +2565,7 @@ function(feraw_DrawRectangleGradientEx)
     DrawRectangleGradientEx(rec, color1, color2, color3, color4);
 }
 
-function(feraw_DrawRectangleLines)
+void feraw_DrawRectangleLines(BruterList* stack)
 {
     int posX = bruter_pop_int(stack);
     int posY = bruter_pop_int(stack);
@@ -2575,7 +2575,7 @@ function(feraw_DrawRectangleLines)
     DrawRectangleLines(posX, posY, width, height, color);
 }
 
-function(feraw_DrawRectangleLinesEx)
+void feraw_DrawRectangleLinesEx(BruterList* stack)
 {
     Rectangle rec = rectangle_constructor(bruter_pop_pointer(stack));
     float thick = bruter_pop_float(stack);
@@ -2583,7 +2583,7 @@ function(feraw_DrawRectangleLinesEx)
     DrawRectangleLinesEx(rec, thick, color);
 }
 
-function(feraw_DrawRectangleRounded)
+void feraw_DrawRectangleRounded(BruterList* stack)
 {
     Rectangle rec = rectangle_constructor(bruter_pop_pointer(stack));
     float roundness = bruter_pop_float(stack);
@@ -2592,7 +2592,7 @@ function(feraw_DrawRectangleRounded)
     DrawRectangleRounded(rec, roundness, segments, color);
 }
 
-function(feraw_DrawRectangleRoundedLines)
+void feraw_DrawRectangleRoundedLines(BruterList* stack)
 {
     Rectangle rec = rectangle_constructor(bruter_pop_pointer(stack));
     float roundness = bruter_pop_float(stack);
@@ -2601,7 +2601,7 @@ function(feraw_DrawRectangleRoundedLines)
     DrawRectangleRoundedLines(rec, roundness, segments, color);
 }
 
-function(feraw_DrawRectangleRoundedLinesEx)
+void feraw_DrawRectangleRoundedLinesEx(BruterList* stack)
 {
     Rectangle rec = rectangle_constructor(bruter_pop_pointer(stack));
     float roundness = bruter_pop_float(stack);
@@ -2611,7 +2611,7 @@ function(feraw_DrawRectangleRoundedLinesEx)
     DrawRectangleRoundedLinesEx(rec, roundness, segments, thick, color);
 }
 
-function(feraw_DrawTriangle)
+void feraw_DrawTriangle(BruterList* stack)
 {
     Vector2 v1 = vector2_constructor(bruter_pop_pointer(stack));
     Vector2 v2 = vector2_constructor(bruter_pop_pointer(stack));
@@ -2620,7 +2620,7 @@ function(feraw_DrawTriangle)
     DrawTriangle(v1, v2, v3, color);
 }
 
-function(feraw_DrawTriangleLines)
+void feraw_DrawTriangleLines(BruterList* stack)
 {
     Vector2 v1 = vector2_constructor(bruter_pop_pointer(stack));
     Vector2 v2 = vector2_constructor(bruter_pop_pointer(stack));
@@ -2629,7 +2629,7 @@ function(feraw_DrawTriangleLines)
     DrawTriangleLines(v1, v2, v3, color);
 }
 
-function(feraw_DrawTriangleFan)
+void feraw_DrawTriangleFan(BruterList* stack)
 {
     Vector2 *points = bruter_pop_pointer(stack);
     int pointCount = bruter_pop_int(stack);
@@ -2637,7 +2637,7 @@ function(feraw_DrawTriangleFan)
     DrawTriangleFan(points, pointCount, color);
 }
 
-function(feraw_DrawTriangleStrip)
+void feraw_DrawTriangleStrip(BruterList* stack)
 {
     Vector2 *points = bruter_pop_pointer(stack);
     int pointCount = bruter_pop_int(stack);
@@ -2645,7 +2645,7 @@ function(feraw_DrawTriangleStrip)
     DrawTriangleStrip(points, pointCount, color);
 }
 
-function(feraw_DrawPoly)
+void feraw_DrawPoly(BruterList* stack)
 {
     Vector2 center = vector2_constructor(bruter_pop_pointer(stack));
     int sides = bruter_pop_int(stack);
@@ -2655,7 +2655,7 @@ function(feraw_DrawPoly)
     DrawPoly(center, sides, radius, rotation, color);
 }
 
-function(feraw_DrawPolyLines)
+void feraw_DrawPolyLines(BruterList* stack)
 {
     Vector2 center = vector2_constructor(bruter_pop_pointer(stack));
     int sides = bruter_pop_int(stack);
@@ -2665,7 +2665,7 @@ function(feraw_DrawPolyLines)
     DrawPolyLines(center, sides, radius, rotation, color);
 }
 
-function(feraw_DrawPolyLinesEx)
+void feraw_DrawPolyLinesEx(BruterList* stack)
 {
     Vector2 center = vector2_constructor(bruter_pop_pointer(stack));
     int sides = bruter_pop_int(stack);
@@ -2677,7 +2677,7 @@ function(feraw_DrawPolyLinesEx)
 }
 
 // splines drawing functions
-function(feraw_DrawSplineLinear)
+void feraw_DrawSplineLinear(BruterList* stack)
 {
     Vector2 *points = (Vector2*)bruter_pop_pointer(stack);
     int pointCount = bruter_pop_int(stack);
@@ -2686,7 +2686,7 @@ function(feraw_DrawSplineLinear)
     DrawSplineLinear(points, pointCount, thick, color);
 }
 
-function(feraw_DrawSplineBasis)
+void feraw_DrawSplineBasis(BruterList* stack)
 {
     Vector2 *points = (Vector2*)bruter_pop_pointer(stack);
     int pointCount = bruter_pop_int(stack);
@@ -2695,7 +2695,7 @@ function(feraw_DrawSplineBasis)
     DrawSplineBasis(points, pointCount, thick, color);
 }
 
-function(feraw_DrawSplineCatmullRom)
+void feraw_DrawSplineCatmullRom(BruterList* stack)
 {
     Vector2 *points = (Vector2*)bruter_pop_pointer(stack);
     int pointCount = bruter_pop_int(stack);
@@ -2704,7 +2704,7 @@ function(feraw_DrawSplineCatmullRom)
     DrawSplineCatmullRom(points, pointCount, thick, color);
 }
 
-function(feraw_DrawSplineBezierQuadratic)
+void feraw_DrawSplineBezierQuadratic(BruterList* stack)
 {
     Vector2 *points = (Vector2*)bruter_pop_pointer(stack);
     int pointCount = bruter_pop_int(stack);
@@ -2713,7 +2713,7 @@ function(feraw_DrawSplineBezierQuadratic)
     DrawSplineBezierQuadratic(points, pointCount, thick, color);
 }
 
-function(feraw_DrawSplineBezierCubic)
+void feraw_DrawSplineBezierCubic(BruterList* stack)
 {
     Vector2 *points = (Vector2*)bruter_pop_pointer(stack);
     int pointCount = bruter_pop_int(stack);
@@ -2722,7 +2722,7 @@ function(feraw_DrawSplineBezierCubic)
     DrawSplineBezierCubic(points, pointCount, thick, color);
 }
 
-function(feraw_DrawSplineSegmentLinear)
+void feraw_DrawSplineSegmentLinear(BruterList* stack)
 {
     Vector2 p1 = vector2_constructor(bruter_pop_pointer(stack));
     Vector2 p2 = vector2_constructor(bruter_pop_pointer(stack));
@@ -2731,7 +2731,7 @@ function(feraw_DrawSplineSegmentLinear)
     DrawSplineSegmentLinear(p1, p2, thick, color);
 }
 
-function(feraw_DrawSplineSegmentBasis)
+void feraw_DrawSplineSegmentBasis(BruterList* stack)
 {
     Vector2 p1 = vector2_constructor(bruter_pop_pointer(stack));
     Vector2 p2 = vector2_constructor(bruter_pop_pointer(stack));
@@ -2742,7 +2742,7 @@ function(feraw_DrawSplineSegmentBasis)
     DrawSplineSegmentBasis(p1, p2, p3, p4, thick, color);
 }
 
-function(feraw_DrawSplineSegmentCatmullRom)
+void feraw_DrawSplineSegmentCatmullRom(BruterList* stack)
 {
     Vector2 p1 = vector2_constructor(bruter_pop_pointer(stack));
     Vector2 p2 = vector2_constructor(bruter_pop_pointer(stack));
@@ -2753,7 +2753,7 @@ function(feraw_DrawSplineSegmentCatmullRom)
     DrawSplineSegmentCatmullRom(p1, p2, p3, p4, thick, color);
 }
 
-function(feraw_DrawSplineSegmentBezierQuadratic)
+void feraw_DrawSplineSegmentBezierQuadratic(BruterList* stack)
 {
     Vector2 p1 = vector2_constructor(bruter_pop_pointer(stack));
     Vector2 p2 = vector2_constructor(bruter_pop_pointer(stack));
@@ -2763,7 +2763,7 @@ function(feraw_DrawSplineSegmentBezierQuadratic)
     DrawSplineSegmentBezierQuadratic(p1, p2, p3, thick, color);
 }
 
-function(feraw_DrawSplineSegmentBezierCubic)
+void feraw_DrawSplineSegmentBezierCubic(BruterList* stack)
 {
     Vector2 p1 = vector2_constructor(bruter_pop_pointer(stack));
     Vector2 p2 = vector2_constructor(bruter_pop_pointer(stack));
@@ -2775,7 +2775,7 @@ function(feraw_DrawSplineSegmentBezierCubic)
 }
 
 // spline segment point evaluation functions
-function(feraw_GetSplinePointLinear)
+void feraw_GetSplinePointLinear(BruterList* stack)
 {
     Vector2 startPos = vector2_constructor(bruter_pop_pointer(stack));
     Vector2 endPos = vector2_constructor(bruter_pop_pointer(stack));
@@ -2784,7 +2784,7 @@ function(feraw_GetSplinePointLinear)
     bruter_push_pointer(stack, vector2_to_list(point), NULL, BRUTER_TYPE_LIST);
 }
 
-function(feraw_GetSplinePointBasis)
+void feraw_GetSplinePointBasis(BruterList* stack)
 {
     Vector2 p1 = vector2_constructor(bruter_pop_pointer(stack));
     Vector2 p2 = vector2_constructor(bruter_pop_pointer(stack));
@@ -2795,7 +2795,7 @@ function(feraw_GetSplinePointBasis)
     bruter_push_pointer(stack, vector2_to_list(point), NULL, BRUTER_TYPE_LIST);
 }
 
-function(feraw_GetSplinePointCatmullRom)
+void feraw_GetSplinePointCatmullRom(BruterList* stack)
 {
     Vector2 p1 = vector2_constructor(bruter_pop_pointer(stack));
     Vector2 p2 = vector2_constructor(bruter_pop_pointer(stack));
@@ -2806,7 +2806,7 @@ function(feraw_GetSplinePointCatmullRom)
     bruter_push_pointer(stack, vector2_to_list(point), NULL, BRUTER_TYPE_LIST);
 }
 
-function(feraw_GetSplinePointBezierQuad)
+void feraw_GetSplinePointBezierQuad(BruterList* stack)
 {
     Vector2 p1 = vector2_constructor(bruter_pop_pointer(stack));
     Vector2 p2 = vector2_constructor(bruter_pop_pointer(stack));
@@ -2816,7 +2816,7 @@ function(feraw_GetSplinePointBezierQuad)
     bruter_push_pointer(stack, vector2_to_list(point), NULL, BRUTER_TYPE_LIST);
 }
 
-function(feraw_GetSplinePointBezierCubic)
+void feraw_GetSplinePointBezierCubic(BruterList* stack)
 {
     Vector2 p1 = vector2_constructor(bruter_pop_pointer(stack));
     Vector2 p2 = vector2_constructor(bruter_pop_pointer(stack));
@@ -2828,7 +2828,7 @@ function(feraw_GetSplinePointBezierCubic)
 }
 
 // basic shapes collision detection functions
-function(feraw_CheckCollisionRecs)
+void feraw_CheckCollisionRecs(BruterList* stack)
 {
     Rectangle rec1 = rectangle_constructor(bruter_pop_pointer(stack));
     Rectangle rec2 = rectangle_constructor(bruter_pop_pointer(stack));
@@ -2836,7 +2836,7 @@ function(feraw_CheckCollisionRecs)
     bruter_push_int(stack, collision, NULL, BRUTER_TYPE_ANY);
 }
 
-function(feraw_CheckCollisionCircles)
+void feraw_CheckCollisionCircles(BruterList* stack)
 {
     Vector2 center1 = vector2_constructor(bruter_pop_pointer(stack));
     float radius1 = bruter_pop_float(stack);
@@ -2846,7 +2846,7 @@ function(feraw_CheckCollisionCircles)
     bruter_push_int(stack, collision, NULL, BRUTER_TYPE_ANY);
 }
 
-function(feraw_CheckCollisionCircleRec)
+void feraw_CheckCollisionCircleRec(BruterList* stack)
 {
     Vector2 center = vector2_constructor(bruter_pop_pointer(stack));
     float radius = bruter_pop_float(stack);
@@ -2855,7 +2855,7 @@ function(feraw_CheckCollisionCircleRec)
     bruter_push_int(stack, collision, NULL, BRUTER_TYPE_ANY);
 }
 
-function(feraw_CheckCollisionCircleLine)
+void feraw_CheckCollisionCircleLine(BruterList* stack)
 {
     Vector2 center = vector2_constructor(bruter_pop_pointer(stack));
     float radius = bruter_pop_float(stack);
@@ -2865,7 +2865,7 @@ function(feraw_CheckCollisionCircleLine)
     bruter_push_int(stack, collision, NULL, BRUTER_TYPE_ANY);
 }
 
-function(feraw_CheckCollisionPointRec)
+void feraw_CheckCollisionPointRec(BruterList* stack)
 {
     Vector2 point = vector2_constructor(bruter_pop_pointer(stack));
     Rectangle rec = rectangle_constructor(bruter_pop_pointer(stack));
@@ -2873,7 +2873,7 @@ function(feraw_CheckCollisionPointRec)
     bruter_push_int(stack, collision, NULL, BRUTER_TYPE_ANY);
 }
 
-function(feraw_CheckCollisionPointCircle)
+void feraw_CheckCollisionPointCircle(BruterList* stack)
 {
     Vector2 point = vector2_constructor(bruter_pop_pointer(stack));
     Vector2 center = vector2_constructor(bruter_pop_pointer(stack));
@@ -2882,7 +2882,7 @@ function(feraw_CheckCollisionPointCircle)
     bruter_push_int(stack, collision, NULL, BRUTER_TYPE_ANY);
 }
 
-function(feraw_CheckCollisionPointTriangle)
+void feraw_CheckCollisionPointTriangle(BruterList* stack)
 {
     Vector2 point = vector2_constructor(bruter_pop_pointer(stack));
     Vector2 p1 = vector2_constructor(bruter_pop_pointer(stack));
@@ -2892,7 +2892,7 @@ function(feraw_CheckCollisionPointTriangle)
     bruter_push_int(stack, collision, NULL, BRUTER_TYPE_ANY);
 }
 
-function(feraw_CheckCollisionPointLine)
+void feraw_CheckCollisionPointLine(BruterList* stack)
 {
     Vector2 point = vector2_constructor(bruter_pop_pointer(stack));
     Vector2 start = vector2_constructor(bruter_pop_pointer(stack));
@@ -2902,7 +2902,7 @@ function(feraw_CheckCollisionPointLine)
     bruter_push_int(stack, collision, NULL, BRUTER_TYPE_ANY);
 }
 
-function(feraw_CheckCollisionPointPoly)
+void feraw_CheckCollisionPointPoly(BruterList* stack)
 {
     Vector2 point = vector2_constructor(bruter_pop_pointer(stack));
     Vector2 *points = (Vector2*)bruter_pop_pointer(stack);
@@ -2911,7 +2911,7 @@ function(feraw_CheckCollisionPointPoly)
     bruter_push_int(stack, collision, NULL, BRUTER_TYPE_ANY);
 }
 
-function(feraw_CheckCollisionLines)
+void feraw_CheckCollisionLines(BruterList* stack)
 {
     Vector2 start1 = vector2_constructor(bruter_pop_pointer(stack));
     Vector2 end1 = vector2_constructor(bruter_pop_pointer(stack));
@@ -2923,7 +2923,7 @@ function(feraw_CheckCollisionLines)
     bruter_push_pointer(stack, vector2_to_list(collisionPoint), NULL, BRUTER_TYPE_LIST);
 }
 
-function(feraw_GetCollisionRec)
+void feraw_GetCollisionRec(BruterList* stack)
 {
     Rectangle rec1 = rectangle_constructor(bruter_pop_pointer(stack));
     Rectangle rec2 = rectangle_constructor(bruter_pop_pointer(stack));
@@ -2932,14 +2932,14 @@ function(feraw_GetCollisionRec)
 }
 
 // image loading functions
-function(feraw_LoadImage)
+void feraw_LoadImage(BruterList* stack)
 {
     char *fileName = (char*)bruter_pop_pointer(stack);
     Image image = LoadImage(fileName);
     bruter_push_pointer(stack, image_to_list(image), NULL, BRUTER_TYPE_LIST);
 }
 
-function(feraw_LoadImageRaw)
+void feraw_LoadImageRaw(BruterList* stack)
 {
     char *fileName = (char*)bruter_pop_pointer(stack);
     int width = bruter_pop_int(stack);
@@ -2950,7 +2950,7 @@ function(feraw_LoadImageRaw)
     bruter_push_pointer(stack, image_to_list(image), NULL, BRUTER_TYPE_LIST);
 }
 
-function(feraw_LoadImageAnim)
+void feraw_LoadImageAnim(BruterList* stack)
 {
     char *fileName = (char*)bruter_pop_pointer(stack);
     int *framesCount = (int*)bruter_pop_pointer(stack);
@@ -2958,7 +2958,7 @@ function(feraw_LoadImageAnim)
     bruter_push_pointer(stack, &images, NULL, BRUTER_TYPE_BUFFER);
 }
 
-function(feraw_LoadImageAnimFromMemory)
+void feraw_LoadImageAnimFromMemory(BruterList* stack)
 {
     char *fileType = (char*)bruter_pop_pointer(stack);
     const unsigned char *fileData = (const unsigned char*)bruter_pop_pointer(stack);
@@ -2968,7 +2968,7 @@ function(feraw_LoadImageAnimFromMemory)
     bruter_push_pointer(stack, &images, NULL, BRUTER_TYPE_BUFFER);
 }
 
-function(feraw_LoadImageFromMemory)
+void feraw_LoadImageFromMemory(BruterList* stack)
 {
     char *fileType = (char*)bruter_pop_pointer(stack);
     const unsigned char *fileData = (const unsigned char*)bruter_pop_pointer(stack);
@@ -2977,33 +2977,33 @@ function(feraw_LoadImageFromMemory)
     bruter_push_pointer(stack, image_to_list(image), NULL, BRUTER_TYPE_LIST);
 }
 
-function(feraw_LoadImageFromTexture)
+void feraw_LoadImageFromTexture(BruterList* stack)
 {
     Texture2D texture = texture_constructor(bruter_pop_pointer(stack));
     Image image = LoadImageFromTexture(texture);
     bruter_push_pointer(stack, image_to_list(image), NULL, BRUTER_TYPE_LIST);
 }
 
-function(feraw_LoadImageFromScreen)
+void feraw_LoadImageFromScreen(BruterList* stack)
 {
     Image image = LoadImageFromScreen();
     bruter_push_pointer(stack, image_to_list(image), NULL, BRUTER_TYPE_LIST);
 }
 
-function(feraw_IsImageValid)
+void feraw_IsImageValid(BruterList* stack)
 {
     Image image = image_constructor(bruter_pop_pointer(stack));
     bool isValid = IsImageValid(image);
     bruter_push_int(stack, isValid, NULL, BRUTER_TYPE_ANY);
 }
 
-function(feraw_UnloadImage)
+void feraw_UnloadImage(BruterList* stack)
 {
     Image image = image_constructor(bruter_pop_pointer(stack));
     UnloadImage(image);
 }
 
-function(feraw_ExportImage)
+void feraw_ExportImage(BruterList* stack)
 {
     Image image = image_constructor(bruter_pop_pointer(stack));
     char *fileName = (char*)bruter_pop_pointer(stack);
@@ -3011,7 +3011,7 @@ function(feraw_ExportImage)
     bruter_push_int(stack, success, NULL, BRUTER_TYPE_ANY);
 }
 
-function(feraw_ExportImageToMemory)
+void feraw_ExportImageToMemory(BruterList* stack)
 {
     Image image = image_constructor(bruter_pop_pointer(stack));
     char *fileType = (char*)bruter_pop_pointer(stack);
@@ -3020,7 +3020,7 @@ function(feraw_ExportImageToMemory)
     bruter_push_pointer(stack, data, NULL, BRUTER_TYPE_BUFFER);
 }
 
-function(feraw_ExportImageAsCode)
+void feraw_ExportImageAsCode(BruterList* stack)
 {
     Image image = image_constructor(bruter_pop_pointer(stack));
     char *fileName = (char*)bruter_pop_pointer(stack);
@@ -3029,7 +3029,7 @@ function(feraw_ExportImageAsCode)
 }
 
 // image generation functions
-function(feraw_GenImageColor)
+void feraw_GenImageColor(BruterList* stack)
 {
     int width = bruter_pop_int(stack);
     int height = bruter_pop_int(stack);
@@ -3038,7 +3038,7 @@ function(feraw_GenImageColor)
     bruter_push_pointer(stack, image_to_list(image), NULL, BRUTER_TYPE_LIST);
 }
 
-function(feraw_GenImageGradientLinear)
+void feraw_GenImageGradientLinear(BruterList* stack)
 {
     int width = bruter_pop_int(stack);
     int height = bruter_pop_int(stack);
@@ -3049,7 +3049,7 @@ function(feraw_GenImageGradientLinear)
     bruter_push_pointer(stack, image_to_list(image), NULL, BRUTER_TYPE_LIST);
 }
 
-function(feraw_GenImageGradientRadial)
+void feraw_GenImageGradientRadial(BruterList* stack)
 {
     int width = bruter_pop_int(stack);
     int height = bruter_pop_int(stack);
@@ -3060,7 +3060,7 @@ function(feraw_GenImageGradientRadial)
     bruter_push_pointer(stack, image_to_list(image), NULL, BRUTER_TYPE_LIST);
 }
 
-function(feraw_GenImageGradientSquare)
+void feraw_GenImageGradientSquare(BruterList* stack)
 {
     int width = bruter_pop_int(stack);
     int height = bruter_pop_int(stack);
@@ -3071,7 +3071,7 @@ function(feraw_GenImageGradientSquare)
     bruter_push_pointer(stack, image_to_list(image), NULL, BRUTER_TYPE_LIST);
 }
 
-function(feraw_GenImageChecked)
+void feraw_GenImageChecked(BruterList* stack)
 {
     int width = bruter_pop_int(stack);
     int height = bruter_pop_int(stack);
@@ -3083,7 +3083,7 @@ function(feraw_GenImageChecked)
     bruter_push_pointer(stack, image_to_list(image), NULL, BRUTER_TYPE_LIST);
 }
 
-function(feraw_GenImageWhiteNoise)
+void feraw_GenImageWhiteNoise(BruterList* stack)
 {
     int width = bruter_pop_int(stack);
     int height = bruter_pop_int(stack);
@@ -3092,7 +3092,7 @@ function(feraw_GenImageWhiteNoise)
     bruter_push_pointer(stack, image_to_list(image), NULL, BRUTER_TYPE_LIST);
 }
 
-function(feraw_GenImagePerlinNoise)
+void feraw_GenImagePerlinNoise(BruterList* stack)
 {
     int width = bruter_pop_int(stack);
     int height = bruter_pop_int(stack);
@@ -3103,7 +3103,7 @@ function(feraw_GenImagePerlinNoise)
     bruter_push_pointer(stack, image_to_list(image), NULL, BRUTER_TYPE_LIST);
 }
 
-function(feraw_GenImageCellular)
+void feraw_GenImageCellular(BruterList* stack)
 {
     int width = bruter_pop_int(stack);
     int height = bruter_pop_int(stack);
@@ -3112,7 +3112,7 @@ function(feraw_GenImageCellular)
     bruter_push_pointer(stack, image_to_list(image), NULL, BRUTER_TYPE_LIST);
 }
 
-function(feraw_GenImageText)
+void feraw_GenImageText(BruterList* stack)
 {
     int width = bruter_pop_int(stack);
     int height = bruter_pop_int(stack);
@@ -3123,14 +3123,14 @@ function(feraw_GenImageText)
 
 // image manipulation functions
 
-function(feraw_ImageCopy)
+void feraw_ImageCopy(BruterList* stack)
 {
     Image image = image_constructor(bruter_pop_pointer(stack));
     Image copiedImage = ImageCopy(image);
     bruter_push_pointer(stack, image_to_list(copiedImage), NULL, BRUTER_TYPE_LIST);
 }
 
-function(feraw_ImageFromImage)
+void feraw_ImageFromImage(BruterList* stack)
 {
     Image image = image_constructor(bruter_pop_pointer(stack));
     Rectangle rec = rectangle_constructor(bruter_pop_pointer(stack));
@@ -3138,7 +3138,7 @@ function(feraw_ImageFromImage)
     bruter_push_pointer(stack, image_to_list(subImage), NULL, BRUTER_TYPE_LIST);
 }
 
-function(feraw_ImageFromChannel)
+void feraw_ImageFromChannel(BruterList* stack)
 {
     Image image = image_constructor(bruter_pop_pointer(stack));
     int channel = bruter_pop_int(stack);
@@ -3146,7 +3146,7 @@ function(feraw_ImageFromChannel)
     bruter_push_pointer(stack, image_to_list(channelImage), NULL, BRUTER_TYPE_LIST);
 }
 
-function(feraw_ImageText)
+void feraw_ImageText(BruterList* stack)
 {
     char *text = (char*)bruter_pop_pointer(stack);
     int fontSize = bruter_pop_int(stack);
@@ -3155,7 +3155,7 @@ function(feraw_ImageText)
     bruter_push_pointer(stack, image_to_list(image), NULL, BRUTER_TYPE_LIST);
 }
 
-function(feraw_ImageTextEx)
+void feraw_ImageTextEx(BruterList* stack)
 {
     Font font = font_constructor(bruter_pop_pointer(stack));
     char *text = (char*)bruter_pop_pointer(stack);
@@ -3166,14 +3166,14 @@ function(feraw_ImageTextEx)
     bruter_push_pointer(stack, image_to_list(image), NULL, BRUTER_TYPE_LIST);
 }
 
-function(feraw_ImageFormat)
+void feraw_ImageFormat(BruterList* stack)
 {
     Image image = image_constructor(bruter_pop_pointer(stack));
     int newFormat = bruter_pop_int(stack);
     ImageFormat(&image, newFormat);
 }
 
-function(feraw_ImageToPot)
+void feraw_ImageToPot(BruterList* stack)
 {
     Image image = image_constructor(bruter_pop_pointer(stack));
     Color fill = color_from_int(bruter_pop_int(stack));
@@ -3181,7 +3181,7 @@ function(feraw_ImageToPot)
     bruter_push_pointer(stack, image_to_list(image), NULL, BRUTER_TYPE_LIST);
 }
 
-function(feraw_ImageCrop)
+void feraw_ImageCrop(BruterList* stack)
 {
     Image image = image_constructor(bruter_pop_pointer(stack));
     Rectangle crop = rectangle_constructor(bruter_pop_pointer(stack));
@@ -3189,7 +3189,7 @@ function(feraw_ImageCrop)
     bruter_push_pointer(stack, image_to_list(image), NULL, BRUTER_TYPE_LIST);
 }
 
-function(feraw_ImageAlphaCrop)
+void feraw_ImageAlphaCrop(BruterList* stack)
 {
     Image image = image_constructor(bruter_pop_pointer(stack));
     float threshold = bruter_pop_float(stack);
@@ -3197,7 +3197,7 @@ function(feraw_ImageAlphaCrop)
     bruter_push_pointer(stack, image_to_list(image), NULL, BRUTER_TYPE_LIST);
 }
 
-function(feraw_ImageAlphaClear)
+void feraw_ImageAlphaClear(BruterList* stack)
 {
     Image image = image_constructor(bruter_pop_pointer(stack));
     Color color = color_from_int(bruter_pop_int(stack));
@@ -3206,7 +3206,7 @@ function(feraw_ImageAlphaClear)
     bruter_push_pointer(stack, image_to_list(image), NULL, BRUTER_TYPE_LIST);
 }
 
-function(feraw_ImageAlphaMask)
+void feraw_ImageAlphaMask(BruterList* stack)
 {
     Image image = image_constructor(bruter_pop_pointer(stack));
     Image mask = image_constructor(bruter_pop_pointer(stack));
@@ -3214,14 +3214,14 @@ function(feraw_ImageAlphaMask)
     bruter_push_pointer(stack, image_to_list(image), NULL, BRUTER_TYPE_LIST);
 }
 
-function(feraw_ImageAlphaPremultiply)
+void feraw_ImageAlphaPremultiply(BruterList* stack)
 {
     Image image = image_constructor(bruter_pop_pointer(stack));
     ImageAlphaPremultiply(&image);
     bruter_push_pointer(stack, image_to_list(image), NULL, BRUTER_TYPE_LIST);
 }
 
-function(feraw_ImageBlurGlaussian)
+void feraw_ImageBlurGlaussian(BruterList* stack)
 {
     Image image = image_constructor(bruter_pop_pointer(stack));
     int blurSize = bruter_pop_int(stack);
@@ -3229,7 +3229,7 @@ function(feraw_ImageBlurGlaussian)
     bruter_push_pointer(stack, image_to_list(image), NULL, BRUTER_TYPE_LIST);
 }
 
-function(feraw_ImageKernelConvolution)
+void feraw_ImageKernelConvolution(BruterList* stack)
 {
     Image image = image_constructor(bruter_pop_pointer(stack));
     float *kernel = (float*)bruter_pop_pointer(stack);
@@ -3238,7 +3238,7 @@ function(feraw_ImageKernelConvolution)
     bruter_push_pointer(stack, image_to_list(image), NULL, BRUTER_TYPE_LIST);
 }
 
-function(feraw_ImageResize)
+void feraw_ImageResize(BruterList* stack)
 {
     Image image = image_constructor(bruter_pop_pointer(stack));
     int newWidth = bruter_pop_int(stack);
@@ -3247,7 +3247,7 @@ function(feraw_ImageResize)
     bruter_push_pointer(stack, image_to_list(image), NULL, BRUTER_TYPE_LIST);
 }
 
-function(feraw_ImageResizeNn)
+void feraw_ImageResizeNn(BruterList* stack)
 {
     Image image = image_constructor(bruter_pop_pointer(stack));
     int newWidth = bruter_pop_int(stack);
@@ -3256,7 +3256,7 @@ function(feraw_ImageResizeNn)
     bruter_push_pointer(stack, image_to_list(image), NULL, BRUTER_TYPE_LIST);
 }
 
-function(feraw_ImageResizeCanvas)
+void feraw_ImageResizeCanvas(BruterList* stack)
 {
     Image image = image_constructor(bruter_pop_pointer(stack));
     int newWidth = bruter_pop_int(stack);
@@ -3268,14 +3268,14 @@ function(feraw_ImageResizeCanvas)
     bruter_push_pointer(stack, image_to_list(image), NULL, BRUTER_TYPE_LIST);
 }
 
-function(feraw_ImageMipmaps)
+void feraw_ImageMipmaps(BruterList* stack)
 {
     Image image = image_constructor(bruter_pop_pointer(stack));
     ImageMipmaps(&image);
     bruter_push_pointer(stack, image_to_list(image), NULL, BRUTER_TYPE_LIST);
 }
 
-function(feraw_ImageDither)
+void feraw_ImageDither(BruterList* stack)
 {
     Image image = image_constructor(bruter_pop_pointer(stack));
     int rBpp = bruter_pop_int(stack);
@@ -3286,21 +3286,21 @@ function(feraw_ImageDither)
     bruter_push_pointer(stack, image_to_list(image), NULL, BRUTER_TYPE_LIST);
 }
 
-function(feraw_ImageFlipVertical)
+void feraw_ImageFlipVertical(BruterList* stack)
 {
     Image image = image_constructor(bruter_pop_pointer(stack));
     ImageFlipVertical(&image);
     bruter_push_pointer(stack, image_to_list(image), NULL, BRUTER_TYPE_LIST);
 }
 
-function(feraw_ImageFlipHorizontal)
+void feraw_ImageFlipHorizontal(BruterList* stack)
 {
     Image image = image_constructor(bruter_pop_pointer(stack));
     ImageFlipHorizontal(&image);
     bruter_push_pointer(stack, image_to_list(image), NULL, BRUTER_TYPE_LIST);
 }
 
-function(feraw_ImageRotate)
+void feraw_ImageRotate(BruterList* stack)
 {
     Image image = image_constructor(bruter_pop_pointer(stack));
     float degrees = bruter_pop_float(stack);
@@ -3308,21 +3308,21 @@ function(feraw_ImageRotate)
     bruter_push_pointer(stack, image_to_list(image), NULL, BRUTER_TYPE_LIST);
 }
 
-function(feraw_ImageRotateCw)
+void feraw_ImageRotateCw(BruterList* stack)
 {
     Image image = image_constructor(bruter_pop_pointer(stack));
     ImageRotateCW(&image);
     bruter_push_pointer(stack, image_to_list(image), NULL, BRUTER_TYPE_LIST);
 }
 
-function(feraw_ImageRotateCcw)
+void feraw_ImageRotateCcw(BruterList* stack)
 {
     Image image = image_constructor(bruter_pop_pointer(stack));
     ImageRotateCCW(&image);
     bruter_push_pointer(stack, image_to_list(image), NULL, BRUTER_TYPE_LIST);
 }
 
-function(feraw_ImageColorTint)
+void feraw_ImageColorTint(BruterList* stack)
 {
     Image image = image_constructor(bruter_pop_pointer(stack));
     Color color = color_from_int(bruter_pop_int(stack));
@@ -3330,21 +3330,21 @@ function(feraw_ImageColorTint)
     bruter_push_pointer(stack, image_to_list(image), NULL, BRUTER_TYPE_LIST);
 }
 
-function(feraw_ImageColorInvert)
+void feraw_ImageColorInvert(BruterList* stack)
 {
     Image image = image_constructor(bruter_pop_pointer(stack));
     ImageColorInvert(&image);
     bruter_push_pointer(stack, image_to_list(image), NULL, BRUTER_TYPE_LIST);
 }
 
-function(feraw_ImageColorGrayscale)
+void feraw_ImageColorGrayscale(BruterList* stack)
 {
     Image image = image_constructor(bruter_pop_pointer(stack));
     ImageColorGrayscale(&image);
     bruter_push_pointer(stack, image_to_list(image), NULL, BRUTER_TYPE_LIST);
 }
 
-function(feraw_ImageColorContrast)
+void feraw_ImageColorContrast(BruterList* stack)
 {
     Image image = image_constructor(bruter_pop_pointer(stack));
     float contrast = bruter_pop_float(stack);
@@ -3352,7 +3352,7 @@ function(feraw_ImageColorContrast)
     bruter_push_pointer(stack, image_to_list(image), NULL, BRUTER_TYPE_LIST);
 }
 
-function(feraw_ImageColorBrightness)
+void feraw_ImageColorBrightness(BruterList* stack)
 {
     Image image = image_constructor(bruter_pop_pointer(stack));
     int brightness = bruter_pop_int(stack);
@@ -3360,7 +3360,7 @@ function(feraw_ImageColorBrightness)
     bruter_push_pointer(stack, image_to_list(image), NULL, BRUTER_TYPE_LIST);
 }
 
-function(feraw_ImageColorReplace)
+void feraw_ImageColorReplace(BruterList* stack)
 {
     Image image = image_constructor(bruter_pop_pointer(stack));
     Color color = color_from_int(bruter_pop_int(stack));
@@ -3369,7 +3369,7 @@ function(feraw_ImageColorReplace)
     bruter_push_pointer(stack, image_to_list(image), NULL, BRUTER_TYPE_LIST);
 }
 
-function(feraw_LoadImageColors)
+void feraw_LoadImageColors(BruterList* stack)
 {
     Image image = image_constructor(bruter_pop_pointer(stack));
     Color *colors = LoadImageColors(image);
@@ -3378,7 +3378,7 @@ function(feraw_LoadImageColors)
     bruter_push_int(stack, colorCount, NULL, BRUTER_TYPE_ANY);
 }
 
-function(feraw_LoadImagePalette)
+void feraw_LoadImagePalette(BruterList* stack)
 {
     Image image = image_constructor(bruter_pop_pointer(stack));
     int maxPaletteSize = bruter_pop_int(stack);
@@ -3387,18 +3387,18 @@ function(feraw_LoadImagePalette)
     bruter_push_pointer(stack, palette, NULL, BRUTER_TYPE_BUFFER);
 }
 
-function(feraw_UnloadImageColors)
+void feraw_UnloadImageColors(BruterList* stack)
 {
     UnloadImageColors((Color*)bruter_pop_pointer(stack));
 }
 
-function(feraw_UnloadImagePalette)
+void feraw_UnloadImagePalette(BruterList* stack)
 {
     Color *palette = (Color*)bruter_pop_pointer(stack);
     UnloadImagePalette(palette);
 }
 
-function(feraw_GetImageAlphaBorder)
+void feraw_GetImageAlphaBorder(BruterList* stack)
 {
     Image image = image_constructor(bruter_pop_pointer(stack));
     float threshold = bruter_pop_float(stack);
@@ -3406,7 +3406,7 @@ function(feraw_GetImageAlphaBorder)
     bruter_push_pointer(stack, rectangle_to_list(rec), NULL, BRUTER_TYPE_LIST);
 }
 
-function(feraw_GetImageColor)
+void feraw_GetImageColor(BruterList* stack)
 {
     Image image = image_constructor(bruter_pop_pointer(stack));
     int x = bruter_pop_int(stack);
@@ -3416,7 +3416,7 @@ function(feraw_GetImageColor)
 }
 
 // image drawing functions
-function(feraw_ImageClearBackground)
+void feraw_ImageClearBackground(BruterList* stack)
 {
     Image image = image_constructor(bruter_pop_pointer(stack));
     Color color = color_from_int(bruter_pop_int(stack));
@@ -3424,7 +3424,7 @@ function(feraw_ImageClearBackground)
     bruter_push_pointer(stack, image_to_list(image), NULL, BRUTER_TYPE_LIST);
 }
 
-function(feraw_ImageDrawPixel)
+void feraw_ImageDrawPixel(BruterList* stack)
 {
     Image image = image_constructor(bruter_pop_pointer(stack));
     int posX = bruter_pop_int(stack);
@@ -3434,7 +3434,7 @@ function(feraw_ImageDrawPixel)
     bruter_push_pointer(stack, image_to_list(image), NULL, BRUTER_TYPE_LIST);
 }
 
-function(feraw_ImageDrawLine)
+void feraw_ImageDrawLine(BruterList* stack)
 {
     Image image = image_constructor(bruter_pop_pointer(stack));
     int startX = bruter_pop_int(stack);
@@ -3446,7 +3446,7 @@ function(feraw_ImageDrawLine)
     bruter_push_pointer(stack, image_to_list(image), NULL, BRUTER_TYPE_LIST);
 }
 
-function(feraw_ImageDrawLineEx)
+void feraw_ImageDrawLineEx(BruterList* stack)
 {
     Image image = image_constructor(bruter_pop_pointer(stack));
     Vector2 start = vector2_constructor(bruter_pop_pointer(stack));
@@ -3457,7 +3457,7 @@ function(feraw_ImageDrawLineEx)
     bruter_push_pointer(stack, image_to_list(image), NULL, BRUTER_TYPE_LIST);
 }
 
-function(feraw_ImageDrawCircle)
+void feraw_ImageDrawCircle(BruterList* stack)
 {
     Image image = image_constructor(bruter_pop_pointer(stack));
     int centerX = bruter_pop_int(stack);
@@ -3468,7 +3468,7 @@ function(feraw_ImageDrawCircle)
     bruter_push_pointer(stack, image_to_list(image), NULL, BRUTER_TYPE_LIST);
 }
 
-function(feraw_ImageDrawCircleLines)
+void feraw_ImageDrawCircleLines(BruterList* stack)
 {
     Image image = image_constructor(bruter_pop_pointer(stack));
     int centerX = bruter_pop_int(stack);
@@ -3479,7 +3479,7 @@ function(feraw_ImageDrawCircleLines)
     bruter_push_pointer(stack, image_to_list(image), NULL, BRUTER_TYPE_LIST);
 }
 
-function(feraw_ImageDrawRectangle)
+void feraw_ImageDrawRectangle(BruterList* stack)
 {
     Image image = image_constructor(bruter_pop_pointer(stack));
     int posX = bruter_pop_int(stack);
@@ -3491,7 +3491,7 @@ function(feraw_ImageDrawRectangle)
     bruter_push_pointer(stack, image_to_list(image), NULL, BRUTER_TYPE_LIST);
 }
 
-function(feraw_ImageDrawRectangleRec)
+void feraw_ImageDrawRectangleRec(BruterList* stack)
 {
     Image image = image_constructor(bruter_pop_pointer(stack));
     Rectangle rec = rectangle_constructor(bruter_pop_pointer(stack));
@@ -3500,7 +3500,7 @@ function(feraw_ImageDrawRectangleRec)
     bruter_push_pointer(stack, image_to_list(image), NULL, BRUTER_TYPE_LIST);
 }
 
-function(feraw_ImageDrawRectangleLines)
+void feraw_ImageDrawRectangleLines(BruterList* stack)
 {
     Image image = image_constructor(bruter_pop_pointer(stack));
     Rectangle rec = rectangle_constructor(bruter_pop_pointer(stack));
@@ -3510,7 +3510,7 @@ function(feraw_ImageDrawRectangleLines)
     bruter_push_pointer(stack, image_to_list(image), NULL, BRUTER_TYPE_LIST);
 }
 
-function(feraw_ImageDrawTriangle)
+void feraw_ImageDrawTriangle(BruterList* stack)
 {
     Image image = image_constructor(bruter_pop_pointer(stack));
     Vector2 p1 = vector2_constructor(bruter_pop_pointer(stack));
@@ -3521,7 +3521,7 @@ function(feraw_ImageDrawTriangle)
     bruter_push_pointer(stack, image_to_list(image), NULL, BRUTER_TYPE_LIST);
 }
 
-function(feraw_ImageDrawTriangleEx)
+void feraw_ImageDrawTriangleEx(BruterList* stack)
 {
     Image image = image_constructor(bruter_pop_pointer(stack));
     Vector2 p1 = vector2_constructor(bruter_pop_pointer(stack));
@@ -3534,7 +3534,7 @@ function(feraw_ImageDrawTriangleEx)
     bruter_push_pointer(stack, image_to_list(image), NULL, BRUTER_TYPE_LIST);
 }
 
-function(feraw_ImageDrawTriangleLines)
+void feraw_ImageDrawTriangleLines(BruterList* stack)
 {
     Image image = image_constructor(bruter_pop_pointer(stack));
     Vector2 p1 = vector2_constructor(bruter_pop_pointer(stack));
@@ -3545,7 +3545,7 @@ function(feraw_ImageDrawTriangleLines)
     bruter_push_pointer(stack, image_to_list(image), NULL, BRUTER_TYPE_LIST);
 }
 
-function(feraw_ImageDrawTriangleFan)
+void feraw_ImageDrawTriangleFan(BruterList* stack)
 {
     Image image = image_constructor(bruter_pop_pointer(stack));
     Vector2 *points = (Vector2*)bruter_pop_pointer(stack);
@@ -3555,7 +3555,7 @@ function(feraw_ImageDrawTriangleFan)
     bruter_push_pointer(stack, image_to_list(image), NULL, BRUTER_TYPE_LIST);
 }
 
-function(feraw_ImageDrawTriangleStrip)
+void feraw_ImageDrawTriangleStrip(BruterList* stack)
 {
     Image image = image_constructor(bruter_pop_pointer(stack));
     Vector2 *points = (Vector2*)bruter_pop_pointer(stack);
@@ -3565,7 +3565,7 @@ function(feraw_ImageDrawTriangleStrip)
     bruter_push_pointer(stack, image_to_list(image), NULL, BRUTER_TYPE_LIST);
 }
 
-function(feraw_ImageDraw)
+void feraw_ImageDraw(BruterList* stack)
 {
     Image image = image_constructor(bruter_pop_pointer(stack));
     Image src = image_constructor(bruter_pop_pointer(stack));
@@ -3576,7 +3576,7 @@ function(feraw_ImageDraw)
     bruter_push_pointer(stack, image_to_list(image), NULL, BRUTER_TYPE_LIST);
 }
 
-function(feraw_ImageDrawText)
+void feraw_ImageDrawText(BruterList* stack)
 {
     Image image = image_constructor(bruter_pop_pointer(stack));
     char *text = (char*)bruter_pop_pointer(stack);
@@ -3588,7 +3588,7 @@ function(feraw_ImageDrawText)
     bruter_push_pointer(stack, image_to_list(image), NULL, BRUTER_TYPE_LIST);
 }
 
-function(feraw_ImageDrawTextEx)
+void feraw_ImageDrawTextEx(BruterList* stack)
 {
     Image image = image_constructor(bruter_pop_pointer(stack));
     Font font = font_constructor(bruter_pop_pointer(stack));
@@ -3603,21 +3603,21 @@ function(feraw_ImageDrawTextEx)
 
 // Texture
 
-function(feraw_LoadTexture)
+void feraw_LoadTexture(BruterList* stack)
 {
     char *fileName = (char*)bruter_pop_pointer(stack);
     Texture2D texture = LoadTexture(fileName);
     bruter_push_pointer(stack, texture_to_list(texture), NULL, BRUTER_TYPE_LIST);
 }
 
-function(feraw_LoadTextureFromImage)
+void feraw_LoadTextureFromImage(BruterList* stack)
 {
     Image image = image_constructor(bruter_pop_pointer(stack));
     Texture2D texture = LoadTextureFromImage(image);
     bruter_push_pointer(stack, texture_to_list(texture), NULL, BRUTER_TYPE_LIST);
 }
 
-function(feraw_LoadTextureCubemap)
+void feraw_LoadTextureCubemap(BruterList* stack)
 {
     Image image = image_constructor(bruter_pop_pointer(stack));
     int layout = bruter_pop_int(stack); // Assuming layout is an int representing the cubemap layout
@@ -3626,7 +3626,7 @@ function(feraw_LoadTextureCubemap)
 }
 
 
-function(feraw_LoadRenderRexture)
+void feraw_LoadRenderRexture(BruterList* stack)
 {
     int width = bruter_pop_int(stack);
     int height = bruter_pop_int(stack);
@@ -3634,40 +3634,40 @@ function(feraw_LoadRenderRexture)
     bruter_push_pointer(stack, render_texture_to_list(renderTexture), NULL, BRUTER_TYPE_LIST);
 }
 
-function(feraw_IsTextureValid)
+void feraw_IsTextureValid(BruterList* stack)
 {
     Texture2D texture = texture_constructor(bruter_pop_pointer(stack));
     bool isValid = IsTextureValid(texture);
     bruter_push_int(stack, isValid, NULL, BRUTER_TYPE_ANY);
 }
 
-function(feraw_UnloadTexture)
+void feraw_UnloadTexture(BruterList* stack)
 {
     Texture2D texture = texture_constructor(bruter_pop_pointer(stack));
     UnloadTexture(texture);
 }
 
-function(feraw_IsRenderTextureValid)
+void feraw_IsRenderTextureValid(BruterList* stack)
 {
     RenderTexture2D renderTexture = render_texture_constructor(bruter_pop_pointer(stack));
     bool isValid = IsRenderTextureValid(renderTexture);
     bruter_push_int(stack, isValid, NULL, BRUTER_TYPE_ANY);
 }
 
-function(feraw_UnloadRenderTexture)
+void feraw_UnloadRenderTexture(BruterList* stack)
 {
     RenderTexture2D renderTexture = render_texture_constructor(bruter_pop_pointer(stack));
     UnloadRenderTexture(renderTexture);
 }
 
-function(feraw_UpdateTexture)
+void feraw_UpdateTexture(BruterList* stack)
 {
     Texture2D texture = texture_constructor(bruter_pop_pointer(stack));
     unsigned char *pixels = (unsigned char*)bruter_pop_pointer(stack);
     UpdateTexture(texture, pixels);
 }
 
-function(feraw_UpdateTextureRec)
+void feraw_UpdateTextureRec(BruterList* stack)
 {
     Texture2D texture = texture_constructor(bruter_pop_pointer(stack));
     Rectangle rec = rectangle_constructor(bruter_pop_pointer(stack));
@@ -3676,21 +3676,21 @@ function(feraw_UpdateTextureRec)
 }
 
 // texture configuration functions
-function(feraw_GenTextureMipmaps)
+void feraw_GenTextureMipmaps(BruterList* stack)
 {
     Texture2D texture = texture_constructor(bruter_pop_pointer(stack));
     GenTextureMipmaps(&texture);
     bruter_push_pointer(stack, texture_to_list(texture), NULL, BRUTER_TYPE_LIST);
 }
 
-function(feraw_SetTextureFilter)
+void feraw_SetTextureFilter(BruterList* stack)
 {
     Texture2D texture = texture_constructor(bruter_pop_pointer(stack));
     int filter = bruter_pop_int(stack);
     SetTextureFilter(texture, filter);
 }
 
-function(feraw_SetTextureWrap)
+void feraw_SetTextureWrap(BruterList* stack)
 {
     Texture2D texture = texture_constructor(bruter_pop_pointer(stack));
     int wrap = bruter_pop_int(stack);
@@ -3698,7 +3698,7 @@ function(feraw_SetTextureWrap)
 }
 
 // texture drawing functions
-function(feraw_DrawTexture)
+void feraw_DrawTexture(BruterList* stack)
 {
     Texture2D texture = texture_constructor(bruter_pop_pointer(stack));
     int posX = bruter_pop_int(stack);
@@ -3707,7 +3707,7 @@ function(feraw_DrawTexture)
     DrawTexture(texture, posX, posY, tint);
 }
 
-function(feraw_DrawTextureEx)
+void feraw_DrawTextureEx(BruterList* stack)
 {
     Texture2D texture = texture_constructor(bruter_pop_pointer(stack));
     Vector2 position = vector2_constructor(bruter_pop_pointer(stack));
@@ -3717,7 +3717,7 @@ function(feraw_DrawTextureEx)
     DrawTextureEx(texture, position, rotation, scale, tint);
 }
 
-function(feraw_DrawTextureRec)
+void feraw_DrawTextureRec(BruterList* stack)
 {
     Texture2D texture = texture_constructor(bruter_pop_pointer(stack));
     Rectangle sourceRec = rectangle_constructor(bruter_pop_pointer(stack));
@@ -3726,7 +3726,7 @@ function(feraw_DrawTextureRec)
     DrawTextureRec(texture, sourceRec, position, tint);
 }
 
-function(feraw_DrawTexturePro)
+void feraw_DrawTexturePro(BruterList* stack)
 {
     Texture2D texture = texture_constructor(bruter_pop_pointer(stack));
     Rectangle sourceRec = rectangle_constructor(bruter_pop_pointer(stack));
@@ -3737,7 +3737,7 @@ function(feraw_DrawTexturePro)
     DrawTexturePro(texture, sourceRec, destRec, origin, rotation, tint);
 }
 
-function(feraw_DrawTextureNpatch)
+void feraw_DrawTextureNpatch(BruterList* stack)
 {
     Texture2D texture = texture_constructor(bruter_pop_pointer(stack));
     NPatchInfo nPatchInfo = npatch_info_constructor(bruter_pop_pointer(stack));
@@ -3750,7 +3750,7 @@ function(feraw_DrawTextureNpatch)
 
 // color/pixel related functions
 
-function(feraw_ColorIsEqual)
+void feraw_ColorIsEqual(BruterList* stack)
 {
     Color color1 = color_from_int(bruter_pop_int(stack));
     Color color2 = color_from_int(bruter_pop_int(stack));
@@ -3758,7 +3758,7 @@ function(feraw_ColorIsEqual)
     bruter_push_int(stack, isEqual, NULL, BRUTER_TYPE_ANY);
 }
 
-function(feraw_FadeColor)
+void feraw_FadeColor(BruterList* stack)
 {
     Color color = color_from_int(bruter_pop_int(stack));
     float alpha = bruter_pop_float(stack);
@@ -3766,35 +3766,35 @@ function(feraw_FadeColor)
     bruter_push_int(stack, color_to_int(fadedColor), NULL, BRUTER_TYPE_ANY);
 }
 
-function(feraw_ColorToInt)
+void feraw_ColorToInt(BruterList* stack)
 {
     Color color = color_from_int(bruter_pop_int(stack));
     int colorInt = ColorToInt(color);
     bruter_push_int(stack, colorInt, NULL, BRUTER_TYPE_ANY);
 }
 
-function(feraw_ColorNormalize)
+void feraw_ColorNormalize(BruterList* stack)
 {
     Color color = color_from_int(bruter_pop_int(stack));
     Vector4 normalizedColor = ColorNormalize(color);
     bruter_push_pointer(stack, vector4_to_list(normalizedColor), NULL, BRUTER_TYPE_LIST);
 }
 
-function(feraw_ColorFromNormalized)
+void feraw_ColorFromNormalized(BruterList* stack)
 {
     Vector4 normalizedColor = vector4_constructor(bruter_pop_pointer(stack));
     Color color = ColorFromNormalized(normalizedColor);
     bruter_push_int(stack, color_to_int(color), NULL, BRUTER_TYPE_ANY);
 }
 
-function(feraw_ColorToHsv)
+void feraw_ColorToHsv(BruterList* stack)
 {
     Color color = color_from_int(bruter_pop_int(stack));
     Vector3 hsv = ColorToHSV(color);
     bruter_push_pointer(stack, vector3_to_list(hsv), NULL, BRUTER_TYPE_LIST);
 }
 
-function(feraw_ColorFromHsv)
+void feraw_ColorFromHsv(BruterList* stack)
 {
     float hue = bruter_pop_float(stack);
     float saturation = bruter_pop_float(stack);
@@ -3803,7 +3803,7 @@ function(feraw_ColorFromHsv)
     bruter_push_int(stack, color_to_int(color), NULL, BRUTER_TYPE_ANY);
 }
 
-function(feraw_ColorTint)
+void feraw_ColorTint(BruterList* stack)
 {
     Color color = color_from_int(bruter_pop_int(stack));
     Color tint = color_from_int(bruter_pop_int(stack));
@@ -3811,7 +3811,7 @@ function(feraw_ColorTint)
     bruter_push_int(stack, color_to_int(tintedColor), NULL, BRUTER_TYPE_ANY);
 }
 
-function(feraw_ColorBrightness)
+void feraw_ColorBrightness(BruterList* stack)
 {
     Color color = color_from_int(bruter_pop_int(stack));
     int brightness = bruter_pop_int(stack);
@@ -3819,7 +3819,7 @@ function(feraw_ColorBrightness)
     bruter_push_int(stack, color_to_int(brightenedColor), NULL, BRUTER_TYPE_ANY);
 }
 
-function(feraw_ColorContrast)
+void feraw_ColorContrast(BruterList* stack)
 {
     Color color = color_from_int(bruter_pop_int(stack));
     float contrast = bruter_pop_float(stack);
@@ -3827,7 +3827,7 @@ function(feraw_ColorContrast)
     bruter_push_int(stack, color_to_int(contrastedColor), NULL, BRUTER_TYPE_ANY);
 }
 
-function(feraw_ColorAlpha)
+void feraw_ColorAlpha(BruterList* stack)
 {
     Color color = color_from_int(bruter_pop_int(stack));
     float alpha = bruter_pop_float(stack);
@@ -3835,7 +3835,7 @@ function(feraw_ColorAlpha)
     bruter_push_int(stack, color_to_int(alphaColor), NULL, BRUTER_TYPE_ANY);
 }
 
-function(feraw_ColorAlphaBlend)
+void feraw_ColorAlphaBlend(BruterList* stack)
 {
     Color dst = color_from_int(bruter_pop_int(stack));
     Color src = color_from_int(bruter_pop_int(stack));
@@ -3844,7 +3844,7 @@ function(feraw_ColorAlphaBlend)
     bruter_push_int(stack, color_to_int(blendedColor), NULL, BRUTER_TYPE_ANY);
 }
 
-function(feraw_ColorLerp)
+void feraw_ColorLerp(BruterList* stack)
 {
     Color color1 = color_from_int(bruter_pop_int(stack));
     Color color2 = color_from_int(bruter_pop_int(stack));
@@ -3853,14 +3853,14 @@ function(feraw_ColorLerp)
     bruter_push_int(stack, color_to_int(lerpedColor), NULL, BRUTER_TYPE_ANY);
 }
 
-function(feraw_GetColor)
+void feraw_GetColor(BruterList* stack)
 {
     int hexColor = bruter_pop_int(stack);
     Color color = GetColor(hexColor);
     bruter_push_int(stack, color_to_int(color), NULL, BRUTER_TYPE_ANY);
 }
 
-function(feraw_GetPixelColor)
+void feraw_GetPixelColor(BruterList* stack)
 {
     void* data = bruter_pop_pointer(stack);
     int format = bruter_pop_int(stack);
@@ -3868,7 +3868,7 @@ function(feraw_GetPixelColor)
     bruter_push_int(stack, color_to_int(color), NULL, BRUTER_TYPE_ANY);
 }
 
-function(feraw_SetPixelColor)
+void feraw_SetPixelColor(BruterList* stack)
 {
     void *data = bruter_pop_pointer(stack);
     Color color = color_from_int(bruter_pop_int(stack));
@@ -3876,7 +3876,7 @@ function(feraw_SetPixelColor)
     SetPixelColor(data, color, format);
 }
 
-function(feraw_GetPixelDataSize)
+void feraw_GetPixelDataSize(BruterList* stack)
 {
     int width = bruter_pop_int(stack);
     int height = bruter_pop_int(stack);
@@ -3887,20 +3887,20 @@ function(feraw_GetPixelDataSize)
 
 // font loading/unloading functions
 
-function(feraw_GetFontDefault)
+void feraw_GetFontDefault(BruterList* stack)
 {
     Font font = GetFontDefault();
     bruter_push_pointer(stack, font_to_list(font), NULL, BRUTER_TYPE_LIST);
 }
 
-function(feraw_LoadFont)
+void feraw_LoadFont(BruterList* stack)
 {
     char *fileName = (char*)bruter_pop_pointer(stack);
     Font font = LoadFont(fileName);
     bruter_push_pointer(stack, font_to_list(font), NULL, BRUTER_TYPE_LIST);
 }
 
-function(feraw_LoadFontEx)
+void feraw_LoadFontEx(BruterList* stack)
 {
     char *fileName = (char*)bruter_pop_pointer(stack);
     int fontSize = bruter_pop_int(stack);
@@ -3910,7 +3910,7 @@ function(feraw_LoadFontEx)
     bruter_push_pointer(stack, font_to_list(font), NULL, BRUTER_TYPE_LIST);
 }
 
-function(feraw_LoadFontFromImage)
+void feraw_LoadFontFromImage(BruterList* stack)
 {
     Image image = image_constructor(bruter_pop_pointer(stack));
     Color key = color_from_int(bruter_pop_int(stack));
@@ -3919,7 +3919,7 @@ function(feraw_LoadFontFromImage)
     bruter_push_pointer(stack, font_to_list(font), NULL, BRUTER_TYPE_LIST);
 }
 
-function(feraw_LoadFontFromMemory)
+void feraw_LoadFontFromMemory(BruterList* stack)
 {
     const char* fileType = (const char*)bruter_pop_pointer(stack);
     unsigned char *fileData = (unsigned char*)bruter_pop_pointer(stack);
@@ -3931,14 +3931,14 @@ function(feraw_LoadFontFromMemory)
     bruter_push_pointer(stack, font_to_list(font), NULL, BRUTER_TYPE_LIST);
 }
 
-function(feraw_IsFontValid)
+void feraw_IsFontValid(BruterList* stack)
 {
     Font font = font_constructor(bruter_pop_pointer(stack));
     bool isValid = IsFontValid(font);
     bruter_push_int(stack, isValid, NULL, BRUTER_TYPE_ANY);
 }
 
-function(feraw_LoadFontData)
+void feraw_LoadFontData(BruterList* stack)
 {
     void *fileData = (void*)bruter_pop_pointer(stack);
     int dataSize = bruter_pop_int(stack);
@@ -3950,7 +3950,7 @@ function(feraw_LoadFontData)
     bruter_push_pointer(stack, fontData, NULL, BRUTER_TYPE_LIST);
 }
 
-function(feraw_GenImageFontAtlas)
+void feraw_GenImageFontAtlas(BruterList* stack)
 {
     const GlyphInfo *fontData = (const GlyphInfo*)bruter_pop_pointer(stack);
     Rectangle **glyphRects = (Rectangle**)bruter_pop_pointer(stack);
@@ -3962,20 +3962,20 @@ function(feraw_GenImageFontAtlas)
     bruter_push_pointer(stack, image_to_list(atlas), NULL, BRUTER_TYPE_LIST);
 }
 
-function(feraw_UnloadFontData)
+void feraw_UnloadFontData(BruterList* stack)
 {
     GlyphInfo *fontData = (GlyphInfo*)bruter_pop_pointer(stack);
     int glyphCount = bruter_pop_int(stack);
     UnloadFontData(fontData, glyphCount);
 }
 
-function(feraw_UnloadFont)
+void feraw_UnloadFont(BruterList* stack)
 {
     Font font = font_constructor(bruter_pop_pointer(stack));
     UnloadFont(font);
 }
 
-function(feraw_ExportFontAsCode)
+void feraw_ExportFontAsCode(BruterList* stack)
 {
     Font font = font_constructor(bruter_pop_pointer(stack));
     char *fileName = (char*)bruter_pop_pointer(stack);
@@ -3983,14 +3983,14 @@ function(feraw_ExportFontAsCode)
 }
 
 // text drawing functions
-function(feraw_DrawFPS)
+void feraw_DrawFPS(BruterList* stack)
 {
     int posX = bruter_pop_int(stack);
     int posY = bruter_pop_int(stack);
     DrawFPS(posX, posY);
 }
 
-function(feraw_DrawText)
+void feraw_DrawText(BruterList* stack)
 {
     char *text = (char*)bruter_pop_pointer(stack);
     int posX = bruter_pop_int(stack);
@@ -4000,7 +4000,7 @@ function(feraw_DrawText)
     DrawText(text, posX, posY, fontSize, color);
 }
 
-function(feraw_DrawTextEx)
+void feraw_DrawTextEx(BruterList* stack)
 {
     Font font = font_constructor(bruter_pop_pointer(stack));
     char *text = (char*)bruter_pop_pointer(stack);
@@ -4011,7 +4011,7 @@ function(feraw_DrawTextEx)
     DrawTextEx(font, text, position, fontSize, spacing, tint);
 }
 
-function(feraw_DrawTextPro)
+void feraw_DrawTextPro(BruterList* stack)
 {
     Font font = font_constructor(bruter_pop_pointer(stack));
     char *text = (char*)bruter_pop_pointer(stack);
@@ -4024,7 +4024,7 @@ function(feraw_DrawTextPro)
     DrawTextPro(font, text, position, origin, rotation, fontSize, spacing, tint);
 }
 
-function(feraw_DrawTextCodepoint)
+void feraw_DrawTextCodepoint(BruterList* stack)
 {
     Font font = font_constructor(bruter_pop_pointer(stack));
     int codepoint = bruter_pop_int(stack);
@@ -4034,7 +4034,7 @@ function(feraw_DrawTextCodepoint)
     DrawTextCodepoint(font, codepoint, position, fontSize, tint);
 }
 
-function(feraw_DrawTextCodepoints)
+void feraw_DrawTextCodepoints(BruterList* stack)
 {
     Font font = font_constructor(bruter_pop_pointer(stack));
     const int *codepoints = (const int*)bruter_pop_pointer(stack);
@@ -4047,13 +4047,13 @@ function(feraw_DrawTextCodepoints)
 }
 
 // text font info functions
-function(feraw_SetTextLineSpacing)
+void feraw_SetTextLineSpacing(BruterList* stack)
 {
     float spacing = bruter_pop_float(stack);
     SetTextLineSpacing(spacing);
 }
 
-function(feraw_MeasureText)
+void feraw_MeasureText(BruterList* stack)
 {
     char *text = (char*)bruter_pop_pointer(stack);
     int fontSize = bruter_pop_int(stack);
@@ -4061,7 +4061,7 @@ function(feraw_MeasureText)
     bruter_push_int(stack, size, NULL, BRUTER_TYPE_ANY);
 }
 
-function(feraw_MeasureTextEx)
+void feraw_MeasureTextEx(BruterList* stack)
 {
     Font font = font_constructor(bruter_pop_pointer(stack));
     char *text = (char*)bruter_pop_pointer(stack);
@@ -4071,7 +4071,7 @@ function(feraw_MeasureTextEx)
     bruter_push_pointer(stack, vector2_to_list(size), NULL, BRUTER_TYPE_LIST);
 }
 
-function(feraw_GetGlyphIndex)
+void feraw_GetGlyphIndex(BruterList* stack)
 {
     Font font = font_constructor(bruter_pop_pointer(stack));
     int codepoint = bruter_pop_int(stack);
@@ -4079,7 +4079,7 @@ function(feraw_GetGlyphIndex)
     bruter_push_int(stack, glyphIndex, NULL, BRUTER_TYPE_ANY);
 }
 
-function(feraw_GetGlyphInfo)
+void feraw_GetGlyphInfo(BruterList* stack)
 {
     Font font = font_constructor(bruter_pop_pointer(stack));
     int codepoint = bruter_pop_int(stack);
@@ -4087,7 +4087,7 @@ function(feraw_GetGlyphInfo)
     bruter_push_pointer(stack, glyph_info_to_list(glyphInfo), NULL, BRUTER_TYPE_LIST);
 }
 
-function(feraw_GetGlyphAtlasRec)
+void feraw_GetGlyphAtlasRec(BruterList* stack)
 {
     Font font = font_constructor(bruter_pop_pointer(stack));
     int codepoint = bruter_pop_int(stack);
@@ -4096,7 +4096,7 @@ function(feraw_GetGlyphAtlasRec)
 }
 
 // text string managment functions
-function(feraw_TextCopy)
+void feraw_TextCopy(BruterList* stack)
 {
     char *text = (char*)bruter_pop_pointer(stack);
     char *src = (char*)bruter_pop_pointer(stack);
@@ -4104,7 +4104,7 @@ function(feraw_TextCopy)
     bruter_push_pointer(stack, text, NULL, BRUTER_TYPE_BUFFER);
 }
 
-function(feraw_TextIsEqual)
+void feraw_TextIsEqual(BruterList* stack)
 {
     char *text1 = (char*)bruter_pop_pointer(stack);
     char *text2 = (char*)bruter_pop_pointer(stack);
@@ -4112,21 +4112,21 @@ function(feraw_TextIsEqual)
     bruter_push_int(stack, isEqual, NULL, BRUTER_TYPE_ANY);
 }
 
-function(feraw_TextLength)
+void feraw_TextLength(BruterList* stack)
 {
     char *text = (char*)bruter_pop_pointer(stack);
     int length = TextLength(text);
     bruter_push_int(stack, length, NULL, BRUTER_TYPE_ANY);
 }
 
-function(feraw_TextFormat)
+void feraw_TextFormat(BruterList* stack)
 {
     char *text = (char*)bruter_pop_pointer(stack);
     char *formattedText = strdup(TextFormat(text));
     bruter_push_pointer(stack, formattedText, NULL, BRUTER_TYPE_BUFFER);
 }
 
-function(feraw_TextSubtext)
+void feraw_TextSubtext(BruterList* stack)
 {
     char *text = (char*)bruter_pop_pointer(stack);
     int position = bruter_pop_int(stack);
@@ -4135,7 +4135,7 @@ function(feraw_TextSubtext)
     bruter_push_pointer(stack, subText, NULL, BRUTER_TYPE_BUFFER);
 }
 
-function(feraw_TextReplace)
+void feraw_TextReplace(BruterList* stack)
 {
     char *text = (char*)bruter_pop_pointer(stack);
     char *find = (char*)bruter_pop_pointer(stack);
@@ -4144,7 +4144,7 @@ function(feraw_TextReplace)
     bruter_push_pointer(stack, replacedText, NULL, BRUTER_TYPE_BUFFER);
 }
 
-function(feraw_TextInsert)
+void feraw_TextInsert(BruterList* stack)
 {
     char *text = (char*)bruter_pop_pointer(stack);
     char *insert = (char*)bruter_pop_pointer(stack);
@@ -4153,7 +4153,7 @@ function(feraw_TextInsert)
     bruter_push_pointer(stack, insertedText, NULL, BRUTER_TYPE_BUFFER);
 }
 
-function(feraw_TextJoin)
+void feraw_TextJoin(BruterList* stack)
 {
     const char **textList = bruter_pop_pointer(stack);
     int count = bruter_pop_int(stack);
@@ -4162,7 +4162,7 @@ function(feraw_TextJoin)
     bruter_push_pointer(stack, strdup(joinedText), NULL, BRUTER_TYPE_BUFFER);
 }
 
-function(feraw_TextSplit)
+void feraw_TextSplit(BruterList* stack)
 {
     char *text = (char*)bruter_pop_pointer(stack);
     char delimiter = bruter_pop_int(stack);
@@ -4176,7 +4176,7 @@ function(feraw_TextSplit)
     bruter_push_pointer(stack, splitedList, NULL, BRUTER_TYPE_LIST);
 }
 
-function(feraw_TextAppend)
+void feraw_TextAppend(BruterList* stack)
 {
     char *text = (char*)bruter_pop_pointer(stack);
     char *appendText = (char*)bruter_pop_pointer(stack);
@@ -4185,7 +4185,7 @@ function(feraw_TextAppend)
     bruter_push_pointer(stack, text, NULL, BRUTER_TYPE_BUFFER);
 }
 
-function(feraw_TextFindIndex)
+void feraw_TextFindIndex(BruterList* stack)
 {
     char *text = (char*)bruter_pop_pointer(stack);
     char *find = (char*)bruter_pop_pointer(stack);
@@ -4193,49 +4193,49 @@ function(feraw_TextFindIndex)
     bruter_push_int(stack, index, NULL, BRUTER_TYPE_ANY);
 }
 
-function(feraw_TextToUpper)
+void feraw_TextToUpper(BruterList* stack)
 {
     char *text = (char*)bruter_pop_pointer(stack);
     const char *upperText = TextToUpper(text);
     bruter_push_pointer(stack, strdup(upperText), NULL, BRUTER_TYPE_BUFFER);
 }
 
-function(feraw_TextToLower)
+void feraw_TextToLower(BruterList* stack)
 {
     char *text = (char*)bruter_pop_pointer(stack);
     char *lowerText = strdup(TextToLower(text));
     bruter_push_pointer(stack, lowerText, NULL, BRUTER_TYPE_BUFFER);
 }
 
-function(feraw_TextToPascal)
+void feraw_TextToPascal(BruterList* stack)
 {
     char *text = (char*)bruter_pop_pointer(stack);
     char *pascalText = strdup(TextToPascal(text));
     bruter_push_pointer(stack, pascalText, NULL, BRUTER_TYPE_BUFFER);
 }
 
-function(feraw_TextToSnake)
+void feraw_TextToSnake(BruterList* stack)
 {
     char *text = (char*)bruter_pop_pointer(stack);
     char *snakeText = strdup(TextToSnake(text));
     bruter_push_pointer(stack, snakeText, NULL, BRUTER_TYPE_BUFFER);
 }
 
-function(feraw_TextToCamel)
+void feraw_TextToCamel(BruterList* stack)
 {
     char *text = (char*)bruter_pop_pointer(stack);
     char *camelText = strdup(TextToCamel(text));
     bruter_push_pointer(stack, camelText, NULL, BRUTER_TYPE_BUFFER);
 }
 
-function(feraw_TextToInteger)
+void feraw_TextToInteger(BruterList* stack)
 {
     char *text = (char*)bruter_pop_pointer(stack);
     int value = TextToInteger(text);
     bruter_push_int(stack, value, NULL, BRUTER_TYPE_ANY);
 }
 
-function(feraw_TextToFloat)
+void feraw_TextToFloat(BruterList* stack)
 {
     char *text = (char*)bruter_pop_pointer(stack);
     float value = TextToFloat(text);
@@ -4244,7 +4244,7 @@ function(feraw_TextToFloat)
 
 // basic geometric 3D shapes drawing functions
 
-function(feraw_DrawLine3D)
+void feraw_DrawLine3D(BruterList* stack)
 {
     Vector3 start = vector3_constructor(bruter_pop_pointer(stack));
     Vector3 end = vector3_constructor(bruter_pop_pointer(stack));
@@ -4252,14 +4252,14 @@ function(feraw_DrawLine3D)
     DrawLine3D(start, end, color);
 }
 
-function(feraw_DrawPoint3D)
+void feraw_DrawPoint3D(BruterList* stack)
 {
     Vector3 position = vector3_constructor(bruter_pop_pointer(stack));
     Color color = color_from_int(bruter_pop_int(stack));
     DrawPoint3D(position, color);
 }
 
-function(feraw_DrawCircle3D)
+void feraw_DrawCircle3D(BruterList* stack)
 {
     Vector3 center = vector3_constructor(bruter_pop_pointer(stack));
     float radius = bruter_pop_float(stack);
@@ -4269,7 +4269,7 @@ function(feraw_DrawCircle3D)
     DrawCircle3D(center, radius, rotationAxis, rotationAngle, color);
 }
 
-function(feraw_DrawTriangle3D)
+void feraw_DrawTriangle3D(BruterList* stack)
 {
     Vector3 p1 = vector3_constructor(bruter_pop_pointer(stack));
     Vector3 p2 = vector3_constructor(bruter_pop_pointer(stack));
@@ -4278,7 +4278,7 @@ function(feraw_DrawTriangle3D)
     DrawTriangle3D(p1, p2, p3, color);
 }
 
-function(feraw_DrawTriangleStrip3D)
+void feraw_DrawTriangleStrip3D(BruterList* stack)
 {
     const Vector3 *points = bruter_pop_pointer(stack);
     int pointCount = bruter_pop_int(stack);
@@ -4286,7 +4286,7 @@ function(feraw_DrawTriangleStrip3D)
     DrawTriangleStrip3D(points, pointCount, color);
 }
 
-function(feraw_DrawCube)
+void feraw_DrawCube(BruterList* stack)
 {
     Vector3 position = vector3_constructor(bruter_pop_pointer(stack));
     float width = bruter_pop_float(stack);
@@ -4296,7 +4296,7 @@ function(feraw_DrawCube)
     DrawCube(position, width, height, length, color);
 }
 
-function(feraw_DrawCubeWires)
+void feraw_DrawCubeWires(BruterList* stack)
 {
     Vector3 position = vector3_constructor(bruter_pop_pointer(stack));
     float width = bruter_pop_float(stack);
@@ -4306,7 +4306,7 @@ function(feraw_DrawCubeWires)
     DrawCubeWires(position, width, height, length, color);
 }
 
-function(feraw_DrawSphere)
+void feraw_DrawSphere(BruterList* stack)
 {
     Vector3 center = vector3_constructor(bruter_pop_pointer(stack));
     float radius = bruter_pop_float(stack);
@@ -4314,7 +4314,7 @@ function(feraw_DrawSphere)
     DrawSphere(center, radius, color);
 }
 
-function(feraw_DrawSphereEx)
+void feraw_DrawSphereEx(BruterList* stack)
 {
     Vector3 center = vector3_constructor(bruter_pop_pointer(stack));
     float radius = bruter_pop_float(stack);
@@ -4324,7 +4324,7 @@ function(feraw_DrawSphereEx)
     DrawSphereEx(center, radius, rings, slices, color);
 }
 
-function(feraw_DrawSphereWires)
+void feraw_DrawSphereWires(BruterList* stack)
 {
     Vector3 center = vector3_constructor(bruter_pop_pointer(stack));
     float radius = bruter_pop_float(stack);
@@ -4334,7 +4334,7 @@ function(feraw_DrawSphereWires)
     DrawSphereWires(center, radius, rings, slices, color);
 }
 
-function(feraw_DrawCylinder)
+void feraw_DrawCylinder(BruterList* stack)
 {
     Vector3 position = vector3_constructor(bruter_pop_pointer(stack));
     float radiusTop = bruter_pop_float(stack);
@@ -4345,7 +4345,7 @@ function(feraw_DrawCylinder)
     DrawCylinder(position, radiusTop, radiusBottom, height, slices, color);
 }
 
-function(feraw_DrawCylinderEx)
+void feraw_DrawCylinderEx(BruterList* stack)
 {
     Vector3 startPos = vector3_constructor(bruter_pop_pointer(stack));
     Vector3 endPos = vector3_constructor(bruter_pop_pointer(stack));
@@ -4356,7 +4356,7 @@ function(feraw_DrawCylinderEx)
     DrawCylinderEx(startPos, endPos, radiusTop, radiusBottom, slices, color);
 }
 
-function(feraw_DrawCylinderWires)
+void feraw_DrawCylinderWires(BruterList* stack)
 {
     Vector3 position = vector3_constructor(bruter_pop_pointer(stack));
     float radiusTop = bruter_pop_float(stack);
@@ -4367,7 +4367,7 @@ function(feraw_DrawCylinderWires)
     DrawCylinderWires(position, radiusTop, radiusBottom, height, slices, color);
 }
 
-function(feraw_DrawCylinderWiresEx)
+void feraw_DrawCylinderWiresEx(BruterList* stack)
 {
     Vector3 startPos = vector3_constructor(bruter_pop_pointer(stack));
     Vector3 endPos = vector3_constructor(bruter_pop_pointer(stack));
@@ -4378,7 +4378,7 @@ function(feraw_DrawCylinderWiresEx)
     DrawCylinderWiresEx(startPos, endPos, radiusTop, radiusBottom, slices, color);
 }
 
-function(feraw_DrawCapsule)
+void feraw_DrawCapsule(BruterList* stack)
 {
     Vector3 startPos = vector3_constructor(bruter_pop_pointer(stack));
     Vector3 endPos = vector3_constructor(bruter_pop_pointer(stack));
@@ -4389,7 +4389,7 @@ function(feraw_DrawCapsule)
     DrawCapsule(startPos, endPos, radius, slices, rings, color);
 }
 
-function(feraw_DrawPlane)
+void feraw_DrawPlane(BruterList* stack)
 {
     Vector3 center = vector3_constructor(bruter_pop_pointer(stack));
     Vector2 size = vector2_constructor(bruter_pop_pointer(stack));
@@ -4397,14 +4397,14 @@ function(feraw_DrawPlane)
     DrawPlane(center, size, color);
 }
 
-function(feraw_DrawRay)
+void feraw_DrawRay(BruterList* stack)
 {
     Ray ray = ray_constructor(bruter_pop_pointer(stack));
     Color color = color_from_int(bruter_pop_int(stack));
     DrawRay(ray, color);
 }
 
-function(feraw_DrawGrid)
+void feraw_DrawGrid(BruterList* stack)
 {
     int slices = bruter_pop_int(stack);
     float spacing = bruter_pop_float(stack);
@@ -4413,34 +4413,34 @@ function(feraw_DrawGrid)
 
 // model managment functions
 
-function(feraw_LoadModel)
+void feraw_LoadModel(BruterList* stack)
 {
     char *fileName = (char*)bruter_pop_pointer(stack);
     Model model = LoadModel(fileName);
     bruter_push_pointer(stack, model_to_list(model), NULL, BRUTER_TYPE_LIST);
 }
 
-function(feraw_LoadModelFromMesh)
+void feraw_LoadModelFromMesh(BruterList* stack)
 {
     Mesh mesh = mesh_constructor(bruter_pop_pointer(stack));
     Model model = LoadModelFromMesh(mesh);
     bruter_push_pointer(stack, model_to_list(model), NULL, BRUTER_TYPE_LIST);
 }
 
-function(feraw_IsModelValid)
+void feraw_IsModelValid(BruterList* stack)
 {
     Model model = model_constructor(bruter_pop_pointer(stack));
     bool isValid = IsModelValid(model);
     bruter_push_int(stack, isValid, NULL, BRUTER_TYPE_ANY);
 }
 
-function(feraw_UnloadModel)
+void feraw_UnloadModel(BruterList* stack)
 {
     Model model = model_constructor(bruter_pop_pointer(stack));
     UnloadModel(model);
 }
 
-function(feraw_GetModelBoundingBox)
+void feraw_GetModelBoundingBox(BruterList* stack)
 {
     Model model = model_constructor(bruter_pop_pointer(stack));
     BoundingBox boundingBox = GetModelBoundingBox(model);
@@ -4448,7 +4448,7 @@ function(feraw_GetModelBoundingBox)
 }
 
 // model drawing functions
-function(feraw_DrawModel)
+void feraw_DrawModel(BruterList* stack)
 {
     Model model = model_constructor(bruter_pop_pointer(stack));
     Vector3 position = vector3_constructor(bruter_pop_pointer(stack));
@@ -4457,7 +4457,7 @@ function(feraw_DrawModel)
     DrawModel(model, position, scale, tint);
 }
 
-function(feraw_DrawModelEx)
+void feraw_DrawModelEx(BruterList* stack)
 {
     Model model = model_constructor(bruter_pop_pointer(stack));
     Vector3 position = vector3_constructor(bruter_pop_pointer(stack));
@@ -4468,7 +4468,7 @@ function(feraw_DrawModelEx)
     DrawModelEx(model, position, rotationAxis, rotationAngle, scale, tint);
 }
 
-function(feraw_DrawModelWires)
+void feraw_DrawModelWires(BruterList* stack)
 {
     Model model = model_constructor(bruter_pop_pointer(stack));
     Vector3 position = vector3_constructor(bruter_pop_pointer(stack));
@@ -4477,7 +4477,7 @@ function(feraw_DrawModelWires)
     DrawModelWires(model, position, scale, tint);
 }
 
-function(feraw_DrawModelWiresEx)
+void feraw_DrawModelWiresEx(BruterList* stack)
 {
     Model model = model_constructor(bruter_pop_pointer(stack));
     Vector3 position = vector3_constructor(bruter_pop_pointer(stack));
@@ -4488,7 +4488,7 @@ function(feraw_DrawModelWiresEx)
     DrawModelWiresEx(model, position, rotationAxis, rotationAngle, scale, tint);
 }
 
-function(feraw_DrawPoints)
+void feraw_DrawPoints(BruterList* stack)
 {
     Model model = model_constructor(bruter_pop_pointer(stack));
     Vector3 position = vector3_constructor(bruter_pop_pointer(stack));
@@ -4497,7 +4497,7 @@ function(feraw_DrawPoints)
     DrawModelPoints(model, position, scale, tint);
 }
 
-function(feraw_DrawPointsEx)
+void feraw_DrawPointsEx(BruterList* stack)
 {
     Model model = model_constructor(bruter_pop_pointer(stack));
     Vector3 position = vector3_constructor(bruter_pop_pointer(stack));
@@ -4508,14 +4508,14 @@ function(feraw_DrawPointsEx)
     DrawModelPointsEx(model, position, rotationAxis, rotationAngle, scale, tint);
 }
 
-function(feraw_DrawBoudingBox)
+void feraw_DrawBoudingBox(BruterList* stack)
 {
     BoundingBox box = bounding_box_constructor(bruter_pop_pointer(stack));
     Color color = color_from_int(bruter_pop_int(stack));
     DrawBoundingBox(box, color);
 }
 
-function(feraw_DrawBillboard)
+void feraw_DrawBillboard(BruterList* stack)
 {
     Camera camera = camera3d_constructor(bruter_pop_pointer(stack));
     Texture2D texture = texture_constructor(bruter_pop_pointer(stack));
@@ -4525,7 +4525,7 @@ function(feraw_DrawBillboard)
     DrawBillboard(camera, texture, position, size, tint);
 }
 
-function(feraw_DrawBillboardRec)
+void feraw_DrawBillboardRec(BruterList* stack)
 {
     Camera camera = camera3d_constructor(bruter_pop_pointer(stack));
     Texture2D texture = texture_constructor(bruter_pop_pointer(stack));
@@ -4536,7 +4536,7 @@ function(feraw_DrawBillboardRec)
     DrawBillboardRec(camera, texture, sourceRec, position, size, tint);
 }
 
-function(feraw_DrawBillboardPro)
+void feraw_DrawBillboardPro(BruterList* stack)
 {
     Camera camera = camera3d_constructor(bruter_pop_pointer(stack));
     Texture2D texture = texture_constructor(bruter_pop_pointer(stack));
@@ -4551,7 +4551,7 @@ function(feraw_DrawBillboardPro)
 }
 
 // mesh management functions
-function(feraw_UploadMesh)
+void feraw_UploadMesh(BruterList* stack)
 {
     Mesh mesh = mesh_constructor(bruter_pop_pointer(stack));
     bool dynamic = bruter_pop_int(stack);
@@ -4559,7 +4559,7 @@ function(feraw_UploadMesh)
     bruter_push_pointer(stack, mesh_to_list(mesh), NULL, BRUTER_TYPE_LIST);
 }
 
-function(feraw_UpdateMeshBuffer)
+void feraw_UpdateMeshBuffer(BruterList* stack)
 {
     Mesh mesh = mesh_constructor(bruter_pop_pointer(stack));
     int index = bruter_pop_int(stack);
@@ -4570,13 +4570,13 @@ function(feraw_UpdateMeshBuffer)
     bruter_push_pointer(stack, mesh_to_list(mesh), NULL, BRUTER_TYPE_LIST);
 }
 
-function(feraw_UnloadMesh)
+void feraw_UnloadMesh(BruterList* stack)
 {
     Mesh mesh = mesh_constructor(bruter_pop_pointer(stack));
     UnloadMesh(mesh);
 }
 
-function(feraw_DrawMesh)
+void feraw_DrawMesh(BruterList* stack)
 {
     Mesh mesh = mesh_constructor(bruter_pop_pointer(stack));
     Material material = material_constructor(bruter_pop_pointer(stack));
@@ -4584,7 +4584,7 @@ function(feraw_DrawMesh)
     DrawMesh(mesh, material, transform);
 }
 
-function(feraw_DrawMeshInstanced)
+void feraw_DrawMeshInstanced(BruterList* stack)
 {
     Mesh mesh = mesh_constructor(bruter_pop_pointer(stack));
     Material material = material_constructor(bruter_pop_pointer(stack));
@@ -4593,28 +4593,28 @@ function(feraw_DrawMeshInstanced)
     DrawMeshInstanced(mesh, material, transforms, instanceCount);
 }
 
-function(feraw_GetMeshBoundingBox)
+void feraw_GetMeshBoundingBox(BruterList* stack)
 {
     Mesh mesh = mesh_constructor(bruter_pop_pointer(stack));
     BoundingBox boundingBox = GetMeshBoundingBox(mesh);
     bruter_push_pointer(stack, bounding_box_to_list(boundingBox), NULL, BRUTER_TYPE_LIST);
 }
 
-function(feraw_GenMeshTangents)
+void feraw_GenMeshTangents(BruterList* stack)
 {
     Mesh mesh = mesh_constructor(bruter_pop_pointer(stack));
     GenMeshTangents(&mesh);
     bruter_push_pointer(stack, mesh_to_list(mesh), NULL, BRUTER_TYPE_LIST);
 }
 
-function(feraw_ExportMesh)
+void feraw_ExportMesh(BruterList* stack)
 {
     Mesh mesh = mesh_constructor(bruter_pop_pointer(stack));
     char *fileName = (char*)bruter_pop_pointer(stack);
     ExportMesh(mesh, fileName);
 }
 
-function(feraw_ExportMeshAsCode)
+void feraw_ExportMeshAsCode(BruterList* stack)
 {
     Mesh mesh = mesh_constructor(bruter_pop_pointer(stack));
     char *fileName = (char*)bruter_pop_pointer(stack);
@@ -4622,7 +4622,7 @@ function(feraw_ExportMeshAsCode)
 }
 
 // mesh generation functions
-function(feraw_GenMeshPoly)
+void feraw_GenMeshPoly(BruterList* stack)
 {
     int sides = bruter_pop_int(stack);
     float radius = bruter_pop_float(stack);
@@ -4630,7 +4630,7 @@ function(feraw_GenMeshPoly)
     bruter_push_pointer(stack, mesh_to_list(mesh), NULL, BRUTER_TYPE_LIST);
 }
 
-function(feraw_GenMeshPlane)
+void feraw_GenMeshPlane(BruterList* stack)
 {
     float width = bruter_pop_float(stack);
     float length = bruter_pop_float(stack);
@@ -4640,7 +4640,7 @@ function(feraw_GenMeshPlane)
     bruter_push_pointer(stack, mesh_to_list(mesh), NULL, BRUTER_TYPE_LIST);
 }
 
-function(feraw_GenMeshCube)
+void feraw_GenMeshCube(BruterList* stack)
 {
     float width = bruter_pop_float(stack);
     float height = bruter_pop_float(stack);
@@ -4649,7 +4649,7 @@ function(feraw_GenMeshCube)
     bruter_push_pointer(stack, mesh_to_list(mesh), NULL, BRUTER_TYPE_LIST);
 }
 
-function(feraw_GenMeshSphere)
+void feraw_GenMeshSphere(BruterList* stack)
 {
     float radius = bruter_pop_float(stack);
     int rings = bruter_pop_int(stack);
@@ -4658,7 +4658,7 @@ function(feraw_GenMeshSphere)
     bruter_push_pointer(stack, mesh_to_list(mesh), NULL, BRUTER_TYPE_LIST);
 }
 
-function(feraw_GenMeshHemiSphere)
+void feraw_GenMeshHemiSphere(BruterList* stack)
 {
     float radius = bruter_pop_float(stack);
     int rings = bruter_pop_int(stack);
@@ -4667,7 +4667,7 @@ function(feraw_GenMeshHemiSphere)
     bruter_push_pointer(stack, mesh_to_list(mesh), NULL, BRUTER_TYPE_LIST);
 }
 
-function(feraw_GenMeshCylinder)
+void feraw_GenMeshCylinder(BruterList* stack)
 {
     float radius = bruter_pop_float(stack);
     float height = bruter_pop_float(stack);
@@ -4676,7 +4676,7 @@ function(feraw_GenMeshCylinder)
     bruter_push_pointer(stack, mesh_to_list(mesh), NULL, BRUTER_TYPE_LIST);
 }
 
-function(feraw_GenMeshCone)
+void feraw_GenMeshCone(BruterList* stack)
 {
     float radius = bruter_pop_float(stack);
     float height = bruter_pop_float(stack);
@@ -4685,7 +4685,7 @@ function(feraw_GenMeshCone)
     bruter_push_pointer(stack, mesh_to_list(mesh), NULL, BRUTER_TYPE_LIST);
 }
 
-function(feraw_GenMeshTorus)
+void feraw_GenMeshTorus(BruterList* stack)
 {
     float radius = bruter_pop_float(stack);
     float tubeRadius = bruter_pop_float(stack);
@@ -4695,7 +4695,7 @@ function(feraw_GenMeshTorus)
     bruter_push_pointer(stack, mesh_to_list(mesh), NULL, BRUTER_TYPE_LIST);
 }
 
-function(feraw_GenMeshKnot)
+void feraw_GenMeshKnot(BruterList* stack)
 {
     float radius = bruter_pop_float(stack);
     float tubeRadius = bruter_pop_float(stack);
@@ -4705,7 +4705,7 @@ function(feraw_GenMeshKnot)
     bruter_push_pointer(stack, mesh_to_list(mesh), NULL, BRUTER_TYPE_LIST);
 }
 
-function(feraw_GenMeshHeightmap)
+void feraw_GenMeshHeightmap(BruterList* stack)
 {
     Image heightmap = image_constructor(bruter_pop_pointer(stack));
     Vector3 size = vector3_constructor(bruter_pop_pointer(stack));
@@ -4713,7 +4713,7 @@ function(feraw_GenMeshHeightmap)
     bruter_push_pointer(stack, mesh_to_list(mesh), NULL, BRUTER_TYPE_LIST);
 }
 
-function(feraw_GenMeshCubicmap)
+void feraw_GenMeshCubicmap(BruterList* stack)
 {
     Image cubicmap = image_constructor(bruter_pop_pointer(stack));
     Vector3 cubeSize = vector3_constructor(bruter_pop_pointer(stack));
@@ -4722,33 +4722,33 @@ function(feraw_GenMeshCubicmap)
 }
 
 // material loading/unloading functions
-function(feraw_LoadMaterials)
+void feraw_LoadMaterials(BruterList* stack)
 {
     char *fileName = (char*)bruter_pop_pointer(stack);
     int *materialCount = (int*)bruter_pop_pointer(stack);
     bruter_push_pointer(stack, LoadMaterials(fileName, materialCount), NULL, BRUTER_TYPE_LIST);
 }
 
-function(feraw_LoadMaterialDefault)
+void feraw_LoadMaterialDefault(BruterList* stack)
 {
     Material material = LoadMaterialDefault();
     bruter_push_pointer(stack, material_to_list(material), NULL, BRUTER_TYPE_LIST);
 }
 
-function(feraw_IsMaterialValid)
+void feraw_IsMaterialValid(BruterList* stack)
 {
     Material material = material_constructor(bruter_pop_pointer(stack));
     bool isValid = IsMaterialValid(material);
     bruter_push_int(stack, isValid, NULL, BRUTER_TYPE_ANY);
 }
 
-function(feraw_UnloadMaterial)
+void feraw_UnloadMaterial(BruterList* stack)
 {
     Material material = material_constructor(bruter_pop_pointer(stack));
     UnloadMaterial(material);
 }
 
-function(feraw_SetMaterialTexture)
+void feraw_SetMaterialTexture(BruterList* stack)
 {
     Material material = material_constructor(bruter_pop_pointer(stack));
     int mapType = bruter_pop_int(stack); // Assuming mapType is an int representing the texture type
@@ -4757,7 +4757,7 @@ function(feraw_SetMaterialTexture)
     bruter_push_pointer(stack, material_to_list(material), NULL, BRUTER_TYPE_LIST);
 }
 
-function(feraw_SetModelMeshMaterial)
+void feraw_SetModelMeshMaterial(BruterList* stack)
 {
     Model model = model_constructor(bruter_pop_pointer(stack));
     int meshId = bruter_pop_int(stack);
@@ -4767,7 +4767,7 @@ function(feraw_SetModelMeshMaterial)
 }
 
 // model animations loading/unloading functions
-function(feraw_LoadModelAnimations)
+void feraw_LoadModelAnimations(BruterList* stack)
 {
     char *fileName = (char*)bruter_pop_pointer(stack);
     int *animCount = (int*)bruter_pop_pointer(stack);
@@ -4775,7 +4775,7 @@ function(feraw_LoadModelAnimations)
     bruter_push_pointer(stack, animations, NULL, BRUTER_TYPE_BUFFER);
 }
 
-function(feraw_UpdateModelAnimation)
+void feraw_UpdateModelAnimation(BruterList* stack)
 {
     Model model = model_constructor(bruter_pop_pointer(stack));
     ModelAnimation animation = model_animation_constructor(bruter_pop_pointer(stack));
@@ -4784,7 +4784,7 @@ function(feraw_UpdateModelAnimation)
     bruter_push_pointer(stack, model_to_list(model), NULL, BRUTER_TYPE_LIST);
 }
 
-function(feraw_UpdateModelAnimationBones)
+void feraw_UpdateModelAnimationBones(BruterList* stack)
 {
     Model model = model_constructor(bruter_pop_pointer(stack));
     ModelAnimation animation = model_animation_constructor(bruter_pop_pointer(stack));
@@ -4793,20 +4793,20 @@ function(feraw_UpdateModelAnimationBones)
     bruter_push_pointer(stack, model_to_list(model), NULL, BRUTER_TYPE_LIST);
 }
 
-function(feraw_UnloadModelAnimation)
+void feraw_UnloadModelAnimation(BruterList* stack)
 {
     ModelAnimation animation = model_animation_constructor(bruter_pop_pointer(stack));
     UnloadModelAnimation(animation);
 }
 
-function(feraw_UnloadModelAnimations)
+void feraw_UnloadModelAnimations(BruterList* stack)
 {
     ModelAnimation *animations = (ModelAnimation*)bruter_pop_pointer(stack);
     int animCount = bruter_pop_int(stack);
     UnloadModelAnimations(animations, animCount);
 }
 
-function(feraw_IsModelAnimationValid)
+void feraw_IsModelAnimationValid(BruterList* stack)
 {
     Model model = model_constructor(bruter_pop_pointer(stack));
     ModelAnimation animation = model_animation_constructor(bruter_pop_pointer(stack));
@@ -4816,7 +4816,7 @@ function(feraw_IsModelAnimationValid)
 
 // collision detection functions
 
-function(feraw_CheckCollisionSpheres)
+void feraw_CheckCollisionSpheres(BruterList* stack)
 {
     Vector3 center1 = vector3_constructor(bruter_pop_pointer(stack));
     float radius1 = bruter_pop_float(stack);
@@ -4826,7 +4826,7 @@ function(feraw_CheckCollisionSpheres)
     bruter_push_int(stack, collision, NULL, BRUTER_TYPE_ANY);
 }
 
-function(feraw_CheckCollisionBoxes)
+void feraw_CheckCollisionBoxes(BruterList* stack)
 {
     BoundingBox box1 = bounding_box_constructor(bruter_pop_pointer(stack));
     BoundingBox box2 = bounding_box_constructor(bruter_pop_pointer(stack));
@@ -4834,7 +4834,7 @@ function(feraw_CheckCollisionBoxes)
     bruter_push_int(stack, collision, NULL, BRUTER_TYPE_ANY);
 }
 
-function(feraw_CheckCollisionBoxSphere)
+void feraw_CheckCollisionBoxSphere(BruterList* stack)
 {
     BoundingBox box = bounding_box_constructor(bruter_pop_pointer(stack));
     Vector3 center = vector3_constructor(bruter_pop_pointer(stack));
@@ -4843,7 +4843,7 @@ function(feraw_CheckCollisionBoxSphere)
     bruter_push_int(stack, collision, NULL, BRUTER_TYPE_ANY);
 }
 
-function(feraw_GetRayCollisionSphere)
+void feraw_GetRayCollisionSphere(BruterList* stack)
 {
     Ray ray = ray_constructor(bruter_pop_pointer(stack));
     Vector3 center = vector3_constructor(bruter_pop_pointer(stack));
@@ -4852,7 +4852,7 @@ function(feraw_GetRayCollisionSphere)
     bruter_push_pointer(stack, ray_collision_to_list(collision), NULL, BRUTER_TYPE_LIST);
 }
 
-function(feraw_GetRayCollisionBox)
+void feraw_GetRayCollisionBox(BruterList* stack)
 {
     Ray ray = ray_constructor(bruter_pop_pointer(stack));
     BoundingBox box = bounding_box_constructor(bruter_pop_pointer(stack));
@@ -4860,7 +4860,7 @@ function(feraw_GetRayCollisionBox)
     bruter_push_pointer(stack, ray_collision_to_list(collision), NULL, BRUTER_TYPE_LIST);
 }
 
-function(feraw_GetRayCollisionMesh)
+void feraw_GetRayCollisionMesh(BruterList* stack)
 {
     Ray ray = ray_constructor(bruter_pop_pointer(stack));
     Mesh mesh = mesh_constructor(bruter_pop_pointer(stack));
@@ -4869,7 +4869,7 @@ function(feraw_GetRayCollisionMesh)
     bruter_push_pointer(stack, ray_collision_to_list(collision), NULL, BRUTER_TYPE_LIST);
 }
 
-function(feraw_GetRayCollisionTriangle)
+void feraw_GetRayCollisionTriangle(BruterList* stack)
 {
     Ray ray = ray_constructor(bruter_pop_pointer(stack));
     Vector3 p1 = vector3_constructor(bruter_pop_pointer(stack));
@@ -4879,7 +4879,7 @@ function(feraw_GetRayCollisionTriangle)
     bruter_push_pointer(stack, ray_collision_to_list(collision), NULL, BRUTER_TYPE_LIST);
 }
 
-function(feraw_GetRayCollisionQuad)
+void feraw_GetRayCollisionQuad(BruterList* stack)
 {
     Ray ray = ray_constructor(bruter_pop_pointer(stack));
     Vector3 p1 = vector3_constructor(bruter_pop_pointer(stack));
@@ -4891,29 +4891,29 @@ function(feraw_GetRayCollisionQuad)
 }
 
 // audio loading/unloading functions
-function(feraw_InitAudioDevice)
+void feraw_InitAudioDevice(BruterList* stack)
 {
     InitAudioDevice();
 }
 
-function(feraw_CloseAudioDevice)
+void feraw_CloseAudioDevice(BruterList* stack)
 {
     CloseAudioDevice();
 }
 
-function(feraw_IsAudioDeviceReady)
+void feraw_IsAudioDeviceReady(BruterList* stack)
 {
     bool isReady = IsAudioDeviceReady();
     bruter_push_int(stack, isReady, NULL, BRUTER_TYPE_ANY);
 }
 
-function(feraw_SetMasterVolume)
+void feraw_SetMasterVolume(BruterList* stack)
 {
     float volume = bruter_pop_float(stack);
     SetMasterVolume(volume);
 }
 
-function(feraw_GetMasterVolume)
+void feraw_GetMasterVolume(BruterList* stack)
 {
     float volume = GetMasterVolume();
     bruter_push_float(stack, volume, NULL, BRUTER_TYPE_ANY);
@@ -4921,14 +4921,14 @@ function(feraw_GetMasterVolume)
 
 // wave/sound loading/unloading functions
 
-function(feraw_LoadWave)
+void feraw_LoadWave(BruterList* stack)
 {
     char *fileName = (char*)bruter_pop_pointer(stack);
     Wave wave = LoadWave(fileName);
     bruter_push_pointer(stack, wave_to_list(wave), NULL, BRUTER_TYPE_LIST);
 }
 
-function(feraw_LoadWaveFromMemory)
+void feraw_LoadWaveFromMemory(BruterList* stack)
 {
     char *fileType = (char*)bruter_pop_pointer(stack);
     void *data = bruter_pop_pointer(stack);
@@ -4937,42 +4937,42 @@ function(feraw_LoadWaveFromMemory)
     bruter_push_pointer(stack, wave_to_list(wave), NULL, BRUTER_TYPE_LIST);
 }
 
-function(feraw_IsWaveValid)
+void feraw_IsWaveValid(BruterList* stack)
 {
     Wave wave = wave_constructor(bruter_pop_pointer(stack));
     bool isValid = IsWaveValid(wave);
     bruter_push_int(stack, isValid, NULL, BRUTER_TYPE_ANY);
 }
 
-function(feraw_LoadSound)
+void feraw_LoadSound(BruterList* stack)
 {
     char *fileName = (char*)bruter_pop_pointer(stack);
     Sound sound = LoadSound(fileName);
     bruter_push_pointer(stack, sound_to_list(sound), NULL, BRUTER_TYPE_LIST);
 }
 
-function(feraw_LoadSoundFromWave)
+void feraw_LoadSoundFromWave(BruterList* stack)
 {
     Wave wave = wave_constructor(bruter_pop_pointer(stack));
     Sound sound = LoadSoundFromWave(wave);
     bruter_push_pointer(stack, sound_to_list(sound), NULL, BRUTER_TYPE_LIST);
 }
 
-function(feraw_LoadSoundAlias)
+void feraw_LoadSoundAlias(BruterList* stack)
 {
     Sound sound = sound_constructor(bruter_pop_pointer(stack));
     Sound aliasSound = LoadSoundAlias(sound);
     bruter_push_pointer(stack, sound_to_list(aliasSound), NULL, BRUTER_TYPE_LIST);
 }
 
-function(feraw_IsSoundValid)
+void feraw_IsSoundValid(BruterList* stack)
 {
     Sound sound = sound_constructor(bruter_pop_pointer(stack));
     bool isValid = IsSoundValid(sound);
     bruter_push_int(stack, isValid, NULL, BRUTER_TYPE_ANY);
 }
 
-function(feraw_UpdateSound)
+void feraw_UpdateSound(BruterList* stack)
 {
     Sound sound = sound_constructor(bruter_pop_pointer(stack));
     void *data = bruter_pop_pointer(stack);
@@ -4981,32 +4981,32 @@ function(feraw_UpdateSound)
     bruter_push_pointer(stack, sound_to_list(sound), NULL, BRUTER_TYPE_LIST);
 }
 
-function(feraw_UnloadWave)
+void feraw_UnloadWave(BruterList* stack)
 {
     Wave wave = wave_constructor(bruter_pop_pointer(stack));
     UnloadWave(wave);
 }
 
-function(feraw_UnloadSound)
+void feraw_UnloadSound(BruterList* stack)
 {
     Sound sound = sound_constructor(bruter_pop_pointer(stack));
     UnloadSound(sound);
 }
 
-function(feraw_UnloadSoundAlias)
+void feraw_UnloadSoundAlias(BruterList* stack)
 {
     Sound sound = sound_constructor(bruter_pop_pointer(stack));
     UnloadSoundAlias(sound);
 }
 
-function(feraw_ExportWave)
+void feraw_ExportWave(BruterList* stack)
 {
     Wave wave = wave_constructor(bruter_pop_pointer(stack));
     char *fileName = (char*)bruter_pop_pointer(stack);
     ExportWave(wave, fileName);
 }
 
-function(feraw_ExportWaveAsCode)
+void feraw_ExportWaveAsCode(BruterList* stack)
 {
     Wave wave = wave_constructor(bruter_pop_pointer(stack));
     char *fileName = (char*)bruter_pop_pointer(stack);
@@ -5014,38 +5014,38 @@ function(feraw_ExportWaveAsCode)
 }
 
 // wave/sound management functions
-function(feraw_PlaySound)
+void feraw_PlaySound(BruterList* stack)
 {
     Sound sound = sound_constructor(bruter_pop_pointer(stack));
     PlaySound(sound);
 }
 
-function(feraw_StopSound)
+void feraw_StopSound(BruterList* stack)
 {
     Sound sound = sound_constructor(bruter_pop_pointer(stack));
     StopSound(sound);
 }
 
-function(feraw_PauseSound)
+void feraw_PauseSound(BruterList* stack)
 {
     Sound sound = sound_constructor(bruter_pop_pointer(stack));
     PauseSound(sound);
 }
 
-function(feraw_ResumeSound)
+void feraw_ResumeSound(BruterList* stack)
 {
     Sound sound = sound_constructor(bruter_pop_pointer(stack));
     ResumeSound(sound);
 }
 
-function(feraw_IsSoundPlaying)
+void feraw_IsSoundPlaying(BruterList* stack)
 {
     Sound sound = sound_constructor(bruter_pop_pointer(stack));
     bool isPlaying = IsSoundPlaying(sound);
     bruter_push_int(stack, isPlaying, NULL, BRUTER_TYPE_ANY);
 }
 
-function(feraw_SetSoundVolume)
+void feraw_SetSoundVolume(BruterList* stack)
 {
     Sound sound = sound_constructor(bruter_pop_pointer(stack));
     float volume = bruter_pop_float(stack);
@@ -5053,7 +5053,7 @@ function(feraw_SetSoundVolume)
     bruter_push_pointer(stack, sound_to_list(sound), NULL, BRUTER_TYPE_LIST);
 }
 
-function(feraw_SetSoundPitch)
+void feraw_SetSoundPitch(BruterList* stack)
 {
     Sound sound = sound_constructor(bruter_pop_pointer(stack));
     float pitch = bruter_pop_float(stack);
@@ -5061,7 +5061,7 @@ function(feraw_SetSoundPitch)
     bruter_push_pointer(stack, sound_to_list(sound), NULL, BRUTER_TYPE_LIST);
 }
 
-function(feraw_SetSoundPan)
+void feraw_SetSoundPan(BruterList* stack)
 {
     Sound sound = sound_constructor(bruter_pop_pointer(stack));
     float pan = bruter_pop_float(stack);
@@ -5069,14 +5069,14 @@ function(feraw_SetSoundPan)
     bruter_push_pointer(stack, sound_to_list(sound), NULL, BRUTER_TYPE_LIST);
 }
 
-function(feraw_WaveCopy)
+void feraw_WaveCopy(BruterList* stack)
 {
     Wave wave = wave_constructor(bruter_pop_pointer(stack));
     Wave copiedWave = WaveCopy(wave);
     bruter_push_pointer(stack, wave_to_list(copiedWave), NULL, BRUTER_TYPE_LIST);
 }
 
-function(feraw_WaveCrop)
+void feraw_WaveCrop(BruterList* stack)
 {
     Wave wave = wave_constructor(bruter_pop_pointer(stack));
     int initSample = bruter_pop_int(stack);
@@ -5085,7 +5085,7 @@ function(feraw_WaveCrop)
     bruter_push_pointer(stack, wave_to_list(wave), NULL, BRUTER_TYPE_LIST);
 }
 
-function(feraw_WaveFormat)
+void feraw_WaveFormat(BruterList* stack)
 {
     Wave wave = wave_constructor(bruter_pop_pointer(stack));
     int sampleRate = bruter_pop_int(stack);
@@ -5095,28 +5095,28 @@ function(feraw_WaveFormat)
     bruter_push_pointer(stack, wave_to_list(wave), NULL, BRUTER_TYPE_LIST);
 }
 
-function(feraw_LoadWaveSamples)
+void feraw_LoadWaveSamples(BruterList* stack)
 {
     Wave wave = wave_constructor(bruter_pop_pointer(stack));
     void *samples = LoadWaveSamples(wave);
     bruter_push_pointer(stack, samples, NULL, BRUTER_TYPE_BUFFER);
 }
 
-function(feraw_UnloadWaveSamples)
+void feraw_UnloadWaveSamples(BruterList* stack)
 {
     void *samples = bruter_pop_pointer(stack);
     UnloadWaveSamples(samples);
 }
 
 // music management functions
-function(feraw_LoadMusicStream)
+void feraw_LoadMusicStream(BruterList* stack)
 {
     char *fileName = (char*)bruter_pop_pointer(stack);
     Music music = LoadMusicStream(fileName);
     bruter_push_pointer(stack, music_to_list(music), NULL, BRUTER_TYPE_LIST);
 }
 
-function(feraw_LoadMusicStreamFromMemory)
+void feraw_LoadMusicStreamFromMemory(BruterList* stack)
 {
     char *fileType = (char*)bruter_pop_pointer(stack);
     void *data = bruter_pop_pointer(stack);
@@ -5125,58 +5125,58 @@ function(feraw_LoadMusicStreamFromMemory)
     bruter_push_pointer(stack, music_to_list(music), NULL, BRUTER_TYPE_LIST);
 }
 
-function(feraw_IsMusicValid)
+void feraw_IsMusicValid(BruterList* stack)
 {
     Music music = music_constructor(bruter_pop_pointer(stack));
     bool isValid = IsMusicValid(music);
     bruter_push_int(stack, isValid, NULL, BRUTER_TYPE_ANY);
 }
 
-function(feraw_UnloadMusicStream)
+void feraw_UnloadMusicStream(BruterList* stack)
 {
     Music music = music_constructor(bruter_pop_pointer(stack));
     UnloadMusicStream(music);
 }
 
-function(feraw_PlayMusicStream)
+void feraw_PlayMusicStream(BruterList* stack)
 {
     Music music = music_constructor(bruter_pop_pointer(stack));
     PlayMusicStream(music);
 }
 
-function(feraw_IsMusicStreamPlaying)
+void feraw_IsMusicStreamPlaying(BruterList* stack)
 {
     Music music = music_constructor(bruter_pop_pointer(stack));
     bool isPlaying = IsMusicStreamPlaying(music);
     bruter_push_int(stack, isPlaying, NULL, BRUTER_TYPE_ANY);
 }
 
-function(feraw_UpdateMusicStream)
+void feraw_UpdateMusicStream(BruterList* stack)
 {
     Music music = music_constructor(bruter_pop_pointer(stack));
     UpdateMusicStream(music);
     bruter_push_pointer(stack, music_to_list(music), NULL, BRUTER_TYPE_LIST);
 }
 
-function(feraw_StopMusicStream)
+void feraw_StopMusicStream(BruterList* stack)
 {
     Music music = music_constructor(bruter_pop_pointer(stack));
     StopMusicStream(music);
 }
 
-function(feraw_PauseMusicStream)
+void feraw_PauseMusicStream(BruterList* stack)
 {
     Music music = music_constructor(bruter_pop_pointer(stack));
     PauseMusicStream(music);
 }
 
-function(feraw_ResumeMusicStream)
+void feraw_ResumeMusicStream(BruterList* stack)
 {
     Music music = music_constructor(bruter_pop_pointer(stack));
     ResumeMusicStream(music);
 }
 
-function(feraw_SeekMusicStream)
+void feraw_SeekMusicStream(BruterList* stack)
 {
     Music music = music_constructor(bruter_pop_pointer(stack));
     float position = bruter_pop_float(stack);
@@ -5184,7 +5184,7 @@ function(feraw_SeekMusicStream)
     bruter_push_pointer(stack, music_to_list(music), NULL, BRUTER_TYPE_LIST);
 }
 
-function(feraw_SetMusicVolume)
+void feraw_SetMusicVolume(BruterList* stack)
 {
     Music music = music_constructor(bruter_pop_pointer(stack));
     float volume = bruter_pop_float(stack);
@@ -5192,7 +5192,7 @@ function(feraw_SetMusicVolume)
     bruter_push_pointer(stack, music_to_list(music), NULL, BRUTER_TYPE_LIST);
 }
 
-function(feraw_SetMusicPitch)
+void feraw_SetMusicPitch(BruterList* stack)
 {
     Music music = music_constructor(bruter_pop_pointer(stack));
     float pitch = bruter_pop_float(stack);
@@ -5200,7 +5200,7 @@ function(feraw_SetMusicPitch)
     bruter_push_pointer(stack, music_to_list(music), NULL, BRUTER_TYPE_LIST);
 }
 
-function(feraw_SetMusicPan)
+void feraw_SetMusicPan(BruterList* stack)
 {
     Music music = music_constructor(bruter_pop_pointer(stack));
     float pan = bruter_pop_float(stack);
@@ -5208,14 +5208,14 @@ function(feraw_SetMusicPan)
     bruter_push_pointer(stack, music_to_list(music), NULL, BRUTER_TYPE_LIST);
 }
 
-function(feraw_GetMusicTimeLength)
+void feraw_GetMusicTimeLength(BruterList* stack)
 {
     Music music = music_constructor(bruter_pop_pointer(stack));
     float length = GetMusicTimeLength(music);
     bruter_push_float(stack, length, NULL, BRUTER_TYPE_ANY);
 }
 
-function(feraw_GetMusicTimePlayed)
+void feraw_GetMusicTimePlayed(BruterList* stack)
 {
     Music music = music_constructor(bruter_pop_pointer(stack));
     float playedTime = GetMusicTimePlayed(music);
@@ -5223,7 +5223,7 @@ function(feraw_GetMusicTimePlayed)
 }
 
 // audiostream management functions
-function(feraw_LoadAudioStream)
+void feraw_LoadAudioStream(BruterList* stack)
 {
     int sampleRate = bruter_pop_int(stack);
     int sampleSize = bruter_pop_int(stack);
@@ -5232,20 +5232,20 @@ function(feraw_LoadAudioStream)
     bruter_push_pointer(stack, audio_stream_to_list(stream), NULL, BRUTER_TYPE_LIST);
 }
 
-function(feraw_IsAudioStreamValid)
+void feraw_IsAudioStreamValid(BruterList* stack)
 {
     AudioStream stream = audio_stream_constructor(bruter_pop_pointer(stack));
     bool isValid = IsAudioStreamValid(stream);
     bruter_push_int(stack, isValid, NULL, BRUTER_TYPE_ANY);
 }
 
-function(feraw_UnloadAudioStream)
+void feraw_UnloadAudioStream(BruterList* stack)
 {
     AudioStream stream = audio_stream_constructor(bruter_pop_pointer(stack));
     UnloadAudioStream(stream);
 }
 
-function(feraw_UpdateAudioStream)
+void feraw_UpdateAudioStream(BruterList* stack)
 {
     AudioStream stream = audio_stream_constructor(bruter_pop_pointer(stack));
     void *data = bruter_pop_pointer(stack);
@@ -5254,38 +5254,38 @@ function(feraw_UpdateAudioStream)
     bruter_push_pointer(stack, audio_stream_to_list(stream), NULL, BRUTER_TYPE_LIST);
 }
 
-function(feraw_IsAudioStreamProcessed)
+void feraw_IsAudioStreamProcessed(BruterList* stack)
 {
     AudioStream stream = audio_stream_constructor(bruter_pop_pointer(stack));
     bool isProcessed = IsAudioStreamProcessed(stream);
     bruter_push_int(stack, isProcessed, NULL, BRUTER_TYPE_ANY);
 }
 
-function(feraw_PlayAudioStream)
+void feraw_PlayAudioStream(BruterList* stack)
 {
     AudioStream stream = audio_stream_constructor(bruter_pop_pointer(stack));
     PlayAudioStream(stream);
 }
 
-function(feraw_PauseAudioStream)
+void feraw_PauseAudioStream(BruterList* stack)
 {
     AudioStream stream = audio_stream_constructor(bruter_pop_pointer(stack));
     StopAudioStream(stream);
 }
 
-function(feraw_StopAudioStream)
+void feraw_StopAudioStream(BruterList* stack)
 {
     AudioStream stream = audio_stream_constructor(bruter_pop_pointer(stack));
     PauseAudioStream(stream);
 }
 
-function(feraw_ResumeAudioStream)
+void feraw_ResumeAudioStream(BruterList* stack)
 {
     AudioStream stream = audio_stream_constructor(bruter_pop_pointer(stack));
     ResumeAudioStream(stream);
 }
 
-function(feraw_SetAudioStreamVolume)
+void feraw_SetAudioStreamVolume(BruterList* stack)
 {
     AudioStream stream = audio_stream_constructor(bruter_pop_pointer(stack));
     float volume = bruter_pop_float(stack);
@@ -5293,7 +5293,7 @@ function(feraw_SetAudioStreamVolume)
     bruter_push_pointer(stack, audio_stream_to_list(stream), NULL, BRUTER_TYPE_LIST);
 }
 
-function(feraw_SetAudioStreamPitch)
+void feraw_SetAudioStreamPitch(BruterList* stack)
 {
     AudioStream stream = audio_stream_constructor(bruter_pop_pointer(stack));
     float pitch = bruter_pop_float(stack);
@@ -5301,7 +5301,7 @@ function(feraw_SetAudioStreamPitch)
     bruter_push_pointer(stack, audio_stream_to_list(stream), NULL, BRUTER_TYPE_LIST);
 }
 
-function(feraw_SetAudioStreamPan)
+void feraw_SetAudioStreamPan(BruterList* stack)
 {
     AudioStream stream = audio_stream_constructor(bruter_pop_pointer(stack));
     float pan = bruter_pop_float(stack);
@@ -5309,13 +5309,13 @@ function(feraw_SetAudioStreamPan)
     bruter_push_pointer(stack, audio_stream_to_list(stream), NULL, BRUTER_TYPE_LIST);
 }
 
-function(feraw_SetAudioStreamBufferSizeDefault)
+void feraw_SetAudioStreamBufferSizeDefault(BruterList* stack)
 {
     int size = bruter_pop_int(stack);
     SetAudioStreamBufferSizeDefault(size);
 }
 
-function(feraw_SetAudioStreamCallback)
+void feraw_SetAudioStreamCallback(BruterList* stack)
 {
     AudioStream stream = audio_stream_constructor(bruter_pop_pointer(stack));
     AudioCallback callback = (AudioCallback)bruter_pop_pointer(stack);
@@ -5323,7 +5323,7 @@ function(feraw_SetAudioStreamCallback)
     bruter_push_pointer(stack, audio_stream_to_list(stream), NULL, BRUTER_TYPE_LIST);
 }
 
-function(feraw_AttachAudioStreamProcessor)
+void feraw_AttachAudioStreamProcessor(BruterList* stack)
 {
     AudioStream stream = audio_stream_constructor(bruter_pop_pointer(stack));
     AudioCallback processor = (AudioCallback)bruter_pop_pointer(stack);
@@ -5331,7 +5331,7 @@ function(feraw_AttachAudioStreamProcessor)
     bruter_push_pointer(stack, audio_stream_to_list(stream), NULL, BRUTER_TYPE_LIST);
 }
 
-function(feraw_DetachAudioStreamProcessor)
+void feraw_DetachAudioStreamProcessor(BruterList* stack)
 {
     AudioStream stream = audio_stream_constructor(bruter_pop_pointer(stack));
     AudioCallback processor = (AudioCallback)bruter_pop_pointer(stack);
@@ -5339,13 +5339,13 @@ function(feraw_DetachAudioStreamProcessor)
     bruter_push_pointer(stack, audio_stream_to_list(stream), NULL, BRUTER_TYPE_LIST);
 }
 
-function(feraw_AttachAudioMixedProcessor)
+void feraw_AttachAudioMixedProcessor(BruterList* stack)
 {
     AudioCallback processor = (AudioCallback)bruter_pop_pointer(stack);
     AttachAudioMixedProcessor(processor);
 }
 
-function(feraw_DetachAudioMixedProcessor)
+void feraw_DetachAudioMixedProcessor(BruterList* stack)
 {
     AudioCallback processor = (AudioCallback)bruter_pop_pointer(stack);
     DetachAudioMixedProcessor(processor);

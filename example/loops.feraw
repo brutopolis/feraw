@@ -1,12 +1,16 @@
+
+// in this example we will also will try to use the less memory possible, so will not use the stdlib
+// we implement only what we need
+// keep in mind that bigger the context is, 
 cc {
-    function(feraw_dup)
+    void feraw_dup(BruterList* stack)
     {
         BruterMeta value = bruter_pop_meta(stack);
         bruter_push_meta(stack, value); // Push the value back to the stack
         bruter_push_meta(stack, value); // Duplicate it
     }
 
-    function(feraw_shift)
+    void feraw_shift(BruterList* stack)
     {
         BruterList* list = bruter_pop_pointer(stack);
         BruterMeta value = bruter_shift_meta(list);
@@ -14,7 +18,7 @@ cc {
         bruter_push_meta(stack, value); // Push the shifted value back to the stack
     }
 
-    function(feraw_add)
+    void feraw_add(BruterList* stack)
     {
         BruterMeta a = bruter_pop_meta(stack);
         BruterMeta b = bruter_pop_meta(stack);
@@ -45,14 +49,14 @@ cc {
         }
     }
 
-    function(feraw_less)
+    void feraw_less(BruterList* stack)
     {
         BruterInt a = bruter_pop_int(stack);
         BruterInt b = bruter_pop_int(stack);
         bruter_push_int(stack, a < b ? 1 : 0, NULL, BRUTER_TYPE_ANY);
     }
 
-    function (feraw_print)
+    void feraw_print(BruterList* stack)
     {
         BruterMeta value = bruter_pop_meta(stack);
         switch (value.type)
@@ -90,7 +94,7 @@ cc {
         }
     }
 
-    function(feraw_println)
+    void feraw_println(BruterList* stack)
     {
         feraw_print(stack);
         printf("\n");

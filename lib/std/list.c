@@ -5,7 +5,7 @@
 // functions
 // functions
 
-function(feraw_list)
+void feraw_list(BruterList* stack)
 {
     BruterInt size = bruter_pop_int(stack);
     BruterList *list = bruter_new(BRUTER_DEFAULT_SIZE, true, true);
@@ -17,7 +17,7 @@ function(feraw_list)
     bruter_push_pointer(stack, list, NULL, BRUTER_TYPE_LIST);
 }
 
-function(feraw_pop)
+void feraw_pop(BruterList* stack)
 {
     BruterList* list = bruter_pop_pointer(stack);
     BruterMeta value = bruter_pop_meta(list);
@@ -25,14 +25,14 @@ function(feraw_pop)
     bruter_push_meta(stack, value); // Push the popped value back to the stack
 }
 
-function(feraw_push)
+void feraw_push(BruterList* stack)
 {
     BruterList* list = bruter_pop_pointer(stack);
     BruterMeta value = bruter_pop_meta(stack);
     bruter_push_meta(list, value);
 }
 
-function(feraw_shift)
+void feraw_shift(BruterList* stack)
 {
     BruterList* list = bruter_pop_pointer(stack);
     BruterMeta value = bruter_shift_meta(list);
@@ -40,14 +40,14 @@ function(feraw_shift)
     bruter_push_meta(stack, value); // Push the shifted value back to the stack
 }
 
-function(feraw_unshift)
+void feraw_unshift(BruterList* stack)
 {
     BruterList* list = bruter_pop_pointer(stack);
     BruterMeta value = bruter_pop_meta(stack);
     bruter_unshift_meta(list, value);
 }
 
-function(feraw_insert)
+void feraw_insert(BruterList* stack)
 {
     BruterList* list = bruter_pop_pointer(stack);
     BruterInt index = bruter_pop_int(stack);
@@ -61,7 +61,7 @@ function(feraw_insert)
     bruter_insert_meta(list, index, value);
 }
 
-function(feraw_remove)
+void feraw_remove(BruterList* stack)
 {
     BruterList* list = bruter_pop_pointer(stack);
     BruterInt index = bruter_pop_int(stack);
@@ -76,7 +76,7 @@ function(feraw_remove)
     bruter_push_meta(stack, removed_value); // Push the removed value back to the stack
 }
 
-function(feraw_get)
+void feraw_get(BruterList* stack)
 {
     BruterMeta list_meta = bruter_pop_meta(stack);
     BruterMeta index_meta = bruter_pop_meta(stack);
@@ -124,7 +124,7 @@ function(feraw_get)
     }
 }
 
-function(feraw_set)
+void feraw_set(BruterList* stack)
 {
     BruterMeta list_meta = bruter_pop_meta(stack);
     BruterMeta index = bruter_pop_meta(stack);
@@ -198,7 +198,7 @@ function(feraw_set)
     }
 }
 
-function(feraw_where)
+void feraw_where(BruterList* stack)
 {
     BruterList* list = bruter_pop_pointer(stack);
     BruterMeta value = bruter_pop_meta(stack);
@@ -216,7 +216,7 @@ function(feraw_where)
     bruter_push_int(stack, found_index, NULL, BRUTER_TYPE_ANY);
 }
 
-function(feraw_find)
+void feraw_find(BruterList* stack)
 {
     BruterList* list = bruter_pop_pointer(stack);
     char* key = bruter_pop_pointer(stack);
@@ -234,19 +234,19 @@ function(feraw_find)
     bruter_push_int(stack, found_index, NULL, BRUTER_TYPE_ANY);
 }
 
-function(feraw_length)
+void feraw_length(BruterList* stack)
 {
     BruterList* list = bruter_pop_pointer(stack);
     bruter_push_int(stack, list->size, NULL, BRUTER_TYPE_ANY);
 }
 
-function(feraw_copy)
+void feraw_copy(BruterList* stack)
 {
     BruterList* list = bruter_pop_pointer(stack);
     BruterList* new_list = bruter_copy(list);
 }
 
-function(feraw_swap)
+void feraw_swap(BruterList* stack)
 {
     BruterList* list = bruter_pop_pointer(stack);
     BruterInt index1 = bruter_pop_int(stack);
@@ -261,13 +261,13 @@ function(feraw_swap)
     bruter_swap(list, index1, index2);
 }
 
-function(feraw_reverse)
+void feraw_reverse(BruterList* stack)
 {
     BruterList* list = bruter_pop_pointer(stack);
     bruter_reverse(list);
 }
 
-function(feraw_point)
+void feraw_point(BruterList* stack)
 {
     BruterList* list = bruter_pop_pointer(stack);
     BruterMeta value = bruter_pop_meta(stack);
@@ -296,7 +296,7 @@ function(feraw_point)
     }
 }
 
-function(feraw_alloc)
+void feraw_alloc(BruterList* stack)
 {
     BruterList *arena = bruter_pop_pointer(stack);
     BruterInt size = bruter_pop_int(stack);
@@ -304,14 +304,14 @@ function(feraw_alloc)
     bruter_push_pointer(stack, ptr, NULL, BRUTER_TYPE_BUFFER);
 }
 
-function(feraw_dup)
+void feraw_dup(BruterList* stack)
 {
     BruterMeta value = bruter_pop_meta(stack);
     bruter_push_meta(stack, value); // Push the value back to the stack
     bruter_push_meta(stack, value); // Duplicate it
 }
 
-function(feraw_free)
+void feraw_free(BruterList* stack)
 {
     BruterMeta value = bruter_pop_meta(stack);
     if (value.type == BRUTER_TYPE_BUFFER)
@@ -325,7 +325,7 @@ function(feraw_free)
     // No action needed for other types, as they are not dynamically allocated
 }
 
-function(feraw_nameof)
+void feraw_nameof(BruterList* stack)
 {
     BruterList* list = bruter_pop_pointer(stack);
     BruterMeta index_meta = bruter_pop_meta(stack);
@@ -364,7 +364,7 @@ function(feraw_nameof)
     bruter_push_meta(stack, (BruterMeta){.value = {.p = list->keys[index_meta.value.i]}, .key = NULL, .type = BRUTER_TYPE_BUFFER});
 }
 
-function(feraw_typeof)
+void feraw_typeof(BruterList* stack)
 {
     BruterList* list = bruter_pop_pointer(stack);
     BruterMeta index = bruter_pop_meta(stack);
@@ -390,32 +390,41 @@ function(feraw_typeof)
     bruter_push_int(stack, list->types[index.value.i], NULL, BRUTER_TYPE_ANY);
 }
 
-function(feraw_rename)
+void feraw_rename(BruterList* stack)
 {
     BruterList* list = bruter_pop_pointer(stack);
-    char* old_name = bruter_pop_pointer(stack);
-    char* new_name = bruter_pop_pointer(stack);
-    if (list == NULL || old_name == NULL || new_name == NULL)
+    BruterMeta index = bruter_pop_meta(stack);
+    char* newKey = bruter_pop_pointer(stack);
+    if (index.type == BRUTER_TYPE_FLOAT)
     {
-        fprintf(stderr, "ERROR: cannot rename, list or names are NULL\n");
-        exit(EXIT_FAILURE);
+        index.value.i = (BruterInt)index.value.f; // Convert float to integer if necessary
     }
-
-    for (BruterInt i = 0; i < list->size; i++)
+    else if (index.type == BRUTER_TYPE_BUFFER)
     {
-        if (list->keys != NULL && list->keys[i] != NULL && strcmp(list->keys[i], old_name) == 0)
+        index.value.i = bruter_find_key(list, (char*)index.value.p);
+        if (index.value.i < 0)
         {
-            free(list->keys[i]); // Free the old key
-            list->keys[i] = strdup(new_name); // Set the new key
-            return;
+            fprintf(stderr, "ERROR: cannot rename, key '%s' not found in list\n", (char*)index.value.p);
+            exit(EXIT_FAILURE);
         }
     }
-
-    fprintf(stderr, "ERROR: cannot rename, key '%s' not found in list\n", old_name);
-    exit(EXIT_FAILURE);
+    if (index.value.i < 0 || index.value.i >= list->size)
+    {
+        fprintf(stderr, "ERROR: cannot rename, index %" PRIdPTR " out of range in list of size %" PRIdPTR "\n", index.value.i, list->size);
+        exit(EXIT_FAILURE);
+    }
+    if (list->keys == NULL)
+    {
+        list->keys = calloc(list->capacity, sizeof(char*));
+    }
+    if (list->keys[index.value.i] != NULL)
+    {
+        free(list->keys[index.value.i]); // Free the old key if it was allocated
+    }
+    list->keys[index.value.i] = strdup(newKey); // Set the new key
 }
 
-function(feraw_retype)
+void feraw_retype(BruterList* stack)
 {
     BruterList* list = bruter_pop_pointer(stack);
     BruterMeta index = bruter_pop_meta(stack);

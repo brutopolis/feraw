@@ -1,11 +1,11 @@
 #include "bruter.h"
 
-function(feraw_drop)
+void feraw_drop(BruterList* stack)
 {
     bruter_pop_pointer(stack);
 }
 
-function(feraw_eval)
+void feraw_eval(BruterList* stack)
 {
     BruterList* context = bruter_pop_pointer(stack);
     char* code = (char*)bruter_pop_pointer(stack);

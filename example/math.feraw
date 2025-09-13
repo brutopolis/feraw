@@ -13,21 +13,21 @@ seed(add(time(), clock()));
 print("r: ");
 println(random(e, a));
 
-print("trunc: ");
+print("trunc = ");
 println(trunc(b));
 
-print("floor: ");
+print("floor = ");
 println(floor(c));
 
-print("ceil: ");
+print("ceil = ");
 println(ceil(d));
 
-print("round: ");
+print("round = ");
 println(round(d));
 
-print("lshift: ");
+print("lshift = ");
 println(lshift(h, 8));
 
-print("rshift: ");
+print("rshift = ");
 println(rshift(u, 8));
 

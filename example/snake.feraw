@@ -8,7 +8,7 @@ cc{
     #define sleep(ms) usleep((ms)*1000)
     #endif
 
-    function(feraw_sleep)
+    void feraw_sleep(BruterList* stack)
     {
         BruterInt ms = bruter_pop_int(stack);
         sleep(ms);

@@ -1,6 +1,6 @@
 #include <bruter.h>
 
-function (feraw_print)
+void feraw_print(BruterList* stack)
 {
     BruterMeta value = bruter_pop_meta(stack);
     switch (value.type)
@@ -38,7 +38,7 @@ function (feraw_print)
     }
 }
 
-function(feraw_print_string)
+void feraw_print_string(BruterList* stack)
 {
     char *str = bruter_pop_pointer(stack);
     if (str == NULL)
@@ -49,31 +49,31 @@ function(feraw_print_string)
     printf("%s", str);
 }
 
-function(feraw_print_int)
+void feraw_print_int(BruterList* stack)
 {
     BruterInt value = bruter_pop_int(stack);
     printf("%ld", value);
 }
 
-function(feraw_print_float)
+void feraw_print_float(BruterList* stack)
 {
     BruterFloat value = bruter_pop_float(stack);
     printf("%f", value);
 }
 
-function(feraw_print_bool)
+void feraw_print_bool(BruterList* stack)
 {
     BruterInt value = bruter_pop_int(stack);
     printf(value ? "true" : "false");
 }
 
-function(feraw_println)
+void feraw_println(BruterList* stack)
 {
     feraw_print(stack);
     printf("\n");
 }
 
-function(feraw_ls)
+void feraw_ls(BruterList* stack)
 {
     // [index, type, "name"] = value;
     BruterList* list = bruter_pop_pointer(stack);
@@ -127,7 +127,7 @@ function(feraw_ls)
     }
 }
 
-function(feraw_scan)
+void feraw_scan(BruterList* stack)
 {
     char buffer[1024];
     if (fgets(buffer, sizeof(buffer), stdin) != NULL)
