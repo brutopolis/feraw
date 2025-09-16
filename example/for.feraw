@@ -1,6 +1,9 @@
 include("../lib/std.feraw");
 
-for(i = 0; less(i, 5); i = add(i, 1))
-{
-    println(i);
-}
+i = 0;
+for_start:;
+println(i);
+i = i + 1;
+for_start;
+cond = i < 5;
+a = ?(cond, for_start - 2);
