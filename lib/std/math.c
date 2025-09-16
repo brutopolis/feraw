@@ -471,3 +471,16 @@ void feraw_clock(BruterList* stack)
 {
     bruter_push_int(stack, (BruterInt)clock(), NULL, BRUTER_TYPE_ANY);
 }
+
+void feraw_neg(BruterList* stack)
+{
+    BruterMeta a = bruter_pop_meta(stack);
+    if (a.type == BRUTER_TYPE_FLOAT)
+    {
+        bruter_push_float(stack, -a.value.f, NULL, BRUTER_TYPE_FLOAT);
+    }
+    else
+    {
+        bruter_push_int(stack, -a.value.i, NULL, BRUTER_TYPE_ANY);
+    }
+}

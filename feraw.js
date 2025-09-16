@@ -1182,6 +1182,267 @@ function feraw_expand_props(str) {
     return out;
 }
 
+// --- NEW: Infix math & conditional operators expansion ---
+// Transforms infix expressions (a + b * c >= d && e | f) into functional form.
+// Added bitwise operators: | ^ & << >> >>> and unary ~
+(function(){
+    const BIN_PRECEDENCE = {
+        '||': 1,
+        '&&': 2,
+        '|': 3,
+        '^': 4,
+        '&': 5,
+        '==': 6, '!=': 6,
+        '<': 7, '<=': 7, '>': 7, '>=': 7,
+        '<<': 8, '>>': 8, '>>>': 8,
+        '+': 9, '-': 9,
+        '*': 10, '/': 10, '%': 10
+    };
+    const ASSOCIATIVITY = {
+        '||':'L','&&':'L','|':'L','^':'L','&':'L','==':'L','!=':'L','<':'L','<=':'L','>':'L','>=':'L','<<':'L','>>':'L','>>>':'L','+':'L','-':'L','*':'L','/':'L','%':'L'
+    };
+    const OP_FUNC = {
+        '+':'add','-':'sub','*':'mul','/':'div','%':'mod',
+        '==':'equals','!=':'not_equals','<':'less','<=':'less_equal','>':'greater','>=':'greater_equal',
+        '&&':'and','||':'or',
+        '|':'bit_or','^':'bit_xor','&':'bit_and','<<':'lshift','>>':'rshift','>>>':'urshift'
+    };
+    const UNARY_FUNC = { '!':'not', '-':'neg', '~':'bit_not' };
+
+    function tokenizeExpr(expr){
+        const tokens = [];
+        let i=0; const len=expr.length;
+        while(i<len){
+            // skip whitespace
+            if(/\s/.test(expr[i])){ i++; continue; }
+            const c = expr[i];
+            // string literals (single, double, backtick) just copy verbatim
+            if(c==='"' || c==='\'' || c==='`'){
+                let quote=c; let j=i+1; let out=quote; let esc=false;
+                for(; j<len; j++){
+                    const ch=expr[j];
+                    out+=ch;
+                    if(esc){ esc=false; continue; }
+                    if(ch==='\\'){ esc=true; continue; }
+                    if(ch===quote){ j++; break; }
+                }
+                tokens.push(out); i=j; continue;
+            }
+            // numbers (including hex, bin, float)
+            if(/[0-9]/.test(c) || (c==='.' && /[0-9]/.test(expr[i+1]))){
+                let j=i+1;
+                while(j<len && /[0-9a-zA-ZxX\.]/.test(expr[j])) j++;
+                tokens.push(expr.slice(i,j)); i=j; continue;
+            }
+            // identifiers
+            if(/[A-Za-z_$]/.test(c)){
+                let j=i+1; while(j<len && /[A-Za-z0-9_$]/.test(expr[j])) j++;
+                tokens.push(expr.slice(i,j)); i=j; continue;
+            }
+            const three = expr.slice(i,i+3);
+            if(['>>>'].includes(three)){ tokens.push(three); i+=3; continue; }
+            const two = expr.slice(i,i+2);
+            if(['==','!=','<=','>=','&&','||','<<','>>'].includes(two)){ tokens.push(two); i+=2; continue; }
+            if(['+','-','*','/','%','<','>','!','(',')','|','^','&','~'].includes(c)) { tokens.push(c); i++; continue; }
+            // anything else (comma, dot, brackets) => abort (return original tokens with flag)
+            return null; // signal unsupported complexity -> skip transform
+        }
+        return tokens;
+    }
+
+    function toAST(tokens){
+        if(!tokens) return null;
+        // Shunting Yard producing output queue (as tokens) + operator stack
+        const output=[]; const ops=[];
+        let prevType = 'START';
+        for(let i=0;i<tokens.length;i++){
+            const t = tokens[i];
+            if(t === '('){ ops.push(t); prevType='OPEN'; continue; }
+            if(t === ')'){
+                while(ops.length && ops[ops.length-1] !== '('){ output.push(ops.pop()); }
+                if(!ops.length) return null; // mismatched
+                ops.pop(); // remove '('
+                prevType='CLOSE';
+                continue;
+            }
+            if(t in BIN_PRECEDENCE || t==='!' || t==='-' || t==='~'){
+                // determine unary '-' or '!'
+                let isUnary = false;
+                if(t==='!' ) isUnary = true;
+                else if(t==='-' && (prevType === 'START' || prevType==='OPEN' || prevType==='OP')) isUnary = true;
+                if(isUnary){
+                    // represent unary as distinct token e.g. 'u!' or 'u-'
+                    const ut = 'u'+t;
+                    // treat precedence very high
+                    ops.push(ut);
+                } else {
+                    while(ops.length){
+                        const top = ops[ops.length-1];
+                        if(top==='(') break;
+                        const topIsUnary = top.startsWith('u');
+                        const topOp = topIsUnary ? top.slice(1) : top;
+                        const pTop = topIsUnary ? 11 : BIN_PRECEDENCE[topOp];
+                        const pCur = BIN_PRECEDENCE[t];
+                        if( (ASSOCIATIVITY[t]==='L' && pCur <= pTop) || (ASSOCIATIVITY[t]==='R' && pCur < pTop) ){
+                            output.push(ops.pop());
+                        } else break;
+                    }
+                    ops.push(t);
+                }
+                prevType='OP';
+                continue;
+            }
+            // operand
+            output.push(t);
+            prevType='VALUE';
+        }
+        while(ops.length){
+            const op=ops.pop();
+            if(op==='(') return null; // mismatched
+            output.push(op);
+        }
+        // Build AST from RPN
+        const stack=[];
+        for(const tk of output){
+            if(tk.startsWith('u')){ // unary
+                if(stack.length<1) return null;
+                const a = stack.pop();
+                stack.push({type:'unary', op: tk.slice(1), arg:a});
+            } else if(tk in BIN_PRECEDENCE){
+                if(stack.length<2) return null;
+                const b = stack.pop();
+                const a = stack.pop();
+                stack.push({type:'binary', op: tk, left:a, right:b});
+            } else {
+                stack.push({type:'lit', value: tk});
+            }
+        }
+        if(stack.length!==1) return null;
+        return stack[0];
+    }
+
+    function astToString(node){
+        if(!node) return null;
+        switch(node.type){
+            case 'lit': return node.value;
+            case 'unary': {
+                const fn = UNARY_FUNC[node.op];
+                if(!fn) return null;
+                return fn + '(' + astToString(node.arg) + ')';
+            }
+            case 'binary': {
+                const fn = OP_FUNC[node.op];
+                if(!fn) return null;
+                return fn + '(' + astToString(node.left) + ', ' + astToString(node.right) + ')';
+            }
+        }
+        return null;
+    }
+
+    function transformExpression(expr){
+        // quick check if expression even has an operator char
+        if(!/[+\-*/%<>=!&|^~]/.test(expr)) return expr; // nothing to do
+        const tokens = tokenizeExpr(expr);
+        if(!tokens) return expr; // unsupported tokens, skip
+        // skip pure literal/identifier
+        if(tokens.length<=1) return expr;
+        const ast = toAST(tokens);
+        if(!ast) return expr;
+        const out = astToString(ast);
+        return out || expr;
+    }
+
+    function transformInsideParens(src){
+        let i=0; let out='';
+        while(i < src.length){
+            const c = src[i];
+            if(c==='"' || c==='\'' || c==='`'){
+                // copy string literal verbatim
+                let quote=c; let j=i+1; let esc=false; let seg=quote;
+                for(; j<src.length; j++){
+                    const ch=src[j]; seg+=ch; if(esc){ esc=false; continue; } if(ch==='\\'){ esc=true; continue; } if(ch===quote){ j++; break; }
+                }
+                out+=seg; i=j; continue;
+            }
+            if(c==='('){
+                const end = findMatching(src, i, '(', ')');
+                if(end === -1){ out+=c; i++; continue; }
+                const inner = src.slice(i+1,end);
+                const transformedInner = transformExpression(inner.trim());
+                out += '(' + (transformedInner) + ')';
+                i = end+1; continue;
+            }
+            out+=c; i++;
+        }
+        return out;
+    }
+
+    function transformAssignments(stmt){
+        // find first top-level assignment '=' (not '==','!=','<=','>=')
+        let depth=0; let inStr=false; let strCh='';
+        for(let i=0;i<stmt.length;i++){
+            const c=stmt[i];
+            if(inStr){
+                if(c==='\\'){ i++; continue; }
+                if(c===strCh){ inStr=false; }
+                continue;
+            }
+            if(c==='"'||c==='\''||c==='`'){ inStr=true; strCh=c; continue; }
+            if(c==='('||c==='['||c==='{') depth++;
+            else if(c===')'||c===']'||c==='}') depth--;
+            else if(c==='=' && depth===0){
+                // ensure not part of ==, >=, <=, !=
+                const before = stmt[i-1];
+                const after = stmt[i+1];
+                if(before==='=' || before==='!' || before==='<' || before==='>') continue;
+                if(after==='=') continue;
+                const lhs = stmt.slice(0,i).trimEnd();
+                const rhs = stmt.slice(i+1).trim();
+                const newRhs = transformExpression(rhs);
+                return lhs + ' = ' + newRhs;
+            }
+        }
+        return stmt;
+    }
+
+    function transformStatements(src){
+        // split by semicolons outside strings/brackets using existing splitter
+        let parts;
+        try { parts = splitOutsideStrings(src, ';'); }
+        catch { return src; }
+        const rebuilt = parts.map(p => {
+            const trimmed = p.trim();
+            if(!trimmed) return p;
+            // avoid transforming control structure headers (if/while/for) here
+            if(/^(if|while|for)\s*\(/.test(trimmed)) return p;
+            // skip macro definitions
+            if(/=\s*macro\s*\{/.test(trimmed)) return p;
+            let transformed = transformAssignments(p);
+            if(transformed === p){
+                transformed = transformExpression(p);
+            }
+            transformed = transformInsideParens(transformed);
+            return transformed;
+        });
+        return rebuilt.join('; ');
+    }
+
+    function feraw_expand_operators(input){
+        try {
+            return transformStatements(input);
+        } catch (e){
+            console.warn('Operator expansion failed:', e.message);
+            return input; // fail gracefully
+        }
+    }
+
+    // expose globally
+    if (typeof globalThis !== 'undefined') {
+        globalThis.feraw_expand_operators = feraw_expand_operators;
+    }
+})();
+// --- END infix operators expansion ---
+
 function parseArgs(argStr) {
     const args = [];
     let cur = "";
@@ -1481,6 +1742,10 @@ function feraw_expand_all(input, depth = 0)
     
     let previousInput = input;
     input = feraw_expand_macros(input);
+    // NEW: infix operators
+    if (typeof feraw_expand_operators === 'function') {
+        input = feraw_expand_operators(input);
+    }
     input = feraw_expand_props(input);
     input = feraw_expand_ifs(input);
     input = feraw_expand_whiles(input);
