@@ -243,7 +243,7 @@ function tokenize(input)
         }
 
         // replace spaces in strings by \s as requested
-        tokens.push(',' + str.replace(/ /g, '\\s'));
+        tokens.push(';' + str.replace(/ /g, '\\s'));
     }
     
     function parseBlock(depth = 0)
@@ -324,7 +324,7 @@ function tokenize(input)
             return;
         }
 
-        if (["true", "false", "stack", "context", "program"].includes(name))
+        if (["true", "false", "stack", "context", "code"].includes(name))
         {
             switch (name)
             {
@@ -340,8 +340,8 @@ function tokenize(input)
                 case "context":
                     tokens.push('@');
                     return;
-                case "program":
-                    tokens.push('%');
+                case "code":
+                    tokens.push('~');
                     return;
             } 
         }
@@ -474,7 +474,7 @@ function tokenize(input)
             i++;
             skipWhitespace();
             tokens.push("!", "set", "@");
-            tokens.push("," + name);
+            tokens.push(";" + name);
             parseExpr();
         } 
         else 

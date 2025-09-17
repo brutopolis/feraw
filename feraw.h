@@ -18,12 +18,36 @@
 #define REVERSE_15(a, b, c, d, e, f, g, h, i, j, k, l, m, n, o) o n m l k j i h g f e d c b a
 #define REVERSE_16(a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p) p o n m l k j i h g f e d c b a
 
-#define GET_REVERSE_MACRO(_1,_2,_3,_4,_5,_6,_7,_8,_9,_10,_11,_12,_13,_14,_15,_16,NAME,...) NAME
+#define GET_REVERSE_MACRO(_1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, _13, _14, _15, _16, NAME,...) NAME
 
 #define REVERSE(...) GET_REVERSE_MACRO(__VA_ARGS__, REVERSE_16, REVERSE_15, REVERSE_14, REVERSE_13, REVERSE_12, REVERSE_11, REVERSE_10, REVERSE_9, REVERSE_8, REVERSE_7, REVERSE_6, REVERSE_5, REVERSE_4, REVERSE_3, REVERSE_2, REVERSE_1)(__VA_ARGS__)
 
+// calling functions
 #define call(a, ...) REVERSE(__VA_ARGS__) a !
-
+#define $ call
 #define print(...) call(print, __VA_ARGS__)
 
+// 
+#define string(...) ;__VA_ARGS__
+#define static(...) concat(# , __VA_ARGS__)
+
+// while loop
+// create a unique label name
+// "while" + __COUNTER__ + ":"
+
+#define concat_(a, b) a##b
+#define concat(a, b) concat_(a, b)
+
+#define while(condition, ...) \
+:concat(while_, __COUNTER__) \
+condition ?
+
+while($(less, 1, 10))
+
 print(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16)
+
+static(a)
+
+print(string(teste))
+
+print(string(hello\sworld\s!))
