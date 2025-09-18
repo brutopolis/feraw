@@ -1,6 +1,6 @@
 #include "bruter.h"
 
-void feraw_int(BruterList* stack)
+void feraw_to_int(BruterList* stack)
 {
     BruterMeta meta = bruter_pop_meta(stack);
     if (meta.type == BRUTER_TYPE_FLOAT)
@@ -17,7 +17,7 @@ void feraw_int(BruterList* stack)
     }
 }
 
-void feraw_float(BruterList* stack)
+void feraw_to_float(BruterList* stack)
 {
     BruterMeta meta = bruter_pop_meta(stack);
     if (meta.type == BRUTER_TYPE_FLOAT)
@@ -34,7 +34,7 @@ void feraw_float(BruterList* stack)
     }
 }
 
-void feraw_string(BruterList* stack)
+void feraw_to_string(BruterList* stack)
 {
     BruterMeta meta = bruter_pop_meta(stack);
     char buffer[32];

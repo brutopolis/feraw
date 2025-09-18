@@ -1,5 +1,11 @@
 # feraw changelog https://github.com/brutopolis/feraw
 
+(18/09/2025) - version 0.3.0
+
+- feraw dont need javascript anymore, now we use the C preprocessor and some bash scripting to generate bash and C code;
+- some symbols changed, now we use @ for context, ~ for code and & for stack;
+
+
 (15/09/2025) - version 0.2.5
 
 - math and conditional operators are now a thing;

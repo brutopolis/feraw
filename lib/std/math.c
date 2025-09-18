@@ -1,6 +1,5 @@
 #include <bruter.h>
 #include <math.h>
-#include <time.h>
 
 void feraw_add(BruterList* stack)
 {
@@ -460,16 +459,6 @@ void feraw_rshift(BruterList* stack)
         exit(EXIT_FAILURE);
     }
     bruter_push_int(stack, a.value.i >> b.value.i, NULL, BRUTER_TYPE_ANY);
-}
-
-void feraw_time(BruterList* stack)
-{
-    bruter_push_int(stack, (BruterInt)time(NULL), NULL, BRUTER_TYPE_ANY);
-}
-
-void feraw_clock(BruterList* stack)
-{
-    bruter_push_int(stack, (BruterInt)clock(), NULL, BRUTER_TYPE_ANY);
 }
 
 void feraw_neg(BruterList* stack)

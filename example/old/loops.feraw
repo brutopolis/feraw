@@ -3,7 +3,7 @@
 // we implement only what we need
 // keep in mind that bigger the context is, the more time it will take to search for a function
 // also keep in mind bruter searches in reverse order, so the last element added is the first to be found
-cc {
+cc(
     void feraw_dup(BruterList* stack)
     {
         BruterMeta value = bruter_pop_meta(stack);
@@ -100,7 +100,7 @@ cc {
         feraw_print(stack);
         printf("\n");
     }
-};
+);
 // this example, unlike the hello-world example this is probably not so familiar to most people
 // the good part of having no rules at all is that no code is arbitrary, even when it is
 // in this case everything is expected and predictable, so i would not consider it arbitrary

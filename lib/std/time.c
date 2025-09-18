@@ -26,3 +26,13 @@ void feraw_ms(BruterList* stack)
 {
     bruter_push_int(stack, time_ms(), NULL, BRUTER_TYPE_ANY);
 }
+
+void feraw_time(BruterList* stack)
+{
+    bruter_push_int(stack, (BruterInt)time(NULL), NULL, BRUTER_TYPE_ANY);
+}
+
+void feraw_clock(BruterList* stack)
+{
+    bruter_push_int(stack, (BruterInt)clock(), NULL, BRUTER_TYPE_ANY);
+}
