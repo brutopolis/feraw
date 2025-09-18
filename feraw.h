@@ -146,17 +146,19 @@
 #define eval(...)           call(eval, __VA_ARGS__)
 
 // if implementation
-#define if_(label_before, label_after, condition, ...) \
-label_after 1 ? \
+#define if_(label_before, label_after, label_end, condition, ...) \
+goto(label_after) \
 :label_before \
 __VA_ARGS__ \
+goto(label_end) \
 :label_after \
-label_before condition ? 
-#define if(condition, ...) if_(concat(if, __COUNTER__), concat(if, __COUNTER__), condition, __VA_ARGS__)
+label_before condition ? \
+:label_end
+#define if(condition, ...) if_(concat(concat(if, __COUNTER__), before), concat(concat(if, __COUNTER__), after), concat(concat(if, __COUNTER__), end), condition, __VA_ARGS__)
 
 // while loop implementation
 #define while_(label_before, label_after, condition, ...) \
-label_after 1 ? \
+goto(label_after) \
 :label_before \
 __VA_ARGS__ \
 :label_after \
@@ -166,10 +168,13 @@ label_before condition ?
 // for loop implementation
 #define for_(label_before, label_after, init, condition, step, ...) \
 init \
-label_after 1 ? \
+goto(label_after) \
 :label_before \
 __VA_ARGS__ \
 step \
 :label_after \
 label_before condition ?
 #define for(init, condition, step, ...) for_(concat(for, __COUNTER__), concat(for, __COUNTER__), init, condition, step, __VA_ARGS__)
+
+// goto implementation
+#define goto(label) label 1 ?
