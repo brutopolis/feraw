@@ -1,5 +1,4 @@
 PACKAGE="feraw"
-VERSION="0.2.4"
 
 if [ -z "$2" ]; then
     FILENAME="hello"

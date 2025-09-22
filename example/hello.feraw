@@ -1,3 +1,3 @@
 #include "../feraw.h"
 
-println(string(hello\sworld!))
+println(\hello\sworld!)
