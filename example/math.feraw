@@ -1,4 +1,3 @@
-// new code
 #include "../feraw.h"
 define(\a, 50)
 define(\b, 500.123)

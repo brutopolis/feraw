@@ -1,0 +1,12 @@
+#include "../feraw.h"
+define(\content, read_file(\./example/os.feraw))
+if (not_equals(content, 0),
+    println(\File\content:\)
+    println(content)
+)
+if (equals(content, 0),
+    println(\ERROR:\ could\ not\ read\ file.\)
+    ifgo(1, end)
+)
+
+label(end)

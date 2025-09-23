@@ -1,5 +1,4 @@
 
-// new code
 #include "../feraw.h"
 define(\_code, \0\sprintln\s!\s1\sprintln\s!\s2\sprintln\s!)
 println(\Code\sbefore\seval)

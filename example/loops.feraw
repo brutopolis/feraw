@@ -1,5 +1,4 @@
 
-// new code
 #include "../feraw.h"
 static(dup)(0)
 while($less($shift(stack), 100000), 

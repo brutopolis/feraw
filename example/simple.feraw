@@ -1,5 +1,4 @@
 
-// new code
 #include "../feraw.h"
 
 // this is a literal string, a pointer to the code itself
