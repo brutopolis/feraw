@@ -1,4 +1,0 @@
-#include "../feraw.h"
-set(context, \a, 5)
-set(context, \b, 5)
-if(equals(a, b), println(\a\sis\sequal\sto\sb))

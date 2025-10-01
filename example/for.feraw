@@ -1,5 +1,0 @@
-#include "../feraw.h"
-
-for(define(\i, 0), less(i, 5), define(\i, add(i, 1)),
-    println(i)
-); 
