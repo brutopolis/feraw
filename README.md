@@ -1,5 +1,7 @@
 # feraw
 
+  feraw has been discontinued, but check its successor: https://github.com/jardimdanificado/rap
+
   feraw is a bruter code generator i did for my personal use to generate more easily bruter code with a more familiar syntax, it allows you to write a very little abstracted minimal stack-oriented "c-like" code and generates a bruter code or C with embedded bruter code from it;
 
   feraw is currently written in javascript, and it is a single file `feraw.js`, with no deps at all, while bruter code is completely predictable, feraw is not, and have several issues that i might not fix ever, so *ALWAYS* check if the generated bruter code is something you expect;
